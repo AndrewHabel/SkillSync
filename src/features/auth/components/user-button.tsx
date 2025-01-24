@@ -10,7 +10,9 @@ import { useLogout } from "../api/use-logout";
 import { useCurrent } from "../api/use-current";
 
 export const UserButton = () => {
+  
   const { data: user, isLoading } = useCurrent();
+  const { mutate: logout } = useLogout();
 
   if (isLoading) {
     return (
@@ -25,7 +27,6 @@ export const UserButton = () => {
   }
 
   const { name, email } = user;
-  const { mutate: logout } = useLogout();
 
   const avatarFallback = name?.charAt(0).toUpperCase() ?? email?.charAt(0).toUpperCase() ?? "U";
 
