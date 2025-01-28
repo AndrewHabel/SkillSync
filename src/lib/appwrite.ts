@@ -11,6 +11,7 @@ import { cookies } from "next/headers";
 import { AUTH_COOKIE } from "@/features/auth/constans";
 
 export async function createSessionClient(){
+
     const client = new Client()
         .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
         .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
@@ -31,6 +32,7 @@ export async function createSessionClient(){
             return new Databases(client);
         }
     };
+    
 };
 
 export async function createAdminClient(){
@@ -42,5 +44,8 @@ export async function createAdminClient(){
         getAccount() {
             return new Account(client);
         },
+        get users() {
+            return new Users(client);
+        }
     };
 };
