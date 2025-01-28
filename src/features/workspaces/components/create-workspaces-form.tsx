@@ -41,9 +41,9 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
       image: values.image instanceof File ? values.image : "",
     } 
     mutate({ form: finalValues }, {
-      onSuccess: ({data}) => {
+      onSuccess: (data) => {
         form.reset();
-        router.push(`/workspaces/${data.id}`);
+        router.push(`/workspaces/${data.$id}`);
       }
     });
   };
@@ -125,9 +125,22 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                           onChange={handelImageChange}
                           disabled={isPending}
                         />
-                        <Button type="button" disabled={isPending} variant="teritary" size="xs" className="w-fit mt-2" onClick={() => inputRef.current?.click()} >
-                          Upload Image
-                        </Button>
+                        {
+                          field.value ? (
+                            <Button type="button" disabled={isPending} variant="destructive" size="xs" className="w-fit mt-2" onClick={() => {
+                              field.onChange(null);
+                              if(inputRef.current) {
+                                inputRef.current.value = "";
+                              }
+                            }} >
+                              remove Image
+                            </Button>
+                          ):(
+                            <Button type="button" disabled={isPending} variant="teritary" size="xs" className="w-fit mt-2" onClick={() => inputRef.current?.click()} >
+                              Upload Image
+                            </Button>
+                          )
+                        }
                       </div>
                     </div>
                   </div>

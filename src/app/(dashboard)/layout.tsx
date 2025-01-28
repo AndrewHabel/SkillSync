@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/sidebar";
 import { CreateWorkspaceForm } from "@/features/workspaces/components/create-workspaces-form";
-import { CreateWorkspaceModal } from "@/features/workspaces/components/create-workspcae-madal";
+import { CreateWorkspaceModal } from "@/features/workspaces/components/create-workspace-modal";
 
 interface DashboardLayoutProps {
     children: React.ReactNode;

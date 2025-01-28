@@ -7,7 +7,7 @@ interface StandalinLayoutProps {
 }
 const StandalinLayout = ({children}:StandalinLayoutProps) => {
     return (
-        <main className="bg-netural-100 min-h-screen">
+        <main className="bg-neutral-100 min-h-screen">
             <div className="mx-auto max-w-screen-2xl p-4">
                 <nav className="flex justify-between items-center h-[73px]">
                     <Link href="/">
