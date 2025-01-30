@@ -2,52 +2,62 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { createProjectSchema } from "../schema";
+import { UpdateProjectSchema } from "../schema";
 import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useCreateProject } from "../api/use-create-projects";
 import { useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from "next/image";
-import { ImageIcon } from "lucide-react";
+import { ArrowLeftIcon, CopyIcon, ImageIcon } from "lucide-react";
 import { on } from "events";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+import { Project } from "../types";
+import { useUpdateProject } from "../api/use-update-project";
+import { Arrow } from "@radix-ui/react-dropdown-menu";
+import { useConfirm } from "@/hooks/use-confirm";
+import { toast } from "sonner";
+import { useDeleteProject } from "../api/use-delete-project";
 
 
-interface CreateProjectFormProps {
+interface EditProjectFormProps {
   onCancel?: () => void;
+  initialValues:Project;
 }
 
-export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
-  const workspaceId = useWorkspaceId();
+export const EditProjectForm = ({ onCancel , initialValues}: EditProjectFormProps) => {
+
   const router = useRouter();
-  const {mutate, isPending} = useCreateProject();
+
+  const {mutate, isPending} = useUpdateProject();
+
+  const {mutate:deleteProject, 
+   isPending:isDeleteingProject} = useDeleteProject();
+
+  const [DeleteConfirmationDialog, confirmDelete] = useConfirm("Delete project", "Are you sure you want to delete this Project?", "destructive");
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const form = useForm<z.infer<typeof createProjectSchema>>({
-    resolver: zodResolver(createProjectSchema.omit({workspaceId : true})),
+  const form = useForm<z.infer<typeof UpdateProjectSchema>>({
+    resolver: zodResolver(UpdateProjectSchema),
     defaultValues: {
-      name: "",
+      ...initialValues,
+      image:initialValues.imageUrl ?? "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof createProjectSchema> ) => {
+  const onSubmit = (values: z.infer<typeof UpdateProjectSchema> ) => {
     const finalValues = {
       ...values,
-      workspaceId,
       image: values.image instanceof File ? values.image : "",
     } 
-    mutate({ form: finalValues }, {
-      onSuccess: ({ data }) => {
+    mutate({ form: finalValues , param:{projectId:initialValues.$id}}, {
+      onSuccess: () => {
         form.reset();
-        router.push(`/workspaces/${workspaceId}/projects/${data.$id}`)
       }
     });
   };
@@ -59,17 +69,44 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
     }
   }
 
+  const handelDelete = async () => {
+    const ok = await confirmDelete();
+    if(!ok) return;
+    deleteProject({param : {projectId:initialValues.$id},}, {
+      onSuccess: () => {
+        window.location.href = `/workspaces/${initialValues.workspaceId}`;
+      }
+    });
+  };
+
+
+
+  
+
+
   return(
-    <Card className="w-full h-full border-none shadow-none">
-      <CardHeader className="flex p-7">
-        <CardTitle className="text-xl font-bold">
-          Create a new project!
-        </CardTitle>
-      </CardHeader>
-      <div className="px-7">
-        <DottedSeparator />
-      </div>
+    <div className="flex flex-col gap-y-4">
+      <DeleteConfirmationDialog />
+   
+      <Card className="w-full h-full border-none shadow-none">
+        <CardHeader className="flex flex-row items-center gap-x-4 p-7 space-y-0">
+          <Button size="sm" variant="secondary" onClick={onCancel ? onCancel : () => router.push(`/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}`)}>
+            <ArrowLeftIcon className="size-4px mr-2" />
+            Back
+          </Button>
+          <CardTitle className="text-xl font-bold">
+            {initialValues.name}
+          </CardTitle>
+        </CardHeader>      
+      </Card>
+
+      <Card className="w-full h-full border-none shadow-none">
       <CardContent className="p-7">
+      <div className="flex flex-col">
+            <h3 className="font-bold">Edit Project</h3>
+            <p className="text-sm text-muted-foreground">
+            </p>
+            <DottedSeparator className="py-7" />
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-y-4">
@@ -157,12 +194,30 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                   Cancel
                 </Button>
                 <Button type="submit" size="lg" disabled={isPending}>
-                  Create Project
+                  Save Changes
                 </Button>
             </div>
           </form>
         </Form>
+      </div>
       </CardContent>
-    </Card>
+      </Card>
+
+      <Card className="w-full h-full border-none shadow-none">
+        <CardContent className="p-7">
+          <div className="flex flex-col">
+            <h3 className="font-bold">Delete Workspace</h3>
+            <p className="text-sm text-muted-foreground">
+              Deleting a project is irreversible. All associated data will be lost.
+            </p> 
+            <DottedSeparator className="py-7" />
+            <Button className="mt-6 w-fit ml-auto" size="sm" variant="destructive" type="button" disabled={isPending} onClick={handelDelete}>
+              Delete Project
+            </Button>
+          </div>
+        </CardContent>       
+      </Card>
+      
+  </div>
   )
-} ;
+};
