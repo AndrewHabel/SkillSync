@@ -79,11 +79,6 @@ export const EditProjectForm = ({ onCancel , initialValues}: EditProjectFormProp
     });
   };
 
-
-
-  
-
-
   return(
     <div className="flex flex-col gap-y-4">
       <DeleteConfirmationDialog />

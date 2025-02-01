@@ -47,7 +47,9 @@ export const DataFilters = ({hideProjectFilter}: DataFiltersProps) => {
 
   const onAssigneeChange = (value:string) => {
     if(value === "all") setFilters({status:null});
-    else setFilters({assigneeId:value as string});
+    else 
+    console.log(value);
+    setFilters({assigneeId:value as string});
   }
 
   const onProjectChange = (value:string) => {
