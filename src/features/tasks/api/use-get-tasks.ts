@@ -36,9 +36,9 @@ export const useGetTasks = ({
           workspaceId,
           projectId: projectId ?? undefined,
           status: status ?? undefined,
-          assigneedId: assigneeId ?? undefined, // Corrected key name
+          assigneeId: assigneeId ?? undefined, 
           search: search ?? undefined,
-          dueDate: dueDate ?? undefined, // Removed extra period at the end
+          dueDate: dueDate ?? undefined, 
         },
       });
 
