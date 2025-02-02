@@ -20,7 +20,7 @@ export const MembersAvatar= ({
         "bg-neutral-200 font-medium text-neutral-500 flex items-center justify-center",
         fallbackclassName
       )}>
-        {name.charAt(0).toUpperCase()}
+        {name}
       </AvatarFallback>
     </Avatar>
   );
