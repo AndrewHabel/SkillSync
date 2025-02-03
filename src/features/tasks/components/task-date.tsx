@@ -11,7 +11,7 @@ export const TaskDate = ({value, className}: TaskDateProps) => {
     const endDate = new Date(value);
     const daysDifference = differenceInDays(endDate, today);
 
-    let textColor ="text-muted-foregground";
+    let textColor ="text-muted-foreground";
 
     if (daysDifference <= 3) {
         textColor = "text-red-500";
