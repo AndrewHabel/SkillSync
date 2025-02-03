@@ -8,6 +8,9 @@ import { ExternalLinkIcon, PencilIcon, TrashIcon } from "lucide-react";
 
 import { useDeleteTask } from "../api/use-delete-tasks";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useRouter } from "next/navigation";
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+import { useEditTaskModal } from "../hooks/use-edit-task-modal";
 
 interface TaskActionsProps {
     id: string;
@@ -17,6 +20,10 @@ interface TaskActionsProps {
 
 
 export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
+    const workspaceId = useWorkspaceId();
+    const router = useRouter();
+
+    const {open} = useEditTaskModal();
 
     const [ConfirmDialog,confirm] = useConfirm(
         "Are you sure you want to delete this task?",
@@ -32,6 +39,14 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
         mutate({param: {taskId: id}});
     };
 
+    const onOpenTask = () => {
+        router.push(`/workspaces/${workspaceId}/tasks/${id}`)
+    };
+
+    const onOpenProject = () => {
+        router.push(`/workspaces/${workspaceId}/projects/${projectId}`)
+    };
+
     return(
         <div className="flex justify-end">
             <ConfirmDialog />
@@ -40,15 +55,15 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                     {children}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={()=>{}} disabled={false} className="font-medium p-[10px]">
+                    <DropdownMenuItem onClick={onOpenTask} disabled={false} className="font-medium p-[10px]">
                         <ExternalLinkIcon className="size-4 mr-2 stroke-2" />
                         Task Details
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={()=>{}} disabled={false} className="font-medium p-[10px]">
+                    <DropdownMenuItem onClick={onOpenProject} disabled={false} className="font-medium p-[10px]">
                         <ExternalLinkIcon className="size-4 mr-2 stroke-2" />
                         Open Project
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={()=>{}} disabled={false} className="font-medium p-[10px]">
+                    <DropdownMenuItem onClick={()=>open(id)} disabled={false} className="font-medium p-[10px]">
                         <PencilIcon className="size-4 mr-2 stroke-2" />
                         Edit Task
                     </DropdownMenuItem>
