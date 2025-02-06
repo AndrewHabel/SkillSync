@@ -10,6 +10,6 @@ const TasksPage = async () => {
       <TaskViewSwitcher />
     </div>
   );
-}
+};
 
 export default TasksPage;
