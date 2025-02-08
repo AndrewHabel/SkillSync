@@ -10,13 +10,7 @@ import { DottedSeparator } from "@/components/dotted-separator";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";;
 import { useRef } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Image from "next/image";
-import { ImageIcon } from "lucide-react";
-import { on } from "events";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { DatePicker } from "@/components/date-picker";
 import { Select, SelectValue ,SelectTrigger, SelectContent , SelectItem} from "@/components/ui/select";
 import { MembersAvatar } from "@/features/members/components/members-avatar";
@@ -34,8 +28,6 @@ interface EditTaskFormProps {
 
 export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initialValues}: EditTaskFormProps) => {
 
-  const workspaceId = useWorkspaceId();
-  const router = useRouter();
   const {mutate, isPending} = useUpdateTask();
 
   const inputRef = useRef<HTMLInputElement>(null);

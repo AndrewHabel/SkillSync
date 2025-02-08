@@ -25,7 +25,7 @@ const app = new Hono()
     const {email,password} = c.req.valid("json");
 
     const adminClient = await createAdminClient();
-    const account = adminClient.getAccount();
+    const account = adminClient.account;
     const session = await account.createEmailPasswordSession(
       email,
       password,
@@ -51,7 +51,7 @@ const app = new Hono()
 
       const {name ,email,password} = c.req.valid("json");
       const adminClient = await createAdminClient();
-      const account = adminClient.getAccount();
+      const account = adminClient.account;
 
       const user = await account.create(
         ID.unique(),

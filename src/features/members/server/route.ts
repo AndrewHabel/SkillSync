@@ -42,9 +42,10 @@ const app = new Hono()
             const populatedMembers = await Promise.all(
                 members.documents.map(async (member) => {
                     const user = await users.get(member.userId);
+                    const username = user.email.split('@')[0];
                     return {
                         ...member,
-                        name:user.name,
+                        name:user.name || username,
                         email:user.email,
                         role:member.role,
                     };

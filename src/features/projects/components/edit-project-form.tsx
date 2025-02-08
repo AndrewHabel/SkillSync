@@ -10,17 +10,14 @@ import { DottedSeparator } from "@/components/dotted-separator";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback} from "@/components/ui/avatar";
 import Image from "next/image";
-import { ArrowLeftIcon, CopyIcon, ImageIcon } from "lucide-react";
-import { on } from "events";
+import { ArrowLeftIcon, ImageIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Project } from "../types";
 import { useUpdateProject } from "../api/use-update-project";
-import { Arrow } from "@radix-ui/react-dropdown-menu";
 import { useConfirm } from "@/hooks/use-confirm";
-import { toast } from "sonner";
 import { useDeleteProject } from "../api/use-delete-project";
 
 
@@ -204,7 +201,7 @@ export const EditProjectForm = ({ onCancel , initialValues}: EditProjectFormProp
               Deleting a project is irreversible. All associated data will be lost.
             </p> 
             <DottedSeparator className="py-7" />
-            <Button className="mt-6 w-fit ml-auto" size="sm" variant="destructive" type="button" disabled={isPending} onClick={handelDelete}>
+            <Button className="mt-6 w-fit ml-auto" size="sm" variant="destructive" type="button" disabled={isPending || isDeleteingProject} onClick={handelDelete}>
               Delete Project
             </Button>
           </div>

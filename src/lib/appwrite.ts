@@ -4,7 +4,6 @@ import {
     Client,
     Account,
     Databases,
-    Storage,
     Users,
 } from "node-appwrite"
 import { cookies } from "next/headers";
@@ -41,7 +40,7 @@ export async function createAdminClient(){
         .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
         .setKey(process.env.NEXT_APPWRITE_KEY!)
     return {
-        getAccount() {
+        get account() {
             return new Account(client);
         },
         get users() {
