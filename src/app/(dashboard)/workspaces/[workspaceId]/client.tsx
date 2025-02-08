@@ -13,10 +13,15 @@ import { useCreateTaskModal } from "@/features/tasks/hooks/use-create-task-modal
 import { Task } from "@/features/tasks/types";
 import { useGetWorkspaceAnalytics } from "@/features/workspaces/api/use-get-workspace-analytics";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id"
-import { Plus, PlusIcon ,Calendar, CalendarIcon} from "lucide-react";
+import { Plus, PlusIcon ,Calendar, CalendarIcon, SettingsIcon} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import {Card , CardContent} from "@/components/ui/card";
 import Link from "next/link";
+import { Project } from "@/features/projects/types";
+import { ProjectAvatar } from "@/features/projects/components/project-avatar";
+import { useProjectId } from "@/features/projects/hooks/use-project-id";
+import { Member } from "@/features/members/types";
+import { MembersAvatar } from "@/features/members/components/members-avatar";
 
 export const WorkSpaceIdClient = () => {
 
@@ -27,7 +32,6 @@ export const WorkSpaceIdClient = () => {
     const {data:members, isLoading: isLoadingMembers} = useGetMembers({workspaceId});
 
     const {open:createProject} = useCreateProjectModal();
-   
 
     const isLoading = isLoadingAnalytics || isLoadingTasks || isLoadingProjects || isLoadingMembers;
     if (isLoading) return <PageLoader />
@@ -38,6 +42,8 @@ export const WorkSpaceIdClient = () => {
             {analytics && <Analytics data={analytics} />}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 <TaskList data={tasks.documents} total={tasks.total}/>
+                <ProjectList data={projects.documents} total={projects.total}/>
+                <MembersList data={members.documents} total={members.total}/>
             </div>
         </div>
     )
@@ -96,6 +102,104 @@ export const TaskList = ({data,total}:TaskListProps) => {
                         Show All
                     </Link>
                 </Button>
+            </div>
+        </div>
+    )
+}
+
+interface ProjectListProps{
+    data:Project[];
+    total:number;
+}
+
+export const ProjectList = ({data,total}:ProjectListProps) => {
+
+    const {open:createTask} = useCreateTaskModal();
+    const projectId = useProjectId();
+    const {open:createProject} = useCreateProjectModal();
+
+    return (
+        <div className="flex flex-col gap-y-4 col-span-1">
+            <div className="bg-white border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                    <p className="text-lg font-semibold">
+                        Projects ({total})
+                    </p>
+                    <Button variant="secondary" size="icon" onClick={createProject}>
+                        <PlusIcon className="size-4 text-neutral-400"/>
+                    </Button>
+                </div>
+                <DottedSeparator className="my-4"/>
+                <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {data.map((project) => (
+                        <li key={project.$id}>
+                            <Link href={`/workspaces/${projectId}/projects/${project.$id}`}>
+                                <Card className="shadow-none rounded-lg hover:opacity-75 transition">
+                                    <CardContent className="p-4 flex items-center gap-x-2.5">
+                                        <ProjectAvatar className="size-12" fallbackClassName="text-lg" name={project.name} image={project.imageUrl}/>
+                                        <p className="text-lg font-medium truncate">
+                                            {project.name}
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </Link>
+                        </li>
+                    ))}
+                    <li className="text-sm text-muted-foreground text-center hidden first-of-type:block">
+                        No Projects found
+                    </li>
+                </ul>
+            </div>
+        </div>
+    )
+}
+
+interface MembersListProps{
+    data:Member[];
+    total:number;
+}
+
+export const MembersList = ({data,total}:MembersListProps) => {
+
+    const {open:createTask} = useCreateTaskModal();
+    const workspaceId = useWorkspaceId();
+
+    return (
+        <div className="flex flex-col gap-y-4 col-span-1">
+            <div className="bg-white border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                    <p className="text-lg font-semibold">
+                        Members ({total})
+                    </p>
+                    <Button asChild variant="secondary" size="icon" >
+                        <Link href={`/workspaces/${workspaceId}/members`}>
+                            <SettingsIcon className="size-4 text-neutral-400"/>
+                        </Link>   
+                    </Button>
+                </div>
+                <DottedSeparator className="my-4"/>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {data.map((member) => (
+                        <li key={member.$id}>
+                            <Card className="shadow-none rounded-lg overflow-hidden">
+                                <CardContent className="p-3 flex flex-col items-center gap-x-2">
+                                    <MembersAvatar className="size-12" name={member.name} />
+                                    <div className="flex flex-col items-center overflow-hidden">
+                                        <p className="text-lg font-medium line-clamp-1">
+                                            {member.name}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground line-clamp-1">
+                                            {member.email}
+                                        </p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </li>
+                    ))}
+                    <li className="text-sm text-muted-foreground text-center hidden first-of-type:block">
+                        No Members found
+                    </li>
+                </ul>
             </div>
         </div>
     )

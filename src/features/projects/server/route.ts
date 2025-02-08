@@ -86,7 +86,7 @@ const app = new Hono()
             }
 
 
-            const projects = await databases.listDocuments(
+            const projects = await databases.listDocuments<Project>(
                 DATABASE_ID,
                 PROJECTS_ID,
                 [
