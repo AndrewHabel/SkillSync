@@ -43,7 +43,6 @@ const app = new Hono()
   }
   )
 
-
   .post(
     "/register",
     zValidator("json",registerSchema),
@@ -76,7 +75,6 @@ const app = new Hono()
     }
   )
 
-  
   .post("/logout", sessionMiddleware, async (c)=>{
     const account = c.get("account")
 

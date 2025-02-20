@@ -22,6 +22,7 @@ import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { useProjectId } from "@/features/projects/hooks/use-project-id";
 import { Member } from "@/features/members/types";
 import { MembersAvatar } from "@/features/members/components/members-avatar";
+import { motion } from "framer-motion";
 
 export const WorkSpaceIdClient = () => {
 
@@ -54,42 +55,49 @@ interface TaskListProps{
     total:number;
 }
 
-export const TaskList = ({data,total}:TaskListProps) => {
-
-    const {open:createTask} = useCreateTaskModal();
+export const TaskList = ({ data, total }: TaskListProps) => {
+    const { open: createTask } = useCreateTaskModal();
     const workspaceId = useWorkspaceId();
 
     return (
         <div className="flex flex-col gap-y-4 col-span-1">
             <div className="bg-muted rounded-lg p-4">
                 <div className="flex items-center justify-between">
-                    <p className="text-lg font-semibold">
-                        Tasks ({total})
-                    </p>
+                    <p className="text-lg font-semibold">Tasks ({total})</p>
                     <Button variant="muted" size="icon" onClick={createTask}>
-                        <PlusIcon className="size-4 text-neutral-400"/>
+                        <PlusIcon className="size-4 text-neutral-400" />
                     </Button>
                 </div>
-                <DottedSeparator className="my-4"/>
+                <DottedSeparator className="my-4" />
                 <ul className="flex flex-col gap-y-4">
-                    {data.map((task) => (
+                    {data.map((task, index) => (
                         <li key={task.$id}>
                             <Link href={`/workspaces/${workspaceId}/tasks/${task.$id}`}>
-                                <Card className="shadow-none rounded-lg hover:opacity-75 transition">
-                                    <CardContent className="p-4">
-                                       <p className="text-lg font-medium truncate">{task.name}</p>
-                                       <div className="flex items-center gap-x-2">
-                                            <p>{task.project?.name}</p>
-                                            <div className="size-1 rounded-full bg-neutral-300"/>
-                                            <div className="text-sm text-muted-foreground flex items-center">
-                                                <CalendarIcon className="size-3 mr-1"/>
-                                                <span className="truncate">
-                                                    {formatDistanceToNow(new Date(task.dueDate))}
-                                                </span>
-                                            </div>
-                                       </div>
-                                    </CardContent>
-                                </Card>
+                                {/* Animated Card */}
+                                <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                                        whileHover={{ scale: 1.02 }}
+                                    >
+                                        <Card className="shadow-none rounded-lg hover:opacity-75 transition group">
+                                            <CardContent className="p-4">
+                                                <p className="text-lg font-medium truncate group-hover:text-blue-600 transition-colors">
+                                                    {task.name}
+                                                </p>
+                                                <div className="flex items-center gap-x-2">
+                                                    <p>{task.project?.name}</p>
+                                                    <div className="size-1 rounded-full bg-neutral-300" />
+                                                    <div className="text-sm text-muted-foreground flex items-center">
+                                                        <CalendarIcon className="size-3 mr-1" />
+                                                       <span className="truncate group-hover:text-blue-600 transition-colors" >
+                                                            {formatDistanceToNow(new Date(task.dueDate))}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </motion.div>
                             </Link>
                         </li>
                     ))}
@@ -98,25 +106,22 @@ export const TaskList = ({data,total}:TaskListProps) => {
                     </li>
                 </ul>
                 <Button variant="muted" className="mt-4 w-full" asChild>
-                    <Link href={`/workspaces/${workspaceId}/tasks`}>
-                        Show All
-                    </Link>
+                    <Link href={`/workspaces/${workspaceId}/tasks`}>Show All</Link>
                 </Button>
             </div>
         </div>
-    )
-}
+    );
+};
 
 interface ProjectListProps{
     data:Project[];
     total:number;
 }
 
-export const ProjectList = ({data,total}:ProjectListProps) => {
-
-    const {open:createTask} = useCreateTaskModal();
+export const ProjectList = ({ data, total }: ProjectListProps) => {
+    const { open: createTask } = useCreateTaskModal();
     const projectId = useProjectId();
-    const {open:createProject} = useCreateProjectModal();
+    const { open: createProject } = useCreateProjectModal();
 
     return (
         <div className="flex flex-col gap-y-4 col-span-1">
@@ -126,22 +131,34 @@ export const ProjectList = ({data,total}:ProjectListProps) => {
                         Projects ({total})
                     </p>
                     <Button variant="secondary" size="icon" onClick={createProject}>
-                        <PlusIcon className="size-4 text-neutral-400"/>
+                        <PlusIcon className="size-4 text-neutral-400" />
                     </Button>
                 </div>
-                <DottedSeparator className="my-4"/>
+                <DottedSeparator className="my-4" />
                 <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {data.map((project) => (
                         <li key={project.$id}>
                             <Link href={`/workspaces/${projectId}/projects/${project.$id}`}>
-                                <Card className="shadow-none rounded-lg hover:opacity-75 transition">
-                                    <CardContent className="p-4 flex items-center gap-x-2.5">
-                                        <ProjectAvatar className="size-12" fallbackClassName="text-lg" name={project.name} image={project.imageUrl}/>
-                                        <p className="text-lg font-medium truncate">
-                                            {project.name}
-                                        </p>
-                                    </CardContent>
-                                </Card>
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    whileHover={{ scale: 1.02 }}
+                                >
+                                    <Card className="shadow-none rounded-lg hover:opacity-95 transition group">
+                                        <CardContent className="p-4 flex items-center gap-x-2.5">
+                                            <ProjectAvatar
+                                                className="size-12"
+                                                fallbackClassName="text-lg"
+                                                name={project.name}
+                                                image={project.imageUrl}
+                                            />
+                                            <p className="text-lg font-medium truncate group-hover:text-blue-600 transition-colors">
+                                                {project.name}
+                                            </p>
+                                        </CardContent>
+                                    </Card>
+                                </motion.div>
                             </Link>
                         </li>
                     ))}
@@ -151,8 +168,10 @@ export const ProjectList = ({data,total}:ProjectListProps) => {
                 </ul>
             </div>
         </div>
-    )
-}
+    );
+};
+
+
 
 interface MembersListProps{
     data:Member[];
