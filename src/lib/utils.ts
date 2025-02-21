@@ -20,3 +20,4 @@ export function snakeCaseToTitleCase (str: string) {
     .replace(/_/g, ' ')
     .replace(/\bw/g, (char) => char.toUpperCase())
 };
+
