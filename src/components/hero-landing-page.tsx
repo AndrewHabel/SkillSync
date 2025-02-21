@@ -42,7 +42,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({ text ,time }) => {
 export const HeroLandingPage = () => {
 
   return (
-    <div className="bg-black w-[80%] h-[80vh] flex flex-col items-center justify-center overflow-hidden">
+    <div className="w-[80%] h-[80vh] flex flex-col items-center justify-center overflow-hidden">
       <div className="flex flex-col items-center justify-center text-center">
         <Image 
           src="/logo.svg" 
@@ -52,7 +52,7 @@ export const HeroLandingPage = () => {
           className="w-3/4 md:w-1/2 max-w-full max-h-full object-contain"
         />
 
-        <h1 className="text-white text-base md:text-xl lg:text-2xl font-bold mt-8 w-[80%]">
+        <h1 className="text-blue-950 text-base md:text-xl lg:text-2xl font-bold mt-8 w-[80%]">
             <AnimatedText time ={0.2} text={
               <>
                 Tired of juggling tasks, deadlines, and team coordination? Meet the next-generation project 

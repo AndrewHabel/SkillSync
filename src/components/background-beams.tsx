@@ -60,7 +60,7 @@ export const BackgroundBeams = React.memo(
     return (
       <div
         className={cn(
-          "absolute  h-full w-full inset-0 pointer-events-none  [mask-size:40px] [mask-repeat:no-repeat] flex items-center justify-center",
+          "absolute pointer-events-none  h-full w-full inset-0  [mask-size:40px] [mask-repeat:no-repeat] flex items-center justify-center",
           className
         )}
       >
@@ -85,7 +85,7 @@ export const BackgroundBeams = React.memo(
               d={path}
               stroke={`url(#linearGradient-${index})`}
               strokeOpacity="0.4"
-              strokeWidth="0.5"
+              strokeWidth="1.5"
             ></motion.path>
           ))}
           <defs>
