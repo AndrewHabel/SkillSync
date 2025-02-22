@@ -16,7 +16,7 @@ export const landingPageLayout = ({children}:StandalinLayoutProps) => {
                     <Link href="/">
                     </Link>
                         <div className="flex flex-wrap justify-center gap-4">
-                            <Button className="group relative inline-flex h-12 w-full md:w-32 overflow-hidden rounded-xl p-[3px] focus:outline-none focus:ring-4 focus:ring-slate-400 focus:ring-offset-4 focus:ring-offset-slate-50 transition-transform duration-300">
+                            <Button className="group relative inline-flex h-12 min-w-[120px] md:w-32 overflow-hidden rounded-xl p-[3px] focus:outline-none focus:ring-4 focus:ring-slate-400 focus:ring-offset-4 focus:ring-offset-slate-50 transition-transform duration-300">
                                 <span className="absolute inset-[-1000%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
                                 <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-xl bg-slate-950 px-4 sm:px-6 py-2 text-base md:text-lg font-medium text-white backdrop-blur-3xl transition-colors duration-300 group-hover:bg-yellow-50 group-hover:text-blue-950">
                                 <Link href="/sign-in">
@@ -25,7 +25,7 @@ export const landingPageLayout = ({children}:StandalinLayoutProps) => {
                                 </span>
                             </Button>
 
-                            <Button className="group relative inline-flex h-12 w-full md:w-32 overflow-hidden rounded-xl p-[3px] focus:outline-none focus:ring-4 focus:ring-slate-400 focus:ring-offset-4 focus:ring-offset-slate-50 transition-transform duration-300">
+                            <Button className="group relative inline-flex h-12 min-w-[120px] md:w-32 overflow-hidden rounded-xl p-[3px] focus:outline-none focus:ring-4 focus:ring-slate-400 focus:ring-offset-4 focus:ring-offset-slate-50 transition-transform duration-300">
                                 <span className="absolute inset-[-1000%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
                                 <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-xl bg-slate-950 px-4 sm:px-6 py-2 text-base md:text-lg font-medium text-white backdrop-blur-3xl transition-colors duration-300 group-hover:bg-yellow-50 group-hover:text-blue-950">
                                     <Link href="/sign-up">
