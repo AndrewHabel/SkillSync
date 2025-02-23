@@ -59,7 +59,7 @@ export const WhyChooseUs = () => {
 
           <div className="absolute bg-blue-400 h-1 w-3/4 bottom-[49%] left-[10%] lg:bottom-[49%] lg:left-[10%] md:bottom-[49%] md:left-[10%]"></div>
 
-          <div className="absolute bg-blue-400 h-1 w-3/4 lg:w-1 lg:h-full left-[10%] bottom-[-48%] lg:bottom-[0%] lg:left-[100%] md:left-[100%]"></div>
+          <div className="absolute bg-blue-400 h-1 w-3/4 lg:w-1 lg:h-full left-[10%] bottom-[-48%] md:bottom-[0%] lg:bottom-[0%] lg:left-[100%] md:left-[100%]"></div>
 
           <div className="absolute bg-blue-400 h-1 w-3/4 left-[10%] bottom-[-3%] lg:bottom-[41%] lg:left-[115%] md:bottom-[41%] md:left-[115%]"></div>
 
