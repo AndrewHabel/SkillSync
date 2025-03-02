@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 const workspaceCreatePage =  async () => {
 
     const user = await getCurrent();
-    if (!user) redirect("/sign-in")
+    if (!user) redirect("http://localhost:3000/landingpage")
         
     return (
         <div className="w-full lg:max-w-xl">

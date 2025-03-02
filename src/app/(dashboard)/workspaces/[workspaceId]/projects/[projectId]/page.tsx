@@ -6,7 +6,7 @@ import { ProjectIdClient } from "./client";
 
 const ProjectIdPage = async () => {
   const user = await getCurrent();
-  if(!user) redirect("/sign-in");
+  if(!user) redirect("http://localhost:3000/landingpage");
 
 
   return <ProjectIdClient />

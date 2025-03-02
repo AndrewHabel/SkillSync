@@ -96,6 +96,5 @@ export const HeroLandingPage = () => {
     </div>
   );
 
-
 };
 

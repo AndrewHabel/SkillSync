@@ -4,6 +4,7 @@ import Link from "next/link";
 import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { FooterAuroraGradient } from "@/components/fotter";
 
 interface StandalinLayoutProps {
     children: React.ReactNode;
@@ -39,6 +40,7 @@ export const landingPageLayout = ({children}:StandalinLayoutProps) => {
                      {children}
                 </div>
             </div>
+            <FooterAuroraGradient />
         </main>
     );  
 };
