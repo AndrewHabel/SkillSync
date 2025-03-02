@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export default async function Home() {
   const user = await getCurrent();
-  if (!user) redirect("/sign-in")
+  if (!user) redirect("http://localhost:3000/landingpage")
 
   const workspaces = await getWorkspaces();
 
