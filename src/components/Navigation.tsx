@@ -52,7 +52,10 @@ export const Navigation = () => {
                                 isActive && "bg-white shadow-sm hover:opacity-100 text-primary"
                             )}
                         >
-                           <Icon className="size-5 text-neutral-500 transition-colors duration-300 group-hover:text-blue-600 group-hover:scale-110" />
+                           <Icon className={cn(
+                                "size-5 text-neutral-500 transition-colors duration-300 group-hover:text-blue-600 group-hover:scale-110",
+                                isActive && "text-blue-600"
+                            )} />
                             <span className="group-hover:translate-x-2 transition-transform duration-300">
                                 {item.label}
                             </span>

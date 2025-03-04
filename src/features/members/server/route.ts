@@ -1,13 +1,14 @@
-import { createAdminClient } from "@/lib/appwrite";
+import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getMember } from "../utils";
-import { DATABASE_ID, MEMBERS_ID } from "@/config";
-import { Query } from "node-appwrite";
+import { DATABASE_ID, IMAGES_BUCKET_ID, MEMBERS_ID } from "@/config";
+import { ID, Query } from "node-appwrite";
 import { get } from "http";
 import { Member, MemberRole } from "../types";
+import { UpdateMemberSchema } from "../schema";
 
 const app = new Hono()
     .get(
@@ -54,6 +55,49 @@ const app = new Hono()
 
             return c.json({data:{...members , documents:populatedMembers}});
 
+        }
+    )
+    .get(
+        "/:memberId",
+        sessionMiddleware,
+        zValidator("query", z.object({ workspaceId: z.string() })),
+        async (c) => {
+            
+            const { users } = await createAdminClient();
+            const databases = c.get("databases");
+            const user = c.get("user");
+
+            const { workspaceId } = c.req.valid("query");
+            const { memberId } = c.req.param(); 
+    
+    
+            const member = await getMember({
+                databases,
+                workspaceId,
+                userId: user.$id,
+            });
+
+            if (!member) {
+                return c.json({ error: "Unauthorized" }, 401);
+            }
+
+            const memberProfle =  await databases.listDocuments<Member>(
+                DATABASE_ID,
+                MEMBERS_ID,
+                [
+                    Query.equal("userId", memberId),
+                    Query.equal("workspaceId", workspaceId),
+                ]
+            )
+            
+            return c.json({data:{
+                id: memberProfle.documents[0].$id,
+                name:user.name,
+                email:user.email,
+                role:memberProfle.documents[0].role,
+                skills:memberProfle.documents[0].skills,
+                image:memberProfle.documents[0].imageUrl,
+            }});
         }
     )
     .delete(
@@ -110,13 +154,17 @@ const app = new Hono()
     .patch(
        "/:memberId",
        sessionMiddleware,
-       zValidator("json", z.object({role:z.nativeEnum(MemberRole)})),
+       zValidator("form", UpdateMemberSchema),
        async (c) => {
 
             const {memberId} = c.req.param();
-            const {role} = c.req.valid("json");
+            const { role ,name , skills , image} = c.req.valid("form");
             const user = c.get("user");
             const databases = c.get("databases");
+            const { account } = await createSessionClient();
+            const storage = c.get("storage");
+            
+            console.log("Image",image);
 
             const memberToUpdate = await databases.getDocument(
                 DATABASE_ID, 
@@ -138,6 +186,7 @@ const app = new Hono()
                 userId: user.$id,
             });
 
+
             if (!member) {
                 return c.json({ error: "Unauthorized" }, 401);
             }
@@ -146,8 +195,27 @@ const app = new Hono()
                 return c.json({error:"Unauthorized"},401);
             }
 
-            if(allMembersInWorkspace.documents.length === 1){
+            if(allMembersInWorkspace.documents.length === 1 && role === MemberRole.MEMBER){
                 return c.json({error:"Cannot set the last member to member role"},400);
+            }
+
+            await account.updateName(name);
+
+            let uploadedImageUrl: string | undefined;
+            
+            if(image instanceof File){
+                const file = await storage.createFile(
+                    IMAGES_BUCKET_ID,
+                    ID.unique(),
+                    image,
+                );
+
+                const arrayBuffer = await storage.getFilePreview(
+                    IMAGES_BUCKET_ID,
+                    file.$id,
+                );
+
+                uploadedImageUrl = `data:image/png;base64,${Buffer.from(arrayBuffer).toString("base64")}`;
             }
 
             await databases.updateDocument(
@@ -156,6 +224,8 @@ const app = new Hono()
                 memberId,
                 {
                     role,
+                    skills,
+                    imageUrl: uploadedImageUrl,
                 }
             )
 

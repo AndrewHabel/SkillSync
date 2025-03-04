@@ -15,11 +15,11 @@ export const Sidebar = () => {
                     </Link>
                 </div>
             </div>
-            <DottedSeparator className="my-4"/>
+            <DottedSeparator className="my-4" color={"#00008B"}/>
             <WorkspaceSwitcher />
-            <DottedSeparator className="my-4"/>
+            <DottedSeparator className="my-4" color={"#00008B"}/>
             <Navigation />
-            <DottedSeparator className="my-4"/>
+            <DottedSeparator className="my-4" color={"#00008B"}/>
             <Projects />
         </aside>
     )

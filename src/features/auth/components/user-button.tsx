@@ -5,14 +5,25 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Loader, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { useLogout } from "../api/use-logout";
 import { useCurrent } from "../api/use-current";
+import { FaUserAlt } from "react-icons/fa";
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+import Link from "next/link";
+import { useGetMemberProfile } from "@/features/members/api/use-get-member";
 
 export const UserButton = () => {
-  
-  const { data: user, isLoading } = useCurrent();
+  const { data:user, isLoading } = useCurrent();
   const { mutate: logout } = useLogout();
+  const workspaceId = useWorkspaceId();
+  
+  // Always call the hook, but conditionally use its data
+  const { data: memberProfile } = useGetMemberProfile({
+    workspaceId: workspaceId || "", // Pass a fallback value if workspaceId is null
+    memberId: user?.$id || "", // Pass a fallback value if user is null
+  });
 
   if (isLoading) {
     return (
@@ -22,29 +33,37 @@ export const UserButton = () => {
     );
   }
 
-  if (!user) {
+  if (!user || !workspaceId) {
     return null;
   }
 
   const { name, email } = user;
 
-  const avatarFallback = name?.charAt(0).toUpperCase() ?? email?.charAt(0).toUpperCase() ?? "U";
+  console.log(memberProfile);
 
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger className="outline-none relative">
-        <Avatar className="size-10 hover:opacity-75 transition border border-neutral-300">
-          <AvatarFallback className="bg-neutral-200 font-medium text-neutral-500 flex items center justify-center">
-            {avatarFallback}
+      <Avatar className="size-14 hover:opacity-75 transition border border-neutral-300">
+        {memberProfile?.image ? (
+          <AvatarImage className="" src={memberProfile.image} alt={name || "User"} />
+        ) : (
+          <AvatarFallback className="bg-neutral-200 font-medium text-neutral-500 flex items-center justify-center">
+            {name ? name.charAt(0).toUpperCase() : <FaUserAlt className="size-4" />}
           </AvatarFallback>
-        </Avatar>
+        )}
+      </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="bottom" className="w-60" sideOffset={10}>
         <div className="flex flex-col items-center justify-center gap-2 px-2.5 py-4">
-          <Avatar className="size-[52px] border border-neutral-300">
-            <AvatarFallback className="bg-neutral-200 text-xl font-medium text-neutral-500 flex items center justify-center">
-              {avatarFallback}
-            </AvatarFallback>
+        <Avatar className="size-16 border border-neutral-300">
+            {memberProfile?.image ? (
+              <AvatarImage src={memberProfile.image} alt={name || "User"} />
+            ) : (
+              <AvatarFallback className="bg-neutral-200 text-xl font-medium text-neutral-500 flex items-center justify-center">
+                {name ? name.charAt(0).toUpperCase() : <FaUserAlt className="size-6" />}
+              </AvatarFallback>
+            )}
           </Avatar>
           <div className="flex flex-col items-center justify-center">
             <p className="text-sm font-medium text-neutral-900">{name || "User"}</p>
@@ -52,12 +71,21 @@ export const UserButton = () => {
           </div>
         </div>
         <DottedSeparator className="mb-1" />
+        <Link href={`/workspaces/${workspaceId}/memberprofile/${user.$id}`}>
+          <DropdownMenuItem
+            className="h-auto flex items-center justify-center text-blue-700 font-medium cursor-pointer"
+          >
+            <FaUserAlt className="size-4 mr-2"/>
+              Profile
+          </DropdownMenuItem>
+        </Link>
+        <DottedSeparator className="mb-1" />
         <DropdownMenuItem
           onClick={() => logout()} // Fixed this
-          className="h-10 flex items-center justify-center text-amber-700 font-medium cursor-pointer"
+          className="h-auto flex items-center justify-center text-amber-700 font-medium cursor-pointer"
         >
           <LogOut className="size-4 mr-2" />
-          Log out
+            Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

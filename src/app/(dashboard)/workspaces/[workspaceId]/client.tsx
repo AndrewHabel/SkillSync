@@ -153,9 +153,14 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
                                                 name={project.name}
                                                 image={project.imageUrl}
                                             />
-                                            <p className="text-lg font-medium truncate group-hover:text-blue-600 transition-colors">
-                                                {project.name}
-                                            </p>
+                                            <div className="flex flex-col items-start overflow-hidden">
+                                                <p className="text-lg font-medium truncate group-hover:text-blue-600 transition-colors">
+                                                    {project.name}
+                                                </p>
+                                                <p className="text-sm font-medium truncate group-hover:text-blue-600 transition-colors">
+                                                    {project.ProjectTechStack.join(" , ")}
+                                                </p>
+                                            </div>
                                         </CardContent>
                                     </Card>
                                 </motion.div>
