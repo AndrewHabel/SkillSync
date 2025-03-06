@@ -7,6 +7,11 @@ interface GetMembersProps {
     userId: string;
 }
 
+interface GetMembersProfileProps {
+    databases: Databases;
+    userId: string;
+}
+
 export const getMember = async ({
     databases,
     workspaceId,

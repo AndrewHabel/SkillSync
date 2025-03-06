@@ -3,7 +3,7 @@ import { sessionMiddleware } from "@/lib/session-middleware";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { z } from "zod";
-import { getMember } from "../utils";
+import { getMember} from "../utils";
 import { DATABASE_ID, IMAGES_BUCKET_ID, MEMBERS_ID } from "@/config";
 import { ID, Query } from "node-appwrite";
 import { get } from "http";

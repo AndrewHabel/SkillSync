@@ -1,22 +1,17 @@
-"use client"
 import { BackgroundBeams } from "@/components/background-beams";
 import { FooterAuroraGradient } from "@/components/fotter";
 import { HeroLandingPage } from "@/components/hero-landing-page";
 import { WhyChooseUs } from "@/components/why-choose-us-landing";
+import {LandingPageClient} from "./client";
+import { getCurrent } from "@/features/auth/queries";
+import { redirect } from "next/navigation";
 
-const landingPage =  async () => {
+const landingPage = async () => {
+
+    const user = await getCurrent();
+
     return (
-      <div className="bg-transparent flex flex-col items-center justify-center w-full h-full overflow-hidden ">
-        <BackgroundBeams
-        starCount={3000}
-        starColor={[255, 255, 255]}
-        speedFactor={0.05}
-        backgroundColor="black"
-        />
-        <HeroLandingPage />
-        <WhyChooseUs />
-      </div>
-    
+      <LandingPageClient user={user}/>
     )
 };
 
