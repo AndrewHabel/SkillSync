@@ -13,12 +13,13 @@ interface LandingPageClientProps {
 export const LandingPageClient = ({ user }: LandingPageClientProps) => {
     return (
       <div className="bg-transparent flex flex-col items-center justify-center w-full h-full overflow-hidden ">
-        <BackgroundBeams
-        starCount={3000}
+        {/*<BackgroundBeams
+        starCount={1000}
         starColor={[255, 255, 255]}
         speedFactor={0.05}
-        backgroundColor="black"
+        backgroundColor="wh"
         />
+        */}
         <LandingNav user={user}/>
         <HeroLandingPage />
         <WhyChooseUs />

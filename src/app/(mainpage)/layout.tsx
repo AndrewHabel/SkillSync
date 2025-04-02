@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { FooterAuroraGradient } from "@/components/fotter";
 import { LandingNav } from "@/components/landing-nav";
+import { ThemeProvider } from "@/components/theme-provider";
 
 interface StandalinLayoutProps {
     children: React.ReactNode;
@@ -13,10 +14,17 @@ interface StandalinLayoutProps {
 
 export const landingPageLayout = ({children}:StandalinLayoutProps) => {
     return (
-        <main className="bg-neutral-100 min-h-screen overflow-hidden">
+        <main className="bg-neutral-100 dark:bg-[#181818] min-h-screen overflow-hidden">
             <div className="mx-auto max-w-screen-2xl">
                 <div className="flex flex-col items-center justify-center">
-                     {children}
+                     <ThemeProvider 
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem={true}
+                        disableTransitionOnChange
+                     >
+                        {children}
+                     </ThemeProvider>
                 </div>
             </div>
             <FooterAuroraGradient />

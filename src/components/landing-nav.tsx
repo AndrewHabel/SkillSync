@@ -8,6 +8,7 @@ import { FooterAuroraGradient } from "@/components/fotter";
 import { Models } from "node-appwrite";
 import { UserButton } from "@/features/auth/components/user-button";
 import { useGetMemberProfile } from "@/features/members/api/use-get-member";
+import { ModeToggle } from "./mode-toggle";
 
 
 interface LandingPageClientProps {
@@ -46,6 +47,7 @@ export const LandingNav = ({ user }: LandingPageClientProps) => {
         <nav className=" flex flex-wrap justify-between items-center w-full h-[73px] md:h-[80px] px-4 sm:px-6 lg:px-8 gap-4 sm:gap-6">
             <Link href="/"></Link>
             <div className="flex flex-wrap justify-center gap-4">
+                <ModeToggle />
                 <UserButton />
             </div>
         </nav>
