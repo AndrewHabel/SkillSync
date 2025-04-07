@@ -43,6 +43,14 @@ export const ProjectIdClient = () => {
             </Link>
           </Button>
         </div>
+        <div>
+          <Button variant="secondary" size="sm" asChild>
+            <Link href={`/workspaces/${project.workspaceId}/projects/${project.$id}/UserStory`}>
+              <PencilIcon className="size-4 mr-2" />
+              Add User Story
+            </Link>
+          </Button>
+        </div>
       </div>
       {analytics ? (
           <Analytics data={analytics} />
