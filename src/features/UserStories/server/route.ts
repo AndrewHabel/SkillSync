@@ -77,7 +77,7 @@ const app = new Hono()
         ],
       );
 
-      return c.json(userStories);
+      return c.json({data:userStories});
     }
   )
   .get(
