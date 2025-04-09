@@ -10,6 +10,7 @@ import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { useProjectId } from "@/features/projects/hooks/use-project-id";
 import { TaskViewSwitcher } from "@/features/tasks/components/task-view-switcher";
 import { PencilIcon } from "lucide-react";
+import { BookUserIcon } from "lucide-react";
 import Link from "next/link";
 
 export const ProjectIdClient = () => {
@@ -36,18 +37,16 @@ export const ProjectIdClient = () => {
           <p className="text-lg font-semibold">{project.name}</p>
         </div>
         <div>
+        <Button variant="secondary" size="sm" asChild>
+            <Link href={`/workspaces/${project.workspaceId}/projects/${project.$id}/UserStory`}>
+              <BookUserIcon className="size-4 mr-2" />
+              Manage User Stories
+            </Link>
+          </Button>
           <Button variant="secondary" size="sm" asChild>
             <Link href={`/workspaces/${project.workspaceId}/projects/${project.$id}/settings`}>
               <PencilIcon className="size-4 mr-2" />
               Edit project
-            </Link>
-          </Button>
-        </div>
-        <div>
-          <Button variant="secondary" size="sm" asChild>
-            <Link href={`/workspaces/${project.workspaceId}/projects/${project.$id}/UserStory`}>
-              <PencilIcon className="size-4 mr-2" />
-              Add User Story
             </Link>
           </Button>
         </div>
