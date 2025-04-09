@@ -7,6 +7,7 @@ import { AUTH_COOKIE } from "../constans";
 import { setCookie } from "hono/cookie";
 import { deleteCookie } from "hono/cookie";
 import { sessionMiddleware } from "@/lib/session-middleware";
+import { sendWelcomeEmail } from "@/lib/sendEmail";
 
 
 
@@ -16,7 +17,6 @@ const app = new Hono()
     const user = c.get("user")
     return c.json({data: user })
   })
-
   .post(
     "/login", 
     zValidator("json",loginSchema),
@@ -42,7 +42,6 @@ const app = new Hono()
     return c.json({success:true});
   }
   )
-
   .post(
     "/register",
     zValidator("json",registerSchema),
@@ -71,10 +70,12 @@ const app = new Hono()
         sameSite:"strict",
         maxAge: 60 * 60 * 24 * 7,
       });
+      
+      await sendWelcomeEmail(email, name);
+      
       return c.json({data:user});
     }
   )
-
   .post("/logout", sessionMiddleware, async (c)=>{
     const account = c.get("account")
 
