@@ -120,7 +120,7 @@ interface ProjectListProps{
 
 export const ProjectList = ({ data, total }: ProjectListProps) => {
     const { open: createTask } = useCreateTaskModal();
-    const projectId = useProjectId();
+    const workspaceId = useWorkspaceId();
     const { open: createProject } = useCreateProjectModal();
 
     return (
@@ -138,7 +138,7 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
                 <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {data.map((project) => (
                         <li key={project.$id}>
-                            <Link href={`/workspaces/${projectId}/projects/${project.$id}`}>
+                            <Link href={`/workspaces/${workspaceId}/projects/${project.$id}`}>
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}

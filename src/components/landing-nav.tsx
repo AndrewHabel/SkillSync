@@ -39,6 +39,7 @@ export const LandingNav = ({ user }: LandingPageClientProps) => {
                             </Link>
                         </span>
                     </Button>
+                    <ModeToggle />
                 </div>
             </nav>
         );  

@@ -14,7 +14,7 @@ interface StandalinLayoutProps {
 
 export const landingPageLayout = ({children}:StandalinLayoutProps) => {
     return (
-        <main className="bg-neutral-100  min-h-screen overflow-hidden">
+        <main className="bg-neutral-100 min-h-screen overflow-hidden">
             <div className="mx-auto max-w-screen-2xl">
                 <div className="flex flex-col items-center justify-center">
                      <ThemeProvider 
