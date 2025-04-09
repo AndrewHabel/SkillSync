@@ -58,19 +58,21 @@ const app = new Hono()
 
             let uploadedImageUrl: string | undefined;
 
-            if(image instanceof File){
+            if (image instanceof File) {
                 const file = await storage.createFile(
                     IMAGES_BUCKET_ID,
                     ID.unique(),
                     image,
                 );
-
-                const arrayBuffer = await storage.getFilePreview(
+            
+                // getFileView returns an ArrayBuffer directly
+                const arrayBuffer = await storage.getFileView(
                     IMAGES_BUCKET_ID,
-                    file.$id,
+                    file.$id
                 );
-
-                uploadedImageUrl = `data:image/png;base64,${Buffer.from(arrayBuffer).toString("base64")}`;
+            
+                const buffer = Buffer.from(arrayBuffer); // Convert to Node.js Buffer
+                uploadedImageUrl = `data:${image.type};base64,${buffer.toString("base64")}`;
             }
 
             const workspace = await databases.createDocument(

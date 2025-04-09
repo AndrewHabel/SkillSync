@@ -172,6 +172,7 @@ const app = new Hono()
                 memberId
             );
 
+            
             const allMembersInWorkspace = await databases.listDocuments(
                 DATABASE_ID,
                 MEMBERS_ID,
@@ -186,13 +187,8 @@ const app = new Hono()
                 userId: user.$id,
             });
 
-
             if (!member) {
                 return c.json({ error: "Unauthorized" }, 401);
-            }
-
-            if(member.role !== MemberRole.ADMIN){
-                return c.json({error:"Unauthorized"},401);
             }
 
             if(allMembersInWorkspace.documents.length === 1 && role === MemberRole.MEMBER){
@@ -203,19 +199,21 @@ const app = new Hono()
 
             let uploadedImageUrl: string | undefined;
             
-            if(image instanceof File){
+            if (image instanceof File) {
                 const file = await storage.createFile(
                     IMAGES_BUCKET_ID,
                     ID.unique(),
                     image,
                 );
-
-                const arrayBuffer = await storage.getFilePreview(
+                        
+                // getFileView returns an ArrayBuffer directly
+                const arrayBuffer = await storage.getFileView(
                     IMAGES_BUCKET_ID,
-                    file.$id,
+                    file.$id
                 );
-
-                uploadedImageUrl = `data:image/png;base64,${Buffer.from(arrayBuffer).toString("base64")}`;
+                        
+                const buffer = Buffer.from(arrayBuffer); // Convert to Node.js Buffer
+                uploadedImageUrl = `data:${image.type};base64,${buffer.toString("base64")}`;
             }
 
             await databases.updateDocument(
