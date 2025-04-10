@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 
 import { PlusIcon } from "lucide-react";
 import { ArrowLeftIcon } from "lucide-react";
+import { CreateStoryForm } from "./create-story-form";
 
 export const ViewStories = () => {
   const workspaceId = useWorkspaceId();
@@ -29,7 +30,6 @@ export const ViewStories = () => {
 
   return (
     <div className="min-h-screen px-4 py-6">
-      {/* Back button */}
       <Button variant="secondary" size="sm" asChild className="mb-4">
         <Link href={`/workspaces/${workspaceId}/projects/${projectId}`}>
           <ArrowLeftIcon className="size-4 mr-2" />
@@ -38,17 +38,14 @@ export const ViewStories = () => {
       </Button>
 
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow p-6">
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold">User Stories</h2>
           <Button onClick={open} className="w-full lg:w-auto px-4 py-2" size="sm">
             <PlusIcon className="size-4 mr-2" />
             New
           </Button>
-          
         </div>
 
-        {/* Table/List */}
         <div className="space-y-4">
           {userStories?.documents.map((story) => (
             <div

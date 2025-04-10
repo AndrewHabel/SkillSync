@@ -2,17 +2,16 @@
 
 import { ResponsiveModal } from "@/components/responsive-modal";
 import { useCreateStoryModal } from "../hooks/use-create-story-modal";
-import { CreateStoryFormWrapper } from "./create-story-form-wrapper";
-
+import { CreateStoryForm } from "./create-story-form";
 
 export const CreateStoryModal = () => {
+
     const { isOpen, setIsOpen, close } = useCreateStoryModal();
+
 
     return (
         <ResponsiveModal open={isOpen} onopenchange={setIsOpen}>
-            <div>
-                <CreateStoryFormWrapper onCancel={close} />
-            </div>
+            <CreateStoryForm onCancel={close} />
         </ResponsiveModal>
     )
 }

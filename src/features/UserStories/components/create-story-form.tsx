@@ -18,8 +18,6 @@ import { useProjectId } from "@/features/projects/hooks/use-project-id";
 
 interface CreateStoryFormProps {
     onCancel?: () => void;
-    projectOptions: { id: string; name: string; imageUrl: string; }[];
-    memberOptions: { id: string; name: string; }[];
 }
 
 export const CreateStoryForm = ({onCancel}: CreateStoryFormProps) => {
@@ -95,9 +93,6 @@ export const CreateStoryForm = ({onCancel}: CreateStoryFormProps) => {
                       </FormItem>
                     )}
                   />
-
-
-
                 </div> 
 
                 <DottedSeparator className="py-7" />

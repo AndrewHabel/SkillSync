@@ -1,4 +1,3 @@
-import { set } from "date-fns";
 import {useQueryState , parseAsBoolean} from "nuqs"
 
 export const useCreateProjectModal = () => {
@@ -6,6 +5,7 @@ export const useCreateProjectModal = () => {
 
     const open = () => setIsOpen(true);
     const close = () => setIsOpen(false);
+
 
     return {
         isOpen,
