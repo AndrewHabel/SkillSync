@@ -111,4 +111,90 @@ const app = new Hono()
       return c.json(userStory);
     }
   )
+  .patch(
+    "/:userStoryId",
+    sessionMiddleware,
+    zValidator("json", createUserStorySchema.partial()),
+    async (c) => {
+      const user = c.get("user");
+      const databases = c.get("databases");
+      const {
+        description,
+        AcceptanceCriteria,
+      } = c.req.valid("json");
+
+      const { userStoryId } = c.req.param();
+
+      const existingUserStory = await databases.getDocument(
+        DATABASE_ID,
+        USERSTORIES_ID,
+        userStoryId,
+      );
+
+      const member = await getMember({  
+        databases,
+        workspaceId: existingUserStory.workspaceId,
+        userId: user.$id,
+      })
+
+      if(!member){  
+        return c.json({error: "Unauthorized"}, 401);
+      }
+
+      const userStory = await databases.updateDocument(
+        DATABASE_ID,
+        USERSTORIES_ID, 
+        userStoryId,
+        {
+          description,
+          AcceptanceCriteria,
+        }
+      );        
+
+      return c.json(userStory);
+    }
+  )
+  .delete(
+    "/:userStoryId",
+    sessionMiddleware,
+    async (c) => {
+      const user = c.get("user");
+      const databases = c.get("databases");
+      const { userStoryId } = c.req.param();
+      
+      const existingUserStory = await databases.getDocument(
+        DATABASE_ID,
+        USERSTORIES_ID,
+        userStoryId,
+      );
+
+      if(!existingUserStory){
+        return c.json({error: "User Story not found"}, 404);
+      }
+
+      const member = await getMember({
+        databases,
+        workspaceId: existingUserStory.workspaceId,
+        userId: user.$id,
+      })
+
+      if(!member){
+        return c.json({error: "Unauthorized"}, 401);
+      }
+
+      await databases.deleteDocument(
+        DATABASE_ID,
+        USERSTORIES_ID,
+        userStoryId,
+      );
+
+      return c.json({ data: { $id: existingUserStory.$id } });
+      
+      
+      
+    },
+  )
+
+  
+
 export default app;
