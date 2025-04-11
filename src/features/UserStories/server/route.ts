@@ -6,6 +6,7 @@ import { getMember } from "@/features/members/utils";
 import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID, USERSTORIES_ID } from "@/config";
 import { ID, Query } from "node-appwrite";
 import { z } from "zod"; 
+import { UserStory } from "../types";
 
 const app = new Hono()
   .post(
@@ -86,11 +87,9 @@ const app = new Hono()
     async (c) => {
       const user = c.get("user");
       const databases = c.get("databases");
-      const {
-        userStoryId,
-      } = c.req.param();    
-    
-      const userStory = await databases.getDocument(
+      const {userStoryId} = c.req.param();    
+
+      const userStory = await databases.getDocument<UserStory>(
         DATABASE_ID,
         USERSTORIES_ID,
         userStoryId,
@@ -106,9 +105,7 @@ const app = new Hono()
         return c.json({error: "Unauthorized"}, 401);
       }
 
-     
-
-      return c.json(userStory);
+      return c.json({data:{...userStory}});
     }
   )
   .patch(
@@ -194,7 +191,5 @@ const app = new Hono()
       
     },
   )
-
-  
 
 export default app;

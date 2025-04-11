@@ -11,6 +11,9 @@ interface StoryDescriptionPrps{
 };
 
 export const StoryDescription = ({userStory}: StoryDescriptionPrps) => {
+
+  console.log("userStory : ", userStory);
+
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(userStory.description);
   const {mutate, isPending} = useUpdateStory();

@@ -10,7 +10,7 @@ import { useConfirm } from "@/hooks/use-confirm"
 import { useRouter } from "next/navigation";
 
 interface StoryBreadCrumbsProps {
-    project: Project;
+    project: any;
     story: UserStory;
 }
 
