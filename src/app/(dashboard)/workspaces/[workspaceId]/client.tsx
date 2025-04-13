@@ -64,7 +64,7 @@ export const TaskList = ({ data, total }: TaskListProps) => {
             <div className="bg-muted rounded-lg p-4">
                 <div className="flex items-center justify-between">
                     <p className="text-lg font-semibold">Tasks ({total})</p>
-                    <Button variant="muted" size="icon" onClick={createTask}>
+                    <Button variant="ghost" size="icon" onClick={createTask}>
                         <PlusIcon className="size-4 text-neutral-400" />
                     </Button>
                 </div>
@@ -80,9 +80,9 @@ export const TaskList = ({ data, total }: TaskListProps) => {
                                         transition={{ duration: 0.3, delay: index * 0.1 }}
                                         whileHover={{ scale: 1.02 }}
                                     >
-                                        <Card className="shadow-none rounded-lg hover:opacity-75 transition group">
+                                        <Card className="shadow-none rounded-lg hover:bg-blue-200/80 hover:border-blue-400 transition-colors group">
                                             <CardContent className="p-4">
-                                                <p className="text-lg font-medium truncate group-hover:text-blue-600 transition-colors">
+                                                <p className="text-lg font-medium truncate group-hover:text-primary transition-colors">
                                                     {task.name}
                                                 </p>
                                                 <div className="flex items-center gap-x-2">
@@ -90,7 +90,7 @@ export const TaskList = ({ data, total }: TaskListProps) => {
                                                     <div className="size-1 rounded-full bg-neutral-300" />
                                                     <div className="text-sm text-muted-foreground flex items-center">
                                                         <CalendarIcon className="size-3 mr-1" />
-                                                       <span className="truncate group-hover:text-blue-600 transition-colors" >
+                                                       <span className="truncate group-hover:text-primary transition-colors" >
                                                             {formatDistanceToNow(new Date(task.dueDate))}
                                                         </span>
                                                     </div>
@@ -105,7 +105,7 @@ export const TaskList = ({ data, total }: TaskListProps) => {
                         No tasks found
                     </li>
                 </ul>
-                <Button variant="muted" className="mt-4 w-full" asChild>
+                <Button variant="ghost" className="mt-4 w-full" asChild>
                     <Link href={`/workspaces/${workspaceId}/tasks`}>Show All</Link>
                 </Button>
             </div>
@@ -125,7 +125,7 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
 
     return (
         <div className="flex flex-col gap-y-4 col-span-1">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-muted rounded-lg p-4">
                 <div className="flex items-center justify-between">
                     <p className="text-lg font-semibold">
                         Projects ({total})
@@ -145,7 +145,7 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
                                     transition={{ duration: 0.3 }}
                                     whileHover={{ scale: 1.02 }}
                                 >
-                                    <Card className="shadow-none rounded-lg hover:opacity-95 transition group">
+                                    <Card className="shadow-none rounded-lg hover:bg-purple-200/80 hover:border-purple-400 transition-colors group">
                                         <CardContent className="p-4 flex items-center gap-x-2.5">
                                             <ProjectAvatar
                                                 className="size-12"
@@ -154,10 +154,10 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
                                                 image={project.imageUrl}
                                             />
                                             <div className="flex flex-col items-start overflow-hidden">
-                                                <p className="text-lg font-medium truncate group-hover:text-blue-600 transition-colors">
+                                                <p className="text-lg font-medium truncate group-hover:text-primary transition-colors">
                                                     {project.name}
                                                 </p>
-                                                <p className="text-sm font-medium truncate group-hover:text-blue-600 transition-colors">
+                                                <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
                                                     {project.ProjectTechStack.join(" , ")}
                                                 </p>
                                             </div>
@@ -190,7 +190,7 @@ export const MembersList = ({data,total}:MembersListProps) => {
 
     return (
         <div className="flex flex-col gap-y-4 col-span-1">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-muted rounded-lg p-4">
                 <div className="flex items-center justify-between">
                     <p className="text-lg font-semibold">
                         Members ({total})

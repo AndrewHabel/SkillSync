@@ -18,8 +18,8 @@ export const Projects = () => {
     return (
         <div className="flex flex-col gap-y-2">
               <div className=" flex items-center justify-between">
-                <p className="text-xs uppercase text-blue-600 font-semibold ">Projects</p>
-                <RiAddCircleFill onClick={open} className="size-5 text-blue-600 cursor-pointer hover:opacity-75 transition " />
+                <p className="text-xs uppercase text-primary font-semibold ">Projects</p>
+                <RiAddCircleFill onClick={open} className="size-5 text-primary cursor-pointer hover:opacity-75 transition " />
               </div>
               {data?.documents.map((project) => {
                 const href = `/workspaces/${workspaceId}/projects/${project.$id}`;
@@ -27,8 +27,8 @@ export const Projects = () => {
                 return (
                   <Link href={href} key={project.$id}>
                     <div className={cn(
-                        "flex items-center gap-2.5 p-2.5 rounded-md font-medium transition-all duration-300 ease-in-out group text-neutral-500 hover:text-primary hover:bg-gray-200 ",
-                        isActive && "bg-white shadow-sm hover:opacity-100 text-primary"
+                        "flex items-center gap-2.5 p-2.5 rounded-md font-medium transition-all duration-300 ease-in-out group text-muted-foreground hover:text-primary hover:bg-accent",
+                        isActive && "bg-card shadow-sm hover:opacity-100 text-primary"
                     )}>
                         <ProjectAvatar image={project.imageUrl} name={project.name} className="group-hover:scale-110" />
                         <span className="truncate group-hover:translate-x-2 transition-transform duration-300">{project.name}</span>

@@ -20,6 +20,7 @@
   @apply min-h-[150px];
   @apply border-t;
   @apply border-x;
+  @apply border-border;
 }
 
 :not(.rbc-month-row ~ .rbc-month-row).rbc-month-row {
@@ -39,13 +40,34 @@
   @apply p-2;
 }
 
-
-/*
 .rbc-today {
-  background: inherit;
+  @apply bg-muted/30;
 }
 
 .rbc-off-range-bg {
-  background: inherit;
+  @apply bg-muted/10;
 }
-*/
+
+.rbc-day-bg {
+  @apply transition-colors;
+}
+
+.rbc-day-bg:hover {
+  @apply bg-accent/10;
+}
+
+.rbc-event {
+  @apply bg-background;
+}
+
+.rbc-month-row + .rbc-month-row {
+  @apply border-t-border;
+}
+
+.rbc-day-bg + .rbc-day-bg {
+  @apply border-l-border;
+}
+
+.rbc-current-time-indicator {
+  @apply bg-primary;
+}

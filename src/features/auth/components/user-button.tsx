@@ -45,11 +45,11 @@ export const UserButton = () => {
     return (
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger className="outline-none relative">
-        <Avatar className="size-14 hover:opacity-75 transition border border-neutral-300">
+        <Avatar className="size-14 hover:opacity-75 transition border border-border">
           {memberProfile?.image ? (
             <AvatarImage className="" src={memberProfile.image} alt={name || "User"} />
           ) : (
-            <AvatarFallback className="bg-neutral-200 font-medium text-neutral-500 flex items-center justify-center">
+            <AvatarFallback className="bg-muted text-muted-foreground font-medium flex items-center justify-center">
               {name ? name.charAt(0).toUpperCase() : <FaUserAlt className="size-4" />}
             </AvatarFallback>
           )}
@@ -57,11 +57,11 @@ export const UserButton = () => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" side="bottom" className="w-60" sideOffset={10}>
           <div className="flex flex-col items-center justify-center gap-2 px-2.5 py-4">
-          <Avatar className="size-16 border border-neutral-300">
+          <Avatar className="size-16 border border-border">
               {memberProfile?.image ? (
                 <AvatarImage src={memberProfile.image} alt={name || "User"} />
               ) : (
-                <AvatarFallback className="bg-neutral-200 text-xl font-medium text-neutral-500 flex items-center justify-center">
+                <AvatarFallback className="bg-muted text-xl font-medium text-muted-foreground flex items-center justify-center">
                   {name ? name.charAt(0).toUpperCase() : <FaUserAlt className="size-6" />}
                 </AvatarFallback>
               )}
@@ -95,16 +95,16 @@ export const UserButton = () => {
   return(
     <DropdownMenu modal={false}>
         <DropdownMenuTrigger className="outline-none relative">
-        <Avatar className="size-14 hover:opacity-75 transition border border-neutral-300">
-            <AvatarFallback className="bg-neutral-200 font-medium text-neutral-500 flex items-center justify-center">
+        <Avatar className="size-14 hover:opacity-75 transition border border-border">
+            <AvatarFallback className="bg-muted font-medium text-muted-foreground flex items-center justify-center">
               {name ? name.charAt(0).toUpperCase() : <FaUserAlt className="size-4" />}
             </AvatarFallback>
         </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" side="bottom" className="w-60" sideOffset={10}>
           <div className="flex flex-col items-center justify-center gap-2 px-2.5 py-4">
-          <Avatar className="size-16 border border-neutral-300">
-                <AvatarFallback className="bg-neutral-200 text-xl font-medium text-neutral-500 flex items-center justify-center">
+          <Avatar className="size-16 border border-border">
+                <AvatarFallback className="bg-muted text-xl font-medium text-muted-foreground flex items-center justify-center">
                   {name ? name.charAt(0).toUpperCase() : <FaUserAlt className="size-6" />}
                 </AvatarFallback>
             </Avatar>

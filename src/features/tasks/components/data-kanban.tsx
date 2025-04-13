@@ -170,7 +170,7 @@ export const DataKanban = ({ data , onChange }: DataKanbanProps) => {
                                                             ref={provided.innerRef}
                                                             {...provided.draggableProps}
                                                             {...provided.dragHandleProps}
-                                                            className="bg-white p-1 rounded-md mb-1  hover:opacity-75 hover:bg-blue-800 transition "
+                                                            className="bg-card p-1 rounded-md mb-1 hover:bg-blue-200/80 hover:border-blue-400 transition-colors"
                                                         >
                                                             <KanbanCard task={task}/>
                                                         </div>
