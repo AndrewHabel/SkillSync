@@ -9,6 +9,7 @@ import { useGetStory } from "@/features/UserStories/api/use-get-story";
 import { StoryAcceptance } from "@/features/UserStories/components/story-acceptance";
 import { StoryBreadCrumbs } from "@/features/UserStories/components/story-bread-crumbs";
 import { StoryDescription } from "@/features/UserStories/components/story-description";
+import { StoryTaskGenerator } from "@/features/UserStories/components/story-task-generator";
 import { useStoryId } from "@/features/UserStories/hooks/use-story-id";
 
 export const UserStoryIdClient = () => {
@@ -28,6 +29,7 @@ export const UserStoryIdClient = () => {
                 <StoryDescription userStory={userStory} />
                 <StoryAcceptance userStory={userStory} />
             </div>
+            <StoryTaskGenerator userStory={userStory} />
         </div>
     )
 }

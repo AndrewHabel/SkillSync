@@ -10,6 +10,7 @@
     "email": "email dev --dir src/components/emails"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.0",
     "@hello-pangea/dnd": "^17.0.0",
     "@hono/zod-validator": "^0.4.2",
     "@hookform/resolvers": "^3.10.0",
