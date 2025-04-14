@@ -12,8 +12,10 @@ export const useUpdateMember = () => {
   const queryClient = useQueryClient();
   
   const mutation = useMutation<ResponseType, Error, RequestType>({
-        mutationFn: async ({ param, form })=> {
-          const response = await client.api.members[":memberId"]["$patch"]({ param , form });
+        mutationFn: async ({ form ,param })=> {
+          console.log("wegwegegwegdsgb")
+
+          const response = await client.api.members[":memberId"]["$patch"]({ form , param});
           
           if(!response.ok) {
             console.log("API Response not OK:", response);

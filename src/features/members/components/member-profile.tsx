@@ -98,19 +98,19 @@ export const MemberProfile = () => {
                 </CardHeader>
             </Card>
 
-            <Card className="w-full h-full border-none shadow-none">
+            <Card className="w-full h-full border shadow-md bg-card">
                 <CardContent className="p-7">
                     <div className="flex flex-col">
                         <h3 className="font-bold">Profile Details</h3>
                         <DottedSeparator className="py-7" />
                         
                         {!isEditing ? (
-                            <div className="flex flex-col justify-between gap-3">
-                                <Image className="h-52 w-52 border-4 border-blue-400 rounded-2xl" src={data?.image||"/male-user-icon-vector-8865469.jpg"} alt="logo" width={165} height={48} />
-                                <p className="text-lg font-bold text-blue-500">Name: <span className="text-black font-normal">{data?.name}</span></p>
-                                <p className="text-lg font-bold text-blue-500">Email: <span className="text-black font-normal">{data?.email}</span></p>
-                                <p className="text-lg font-bold text-blue-500">Role: <span className="text-black font-normal">{data?.role.toLowerCase()}</span></p>
-                                <p className="text-lg font-bold text-blue-500">Skills: <span className="text-black font-normal">{data?.skills.join(" , ")}</span></p>
+                            <div className="flex flex-col justify-between gap-3 p-5 rounded-lg members-list-bg">
+                                <Image className="h-52 w-52 border-4 border-primary rounded-2xl" src={data?.image||"/male-user-icon-vector-8865469.jpg"} alt="logo" width={165} height={48} />
+                                <p className="text-lg font-bold text-primary">Name: <span className="text-foreground font-normal">{data?.name}</span></p>
+                                <p className="text-lg font-bold text-primary">Email: <span className="text-foreground font-normal">{data?.email}</span></p>
+                                <p className="text-lg font-bold text-primary">Role: <span className="text-foreground font-normal">{data?.role.toLowerCase()}</span></p>
+                                <p className="text-lg font-bold text-primary">Skills: <span className="text-foreground font-normal">{data?.skills.join(" , ")}</span></p>
                                 <DottedSeparator className="py-7" />
                                 <div className="flex justify-end">
                                     <Button className="w-28" size="sm" onClick={handleEdit}>
@@ -120,7 +120,7 @@ export const MemberProfile = () => {
                             </div>
                         ) : (
                         <Form {...form}>
-                            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4 p-5 rounded-lg members-list-bg">
                                 <FormField 
                                     control={form.control}
                                     name="image"
@@ -132,7 +132,7 @@ export const MemberProfile = () => {
                                                 <Image
                                                 alt="Logo"
                                                 fill
-                                                className="h-52 w-52 border-4 border-blue-400 rounded-2xl" 
+                                                className="h-52 w-52 border-4 border-primary rounded-2xl" 
                                                 src={
                                                     field.value instanceof File
                                                     ? URL.createObjectURL(field.value)
@@ -141,7 +141,7 @@ export const MemberProfile = () => {
                                                 />
                                             </div>
                                             ) : (
-                                            <Image className="h-52 w-52 border-4 border-blue-400 rounded-2xl" src={data?.image||"/male-user-icon-vector-8865469.jpg"} alt="logo" width={165} height={48} />
+                                            <Image className="h-52 w-52 border-4 border-primary rounded-2xl" src={data?.image||"/male-user-icon-vector-8865469.jpg"} alt="logo" width={165} height={48} />
                                             )
                                         }
                                         <div className="flex flex-col">
@@ -166,7 +166,7 @@ export const MemberProfile = () => {
                                                 remove Image
                                                 </Button>
                                             ):(
-                                                <Button type="button" disabled={isPending} variant="teritary" size="xs" className="w-fit mt-2" onClick={() => inputRef.current?.click()} >
+                                                <Button type="button" disabled={isPending} variant="outline" size="xs" className="w-fit mt-2" onClick={() => inputRef.current?.click()} >
                                                 Upload Image
                                                 </Button>
                                             )

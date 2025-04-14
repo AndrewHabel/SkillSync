@@ -27,6 +27,7 @@ const app = new Hono()
                 workspaceId,
                 userId: user.$id,
             });
+            
 
             if (!member) {
                 return c.json({ error: "Unauthorized" }, 401);
@@ -47,6 +48,8 @@ const app = new Hono()
                     return {
                         ...member,
                         name:user.name || username,
+                        skills:member.skills || [],
+                        image:member.imageUrl || null,
                         email:user.email,
                         role:member.role,
                     };
@@ -164,7 +167,6 @@ const app = new Hono()
             const { account } = await createSessionClient();
             const storage = c.get("storage");
             
-            console.log("Image",image);
 
             const memberToUpdate = await databases.getDocument(
                 DATABASE_ID, 

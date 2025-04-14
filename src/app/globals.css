@@ -49,6 +49,37 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Members list background - light theme */
+    --members-list-bg: 0 0% 94%;
+    
+    /* Landing page specific colors - light theme */
+    --landing-background: 0 0% 100%;
+    --landing-foreground: 0 0% 3.9%;
+    --landing-primary: 210 100% 50%;
+    --landing-primary-foreground: 0 0% 100%;
+    --landing-secondary: 210 50% 95%;
+    --landing-secondary-foreground: 0 0% 9%;
+    --landing-accent: 210 100% 50%;
+    --landing-accent-foreground: 0 0% 100%;
+    --landing-muted: 0 0% 96.1%;
+    --landing-muted-foreground: 0 0% 45.1%;
+    --landing-icon-color: 210 100% 50%;
+    --landing-card-bg: 0 0% 100%;
+    --landing-card-border: 210 20% 93%;
+    --landing-button-bg: 0 0% 9%;
+    --landing-button-text: 0 0% 100%;
+    --landing-button-hover: 210 100% 50%;
+    --landing-button-hover-text: 0 0% 100%;
+    
+    /* Auth page specific colors - light theme */
+    --auth-card-bg: 210 40% 98%;
+    --auth-card-border: 210 20% 93%;
+    --auth-input-bg: 0 0% 100%;
+    --auth-input-border: 0 0% 89.8%;
+    --auth-oauth-bg: 0 0% 96.1%;
+    --auth-oauth-border: 0 0% 89.8%;
+    --auth-oauth-bg-hover: 0 0% 94%;
+    --auth-oauth-border-hover: 0 0% 89%;
   }
   
   /* GitHub theme - improved dark theme based on GitHub's dark mode */
@@ -85,6 +116,37 @@ body {
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 220 26% 18%;
     --sidebar-ring: 212 92% 45%;
+    /* Members list background - dark theme */
+    --members-list-bg: 220 26% 20%;
+    
+    /* Landing page specific colors - dark theme */
+    --landing-background: 220 26% 14%;
+    --landing-foreground: 210 40% 98%;
+    --landing-primary: 212 92% 45%;
+    --landing-primary-foreground: 0 0% 100%;
+    --landing-secondary: 220 26% 18%;
+    --landing-secondary-foreground: 210 40% 98%;
+    --landing-accent: 212 92% 45%;
+    --landing-accent-foreground: 0 0% 100%;
+    --landing-muted: 220 26% 18%;
+    --landing-muted-foreground: 215 20% 65%;
+    --landing-icon-color: 212 92% 45%;
+    --landing-card-bg: 220 26% 16%;
+    --landing-card-border: 220 26% 22%;
+    --landing-button-bg: 212 92% 45%;
+    --landing-button-text: 0 0% 100%;
+    --landing-button-hover: 212 92% 55%;
+    --landing-button-hover-text: 0 0% 100%;
+    
+    /* Auth page specific colors - dark theme */
+    --auth-card-bg: 220 26% 18%;
+    --auth-card-border: 220 26% 24%;
+    --auth-input-bg: 220 26% 20%;
+    --auth-input-border: 220 26% 18%;
+    --auth-oauth-bg: 220 26% 18%;
+    --auth-oauth-border: 220 26% 20%;
+    --auth-oauth-bg-hover: 220 26% 22%;
+    --auth-oauth-border-hover: 220 26% 24%;
   }
   
   /* Dracula theme */
@@ -121,6 +183,37 @@ body {
     --sidebar-accent-foreground: 60 30% 96%;
     --sidebar-border: 231 15% 25%;
     --sidebar-ring: 326 100% 74%;
+    /* Members list background - dracula theme */
+    --members-list-bg: 231 15% 22%;
+    
+    /* Landing page specific colors - dracula theme */
+    --landing-background: 231 15% 18%;
+    --landing-foreground: 60 30% 96%;
+    --landing-primary: 326 100% 74%;
+    --landing-primary-foreground: 231 15% 18%;
+    --landing-secondary: 231 15% 25%;
+    --landing-secondary-foreground: 60 30% 96%;
+    --landing-accent: 191 97% 77%;
+    --landing-accent-foreground: 231 15% 18%;
+    --landing-muted: 231 15% 25%;
+    --landing-muted-foreground: 225 27% 70%;
+    --landing-icon-color: 326 100% 74%;
+    --landing-card-bg: 231 15% 21%;
+    --landing-card-border: 231 15% 28%;
+    --landing-button-bg: 326 100% 74%;
+    --landing-button-text: 231 15% 18%;
+    --landing-button-hover: 326 100% 80%;
+    --landing-button-hover-text: 231 15% 18%;
+    
+    /* Auth page specific colors - dracula theme */
+    --auth-card-bg: 231 15% 22%;
+    --auth-card-border: 231 15% 30%;
+    --auth-input-bg: 231 15% 20%;
+    --auth-input-border: 231 15% 25%;
+    --auth-oauth-bg: 231 15% 25%;
+    --auth-oauth-border: 231 15% 28%;
+    --auth-oauth-bg-hover: 231 15% 28%;
+    --auth-oauth-border-hover: 231 15% 30%;
   }
   
   /* Nord theme */
@@ -157,6 +250,37 @@ body {
     --sidebar-accent-foreground: 218 27% 92%;
     --sidebar-border: 220 26% 23%;
     --sidebar-ring: 193 82% 49%;
+    /* Members list background - nord theme */
+    --members-list-bg: 220 28% 22%;
+    
+    /* Landing page specific colors - nord theme */
+    --landing-background: 220 28% 18%;
+    --landing-foreground: 218 27% 92%;
+    --landing-primary: 193 82% 49%;
+    --landing-primary-foreground: 218 27% 92%;
+    --landing-secondary: 220 26% 23%;
+    --landing-secondary-foreground: 218 27% 92%;
+    --landing-accent: 193 82% 49%;
+    --landing-accent-foreground: 218 27% 92%;
+    --landing-muted: 220 26% 23%;
+    --landing-muted-foreground: 218 17% 65%;
+    --landing-icon-color: 193 82% 49%;
+    --landing-card-bg: 220 28% 21%;
+    --landing-card-border: 220 26% 26%;
+    --landing-button-bg: 193 82% 49%;
+    --landing-button-text: 218 27% 92%;
+    --landing-button-hover: 193 82% 59%;
+    --landing-button-hover-text: 218 27% 92%;
+    
+    /* Auth page specific colors - nord theme */
+    --auth-card-bg: 220 26% 22%;
+    --auth-card-border: 220 26% 28%;
+    --auth-input-bg: 220 26% 20%;
+    --auth-input-border: 220 26% 23%;
+    --auth-oauth-bg: 220 26% 23%;
+    --auth-oauth-border: 220 26% 26%;
+    --auth-oauth-bg-hover: 220 26% 26%;
+    --auth-oauth-border-hover: 220 26% 28%;
   }
   
   /* Monokai theme */
@@ -193,6 +317,37 @@ body {
     --sidebar-accent-foreground: 60 11% 98%;
     --sidebar-border: 60 6% 20%;
     --sidebar-ring: 75 65% 60%;
+    /* Members list background - monokai theme */
+    --members-list-bg: 60 6% 19%;
+    
+    /* Landing page specific colors - monokai theme */
+    --landing-background: 60 6% 14%;
+    --landing-foreground: 60 11% 98%;
+    --landing-primary: 75 65% 60%;
+    --landing-primary-foreground: 60 6% 14%;
+    --landing-secondary: 60 6% 20%;
+    --landing-secondary-foreground: 60 11% 98%;
+    --landing-accent: 338 95% 75%;
+    --landing-accent-foreground: 60 6% 14%;
+    --landing-muted: 60 6% 20%;
+    --landing-muted-foreground: 60 5% 64%;
+    --landing-icon-color: 75 65% 60%;
+    --landing-card-bg: 60 6% 17%;
+    --landing-card-border: 60 6% 24%;
+    --landing-button-bg: 75 65% 60%;
+    --landing-button-text: 60 6% 14%;
+    --landing-button-hover: 75 65% 70%;
+    --landing-button-hover-text: 60 6% 14%;
+    
+    /* Auth page specific colors - monokai theme */
+    --auth-card-bg: 60 6% 18%;
+    --auth-card-border: 60 6% 24%;
+    --auth-input-bg: 60 6% 17%;
+    --auth-input-border: 60 6% 20%;
+    --auth-oauth-bg: 60 6% 20%;
+    --auth-oauth-border: 60 6% 24%;
+    --auth-oauth-bg-hover: 60 6% 24%;
+    --auth-oauth-border-hover: 60 6% 26%;
   }
 }
 
@@ -212,4 +367,156 @@ body {
 
 .hide-scrollbar::--webkit-scrollbar{
   display: none;
+}
+
+/* Custom styles */
+.members-list-bg {
+  background-color: hsl(var(--members-list-bg));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Landing page theme styles */
+.landing-page {
+  background-color: hsl(var(--landing-background));
+  color: hsl(var(--landing-foreground));
+}
+
+.landing-page h1, 
+.landing-page h2, 
+.landing-page h3 {
+  color: hsl(var(--landing-foreground));
+}
+
+.landing-page p {
+  color: hsl(var(--landing-foreground));
+}
+
+.landing-page-card {
+  background-color: hsl(var(--landing-card-bg));
+  border: 1px solid hsl(var(--landing-card-border));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.landing-page-icon {
+  color: hsl(var(--landing-icon-color));
+}
+
+.landing-page-button {
+  background-color: hsl(var(--landing-button-bg));
+  color: hsl(var(--landing-button-text));
+  transition: background-color 0.3s ease;
+}
+
+.landing-page-button:hover {
+  background-color: hsl(var(--landing-button-hover));
+  color: hsl(var(--landing-button-hover-text));
+}
+
+.landing-page-text-primary {
+  color: hsl(var(--landing-primary));
+}
+
+.landing-page-text-secondary {
+  color: hsl(var(--landing-muted-foreground));
+}
+
+.landing-page-text-accent {
+  color: hsl(var(--landing-accent));
+}
+
+.landing-nav {
+  background-color: hsl(var(--landing-background));
+  border-bottom: 1px solid hsl(var(--landing-card-border));
+}
+
+.landing-hero {
+  background: linear-gradient(to bottom, hsl(var(--landing-background)), hsl(var(--landing-background)) 90%);
+}
+
+.why-choose-us-section {
+  background-color: hsl(var(--landing-card-bg));
+  border: 1px solid hsl(var(--landing-card-border));
+}
+
+.landing-page-footer {
+  background-color: hsl(var(--landing-background));
+  color: hsl(var(--landing-foreground));
+  border-top: 1px solid hsl(var(--landing-card-border));
+}
+
+/* Feature icon colors based on theme */
+.feature-icon {
+  color: hsl(var(--landing-icon-color));
+}
+
+.feature-title {
+  color: hsl(var(--landing-foreground));
+}
+
+.feature-description {
+  color: hsl(var(--landing-muted-foreground));
+}
+
+.blue-text {
+  color: hsl(var(--landing-primary));
+}
+
+.blue-bg {
+  background-color: hsl(var(--landing-primary));
+}
+
+.white-text {
+  color: hsl(var(--landing-primary-foreground));
+}
+
+/* Fix for theme button alignment */
+.theme-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Auth page styles */
+.auth-page {
+  background-image: radial-gradient(
+    circle at center,
+    hsl(var(--background)) 0%,
+    color-mix(in hsl, hsl(var(--background)), hsl(var(--primary)) 15%) 100%
+  );
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-card {
+  background-color: hsl(var(--auth-card-bg));
+  border: 1px solid hsl(var(--auth-card-border));
+  border-radius: var(--radius);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* Auth input fields and OAuth buttons styling */
+.auth-input {
+  background-color: hsl(var(--auth-input-bg));
+  border: 1px solid hsl(var(--auth-input-border));
+  transition: all 0.2s ease-in-out;
+}
+
+.auth-input:focus {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px rgba(var(--primary), 0.25);
+}
+
+.auth-oauth-button {
+  background-color: hsl(var(--auth-oauth-bg));
+  border: 1px solid hsl(var(--auth-oauth-border));
+  transition: all 0.2s ease-in-out;
+}
+
+.auth-oauth-button:hover:not(:disabled) {
+  background-color: hsl(var(--auth-oauth-bg-hover));
+  border-color: hsl(var(--auth-oauth-border-hover));
 }

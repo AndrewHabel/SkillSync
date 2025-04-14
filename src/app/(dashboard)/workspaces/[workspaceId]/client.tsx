@@ -73,7 +73,6 @@ export const TaskList = ({ data, total }: TaskListProps) => {
                     {data.map((task, index) => (
                         <li key={task.$id}>
                             <Link href={`/workspaces/${workspaceId}/tasks/${task.$id}`}>
-                                {/* Animated Card */}
                                 <motion.div
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
@@ -190,7 +189,7 @@ export const MembersList = ({data,total}:MembersListProps) => {
 
     return (
         <div className="flex flex-col gap-y-4 col-span-1">
-            <div className="bg-muted rounded-lg p-4">
+            <div className="members-list-bg p-4">
                 <div className="flex items-center justify-between">
                     <p className="text-lg font-semibold">
                         Members ({total})
@@ -203,21 +202,28 @@ export const MembersList = ({data,total}:MembersListProps) => {
                 </div>
                 <DottedSeparator className="my-4"/>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {data.map((member) => (
+                    {data.map((member, index) => (
                         <li key={member.$id}>
-                            <Card className="shadow-none rounded-lg overflow-hidden">
-                                <CardContent className="p-3 flex flex-col items-center gap-x-2">
-                                    <MembersAvatar className="size-12" name={member.name} />
-                                    <div className="flex flex-col items-center overflow-hidden">
-                                        <p className="text-lg font-medium line-clamp-1">
-                                            {member.name}
-                                        </p>
-                                        <p className="text-sm text-muted-foreground line-clamp-1">
-                                            {member.email}
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3, delay: index * 0.05 }}
+                                whileHover={{ scale: 1.05 }}
+                            >
+                                <Card className="shadow-none rounded-lg overflow-hidden hover:bg-green-200/80 hover:border-green-400 transition-colors group">
+                                    <CardContent className="p-3 flex flex-col items-center gap-x-2">
+                                        <MembersAvatar className="size-12" name={member.name} />
+                                        <div className="flex flex-col items-center overflow-hidden">
+                                            <p className="text-lg font-medium line-clamp-1 group-hover:text-primary transition-colors">
+                                                {member.name}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground line-clamp-1 group-hover:text-primary/80 transition-colors">
+                                                {member.email}
+                                            </p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
                         </li>
                     ))}
                     <li className="text-sm text-muted-foreground text-center hidden first-of-type:block">

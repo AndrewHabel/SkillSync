@@ -12,7 +12,7 @@ interface LandingPageClientProps {
 
 export const LandingPageClient = ({ user }: LandingPageClientProps) => {
     return (
-      <div className="bg-transparent flex flex-col items-center justify-center w-full h-full overflow-hidden ">
+      <div className="landing-page w-full h-full overflow-hidden flex flex-col items-center justify-center">
         {/*<BackgroundBeams
         starCount={1000}
         starColor={[255, 255, 255]}

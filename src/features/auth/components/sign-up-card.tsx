@@ -36,7 +36,7 @@ export const SignUpCard = () => {
       console.log({values});
     }
   return (
-    <Card className="w-full h-full md:w-[487px] border-none shadow-none">
+    <Card className="auth-card w-full h-full md:w-[487px] border-none shadow-none">
       <CardHeader className="flex items-center justify-center text-center p-7 ">
         <CardTitle className="text-2xl" >
           Sign Up!
@@ -61,6 +61,7 @@ export const SignUpCard = () => {
                       {...field}
                       type="text"
                       placeholder="Name"
+                      className="auth-input"
                     />
                   </FormControl>
                   <FormMessage />
@@ -78,6 +79,7 @@ export const SignUpCard = () => {
                       {...field}
                       type="email"
                       placeholder="E-mail"
+                      className="auth-input"
                     />
                   </FormControl>
                   <FormMessage />
@@ -95,6 +97,7 @@ export const SignUpCard = () => {
                       {...field}
                       type="password"
                       placeholder="Password"
+                      className="auth-input"
                     />
                   </FormControl>
                   <FormMessage />
@@ -111,11 +114,11 @@ export const SignUpCard = () => {
         <DottedSeparator />
       </div>
       <CardContent className="p-7 flex flex-col gap-y-4">
-        <Button onClick={()=>signUpWithGoogle()} disabled={isPending} variant="secondary" size="lg" className="w-full">
+        <Button onClick={()=>signUpWithGoogle()} disabled={isPending} variant="secondary" size="lg" className="w-full auth-oauth-button">
           <FcGoogle className="mr-2 size-5" />
           Login with Google
         </Button>
-        <Button onClick={()=>signUpWithGithub()} disabled={isPending} variant="secondary" size="lg" className="w-full">
+        <Button onClick={()=>signUpWithGithub()} disabled={isPending} variant="secondary" size="lg" className="w-full auth-oauth-button">
           <FaGithub className="mr-2 size-5" />
           Login with Github
         </Button>

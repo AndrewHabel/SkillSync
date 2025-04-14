@@ -3,7 +3,7 @@
 import {FcGoogle} from "react-icons/fc";
 import {FaGithub} from "react-icons/fa";
 
-import  Link from "next/link"
+import Link from "next/link"
 
 import {useForm} from "react-hook-form";
 import {z} from "zod";
@@ -37,7 +37,7 @@ export const SignInCard = () => {
   };
 
   return (
-    <Card className="w-full h-full md:w-[487px] border-none shadow-none">
+    <Card className="auth-card w-full h-full md:w-[487px] border-none shadow-none">
       <CardHeader className="flex items-center justify-center text-center p-7 ">
         <CardTitle className="text-2xl" >
           Welcome back!
@@ -62,6 +62,7 @@ export const SignInCard = () => {
                       {...field}
                       type="email"
                       placeholder="E-mail"
+                      className="auth-input"
                     />
                   </FormControl>
                   <FormMessage />
@@ -78,6 +79,7 @@ export const SignInCard = () => {
                       {...field}
                       type="password"
                       placeholder="Password"
+                      className="auth-input"
                     />
                   </FormControl>
                   <FormMessage />
@@ -94,11 +96,11 @@ export const SignInCard = () => {
         <DottedSeparator />
       </div>
       <CardContent className="p-7 flex flex-col gap-y-4">
-        <Button onClick={() => signUpWithGoogle()}disabled={isPending} variant="secondary" size="lg" className="w-full">
+        <Button onClick={() => signUpWithGoogle()} disabled={isPending} variant="secondary" size="lg" className="w-full auth-oauth-button">
           <FcGoogle className="mr-2 size-5" />
           Login with Google
         </Button>
-        <Button onClick={() => signUpWithGithub()} disabled={isPending} variant="secondary" size="lg" className="w-full">
+        <Button onClick={() => signUpWithGithub()} disabled={isPending} variant="secondary" size="lg" className="w-full auth-oauth-button">
           <FaGithub className="mr-2 size-5" />
           Login with Github
         </Button>

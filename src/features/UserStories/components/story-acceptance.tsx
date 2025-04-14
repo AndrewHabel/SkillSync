@@ -12,7 +12,7 @@ interface StoryAcceptancePrps{
 
 export const StoryAcceptance = ({userStory}: StoryAcceptancePrps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [value, setValue] = useState(userStory.acceptanceCriteria);
+  const [value, setValue] = useState(userStory.AcceptanceCriteria);
   const {mutate, isPending} = useUpdateStory();
   
   const handleSave = () => {
@@ -27,9 +27,9 @@ export const StoryAcceptance = ({userStory}: StoryAcceptancePrps) => {
   }
 
   return (
-    <div className="p-4 border rounded-lg">
+    <div className="p-4 border rounded-lg bg-card">
       <div className="flex justify-between items-center">
-        <p className="text-lg font-semibold">Acceptance Criteria</p>
+        <p className="text-lg font-semibold text-foreground">Acceptance Criteria</p>
         <Button onClick={() => setIsEditing((prev)=>!prev)} size="sm" variant="secondary">
           {isEditing? (
             <XIcon className="size-4 mr-2" />
@@ -48,7 +48,7 @@ export const StoryAcceptance = ({userStory}: StoryAcceptancePrps) => {
           </Button>
         </div>
       ):(
-        <div>
+        <div className="text-foreground">
           {userStory.AcceptanceCriteria || (
             <span className="text-muted-foreground">No Acceptance Criteria</span>
           )}

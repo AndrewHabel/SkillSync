@@ -12,8 +12,6 @@ interface StoryDescriptionPrps{
 
 export const StoryDescription = ({userStory}: StoryDescriptionPrps) => {
 
-  console.log("userStory : ", userStory);
-
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(userStory.description);
   const {mutate, isPending} = useUpdateStory();
@@ -30,9 +28,9 @@ export const StoryDescription = ({userStory}: StoryDescriptionPrps) => {
   };
 
   return (
-    <div className="p-4 border rounded-lg">
+    <div className="p-4 border rounded-lg bg-card">
       <div className="flex justify-between items-center">
-        <p className="text-lg font-semibold">User Story Description</p>
+        <p className="text-lg font-semibold text-foreground">User Story Description</p>
         <Button onClick={() => setIsEditing((prev)=>!prev)} size="sm" variant="secondary">
           {isEditing? (
             <XIcon className="size-4 mr-2" />
@@ -52,7 +50,7 @@ export const StoryDescription = ({userStory}: StoryDescriptionPrps) => {
           </Button>
         </div>
       ):(
-        <div>
+        <div className="text-foreground">
           {userStory.description || (
             <span className="text-muted-foreground">No Description</span>
           )}

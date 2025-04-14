@@ -24,9 +24,7 @@ export const ViewStories = () => {
   const { data: initialValues, isLoading } = useGetProject({ projectId });
   const { data: userStories, isLoading: loadingStories } = useGetStories({ projectId, workspaceId });
 
-
   const { open } = useCreateStoryModal();
-
 
   if (isLoading || loadingStories) return <PageLoader />;
   if (!initialValues) return <PageError message="Project not found" />;
@@ -40,9 +38,9 @@ export const ViewStories = () => {
         </Link>
       </Button>
 
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow p-6">
+      <div className="max-w-6xl mx-auto bg-card rounded-xl shadow p-6 border border-border">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">User Stories</h2>
+          <h2 className="text-2xl font-semibold text-foreground">User Stories</h2>
           <Button onClick={open} className="w-full lg:w-auto px-4 py-2" size="sm">
             <PlusIcon className="size-4 mr-2" />
             New
@@ -53,20 +51,25 @@ export const ViewStories = () => {
           {userStories?.documents.map((story) => (
             <div
               key={story.$id}
-              className="flex flex-col md:flex-row md:items-center justify-between gap-4 border p-4 rounded-md"
+              className="flex flex-col md:flex-row md:items-center justify-between gap-4 border p-4 rounded-md bg-accent hover:bg-accent/80 transition-colors"
             >
               <div className="flex-1">
-                <p className="text-lg font-semibold">{story.description}</p>
-                <p className="text-sm text-gray-600">{story.AcceptanceCriteria}</p>
+                <p className="text-lg font-semibold text-foreground">{story.description}</p>
+                <p className="text-sm text-muted-foreground">{story.AcceptanceCriteria}</p>
               </div>
-              <Button variant="teritary" className="w-full lg:w-auto px-4 py-2" size="sm">
-                <Link href={`/workspaces/${workspaceId}/projects/${projectId}/UserStory/${story.$id}`}>
+              <Button variant="solid" className="w-full md:w-auto px-4 py-2 shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground" size="sm">
+                <Link href={`/workspaces/${workspaceId}/projects/${projectId}/UserStory/${story.$id}`} className="flex items-center">
                   <PencilIcon className="size-4 mr-2" />
                   Manage
                 </Link>
               </Button>
             </div>
           ))}
+          {userStories?.documents.length === 0 && (
+            <div className="text-center p-6 text-muted-foreground">
+              No user stories found. Create your first one!
+            </div>
+          )}
         </div>
       </div>
     </div>
