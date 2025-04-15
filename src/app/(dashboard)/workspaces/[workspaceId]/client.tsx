@@ -69,41 +69,43 @@ export const TaskList = ({ data, total }: TaskListProps) => {
                     </Button>
                 </div>
                 <DottedSeparator className="my-4" />
-                <ul className="flex flex-col gap-y-4">
-                    {data.map((task, index) => (
-                        <li key={task.$id}>
-                            <Link href={`/workspaces/${workspaceId}/tasks/${task.$id}`}>
-                                <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                                        whileHover={{ scale: 1.02 }}
-                                    >
-                                        <Card className="shadow-none rounded-lg hover:bg-blue-200/80 hover:border-blue-400 transition-colors group">
-                                            <CardContent className="p-4">
-                                                <p className="text-lg font-medium truncate group-hover:text-primary transition-colors">
-                                                    {task.name}
-                                                </p>
-                                                <div className="flex items-center gap-x-2">
-                                                    <p>{task.project?.name}</p>
-                                                    <div className="size-1 rounded-full bg-neutral-300" />
-                                                    <div className="text-sm text-muted-foreground flex items-center">
-                                                        <CalendarIcon className="size-3 mr-1" />
-                                                       <span className="truncate group-hover:text-primary transition-colors" >
-                                                            {formatDistanceToNow(new Date(task.dueDate))}
-                                                        </span>
+                <div className={`${data.length > 3 ? 'max-h-[350px] overflow-y-auto pr-2 custom-scrollbar' : ''}`}>
+                    <ul className="flex flex-col gap-y-4">
+                        {data.map((task, index) => (
+                            <li key={task.$id}>
+                                <Link href={`/workspaces/${workspaceId}/tasks/${task.$id}`}>
+                                    <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.3, delay: index * 0.1 }}
+                                            whileHover={{ scale: 1.02 }}
+                                        >
+                                            <Card className="shadow-none rounded-lg hover:bg-blue-200/80 hover:border-blue-400 transition-colors group">
+                                                <CardContent className="p-4">
+                                                    <p className="text-lg font-medium truncate group-hover:text-primary transition-colors">
+                                                        {task.name}
+                                                    </p>
+                                                    <div className="flex items-center gap-x-2">
+                                                        <p>{task.project?.name}</p>
+                                                        <div className="size-1 rounded-full bg-neutral-300" />
+                                                        <div className="text-sm text-muted-foreground flex items-center">
+                                                            <CalendarIcon className="size-3 mr-1" />
+                                                        <span className="truncate group-hover:text-primary transition-colors" >
+                                                                {formatDistanceToNow(new Date(task.dueDate))}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </motion.div>
-                            </Link>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+                                </Link>
+                            </li>
+                        ))}
+                        <li className="text-sm text-muted-foreground text-center hidden first-of-type:block">
+                            No tasks found
                         </li>
-                    ))}
-                    <li className="text-sm text-muted-foreground text-center hidden first-of-type:block">
-                        No tasks found
-                    </li>
-                </ul>
+                    </ul>
+                </div>
                 <Button variant="ghost" className="mt-4 w-full" asChild>
                     <Link href={`/workspaces/${workspaceId}/tasks`}>Show All</Link>
                 </Button>

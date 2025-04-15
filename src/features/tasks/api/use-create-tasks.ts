@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { client } from "@/lib/rpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -23,9 +22,20 @@ export const useCreateTask = () => {
 
           return await response.json();
         },
-        onSuccess: () => {
+        onSuccess: ({data}) => {
           toast.success("Task Created!");
-          queryClient.invalidateQueries({queryKey: ["tasks"]})
+          // Invalidate task queries
+          queryClient.invalidateQueries({queryKey: ["tasks"]});
+          
+          // Invalidate workspace analytics
+          if (data.workspaceId) {
+            queryClient.invalidateQueries({queryKey: ["project-analytics", data.workspaceId]});
+          }
+          
+          // Invalidate project analytics if the task is assigned to a project
+          if (data.projectId) {
+            queryClient.invalidateQueries({queryKey: ["project-analytics", data.projectId]});
+          }
         },
         onError: (e) => {
           console.log(e);

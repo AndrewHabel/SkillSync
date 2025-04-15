@@ -111,14 +111,6 @@ export const HeroLandingPage = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.6 }}
             >
-              <div className="flex -space-x-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 dark:bg-gray-700" />
-                ))}
-              </div>
-              <p className="ml-5 text-base text-gray-600 dark:text-gray-400">
-                <span className="font-semibold">60+</span> teams already using SkillSync
-              </p>
             </motion.div>
           </div>
           
