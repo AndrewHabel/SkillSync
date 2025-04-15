@@ -2,32 +2,32 @@ import { toast } from "sonner";
 import { client } from "@/lib/rpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { InferRequestType , InferResponseType } from "hono";
-import { useRouter } from "next/navigation";
 
 
-type ResponseType = InferResponseType<typeof client.api.tasks["bulk-update"]["$post"],200>;
-type RequestType = InferRequestType<typeof client.api.tasks["bulk-update"]["$post"]>;
+type ResponseType = InferResponseType<typeof client.api.tasks["bulk-create"]["$post"],200>;
+type RequestType = InferRequestType<typeof client.api.tasks["bulk-create"]["$post"]>;
 
-export const useBulkUpdateTasks = () => {
+export const useBulkCreateTasks = () => {
   const queryClient = useQueryClient();
   
   const mutation = useMutation<ResponseType, Error, RequestType>({
-        mutationFn: async ({ json})=> {
-          const response = await client.api.tasks["bulk-update"]["$post"]({ json });
+        mutationFn: async ({ json })=> {
+          const response = await client.api.tasks["bulk-create"]["$post"]({ json });
           
           if(!response.ok) {
             console.log("API Response not OK:", response);
-            throw new Error("Failed to update Task");
+            throw new Error("Failed to create tasks in bulk");
           }
 
           return await response.json();
         },
-        onSuccess: ({ data }) => {
-          toast.success("Tasks Updated!");
+        onSuccess: ({data}) => {
+          toast.success("Tasks added to project!");
+          // Invalidate task queries
           queryClient.invalidateQueries({queryKey: ["tasks"]});
           
-          // Invalidate workspace analytics for all affected workspaces
-          if (data && Array.isArray(data)) {
+          // Invalidate workspace analytics
+          if (data && Array.isArray(data) && data.length > 0) {
             const workspaceIds = new Set(data.map(task => task.workspaceId).filter(Boolean));
             const projectIds = new Set(data.map(task => task.projectId).filter(Boolean));
             
@@ -48,7 +48,7 @@ export const useBulkUpdateTasks = () => {
         },
         onError: (e) => {
           console.log(e);
-          toast.error("Failed to update Tasks");
+          toast.error("Failed to add tasks to project");
         }
     });
 

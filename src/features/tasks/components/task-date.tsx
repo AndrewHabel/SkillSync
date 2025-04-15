@@ -1,12 +1,21 @@
 import { differenceInDays, format } from "date-fns";
-import {cn} from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface TaskDateProps {
-    value: string;
+    value: string | null | undefined;
     className?: string;
 };
 
 export const TaskDate = ({value, className}: TaskDateProps) => {
+    // If no value is provided, return "No due date"
+    if (!value) {
+        return (
+            <span className={cn("text-muted-foreground italic", className)}>
+                No due date
+            </span>
+        );
+    }
+    
     const today = new Date();
     const endDate = new Date(value);
     const daysDifference = differenceInDays(endDate, today);

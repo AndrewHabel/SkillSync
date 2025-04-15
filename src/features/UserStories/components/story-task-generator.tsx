@@ -3,10 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTaskGeneration } from "@/features/taskgeneration/api/use-task-generation";
 import { Separator } from "@/components/ui/separator";
-import { Wand2Icon, Loader2, ArrowDownIcon } from "lucide-react";
+import { Wand2Icon, Loader2, ArrowDownIcon, PencilIcon, XIcon, CheckIcon, PlusCircleIcon } from "lucide-react";
 import { DottedSeparator } from "@/components/dotted-separator";
 import { UserStory } from "../types";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useBulkCreateTasks } from "@/features/tasks/api/use-bulk-create-tasks";
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+import { TaskStatus } from "@/features/tasks/types";
+import { useGetMembers } from "@/features/members/api/use-get-members";
 
 interface StoryTaskGeneratorProps {
   userStory: UserStory;
@@ -21,9 +27,16 @@ export const StoryTaskGenerator = ({ userStory }: StoryTaskGeneratorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [generatedTasks, setGeneratedTasks] = useState<GeneratedTasks | null>(null);
   const { mutate, isPending } = useTaskGeneration();
+  const { mutate: bulkCreateTasks, isPending: isAddingTasks } = useBulkCreateTasks();
+  const [editingTaskIndex, setEditingTaskIndex] = useState<number | null>(null);
+  const [editedTitle, setEditedTitle] = useState("");
+  const [editedDescription, setEditedDescription] = useState("");
+  
+  // Get necessary context data
+  const workspaceId = useWorkspaceId();
+  const { data: membersData } = useGetMembers({ workspaceId });
 
   const handleGenerateTasks = () => {
-
     const userInput = `
 User Story Description:
 ${userStory.description || "No description provided"}
@@ -58,6 +71,68 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
         },
       }
     );
+  };
+
+  const handleAddTasksToProject = () => {
+    if (!generatedTasks) return;
+    
+    // Create task objects for each generated task
+    const tasksToCreate = generatedTasks["Task Titles"].map((title, index) => {
+      return {
+        name: title,
+        description: generatedTasks["Task description"][index],
+        status: null,
+        workspaceId,
+        projectId: userStory.projectId,
+        assigneeId: null,
+        dueDate: null,
+        position: 1000
+      };
+    });
+    
+    // Call the bulk create API
+    bulkCreateTasks(
+      { json: { tasks: tasksToCreate } },
+      {
+        onSuccess: () => {
+          // Close the task generator after successful creation
+          setIsOpen(false);
+          setGeneratedTasks(null);
+        }
+      }
+    );
+  };
+
+  const handleEditTask = (index: number) => {
+    if (generatedTasks) {
+      setEditingTaskIndex(index);
+      setEditedTitle(generatedTasks["Task Titles"][index]);
+      setEditedDescription(generatedTasks["Task description"][index]);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTaskIndex(null);
+    setEditedTitle("");
+    setEditedDescription("");
+  };
+
+  const handleSaveTask = (index: number) => {
+    if (generatedTasks && editingTaskIndex !== null) {
+      // Create a copy of the current tasks
+      const updatedTasks = {
+        "Task Titles": [...generatedTasks["Task Titles"]],
+        "Task description": [...generatedTasks["Task description"]]
+      };
+      
+      // Update the specific task
+      updatedTasks["Task Titles"][index] = editedTitle;
+      updatedTasks["Task description"][index] = editedDescription;
+      
+      // Update state
+      setGeneratedTasks(updatedTasks);
+      setEditingTaskIndex(null);
+    }
   };
 
   return (
@@ -100,19 +175,99 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
           </CardHeader>
           <CardContent className="pt-4">
             {generatedTasks && (
-              <ScrollArea className="h-[300px] pr-4">
-                <div className="space-y-3">
-                  {generatedTasks["Task Titles"].map((title, index) => (
-                    <div key={index} className="bg-card border rounded-md p-3 shadow-sm">
-                      <h3 className="font-medium text-primary mb-1">{title}</h3>
-                      <DottedSeparator className="my-2" />
-                      <p className="text-sm text-muted-foreground">
-                        {generatedTasks["Task description"][index]}
-                      </p>
-                    </div>
-                  ))}
+              <>
+                <ScrollArea className="h-[300px] pr-4 mb-4">
+                  <div className="space-y-3">
+                    {generatedTasks["Task Titles"].map((title, index) => (
+                      <div key={index} className="bg-card border rounded-md p-3 shadow-sm">
+                        {editingTaskIndex === index ? (
+                          <div className="space-y-3">
+                            <div>
+                              <label htmlFor={`task-title-${index}`} className="block text-sm font-medium mb-1">Task Title</label>
+                              <Input
+                                id={`task-title-${index}`}
+                                value={editedTitle}
+                                onChange={(e) => setEditedTitle(e.target.value)}
+                                className="w-full"
+                              />
+                            </div>
+                            <div>
+                              <label htmlFor={`task-desc-${index}`} className="block text-sm font-medium mb-1">Task Description</label>
+                              <Textarea
+                                id={`task-desc-${index}`}
+                                value={editedDescription}
+                                onChange={(e) => setEditedDescription(e.target.value)}
+                                className="w-full"
+                                rows={3}
+                              />
+                            </div>
+                            <div className="flex justify-end space-x-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={handleCancelEdit}
+                              >
+                                <XIcon className="h-4 w-4 mr-1" />
+                                Cancel
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="solid"
+                                onClick={() => handleSaveTask(index)}
+                              >
+                                <CheckIcon className="h-4 w-4 mr-1" />
+                                Save
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex justify-between">
+                              <h3 className="font-medium text-primary mb-1">{title}</h3>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="h-7 w-7 p-0" 
+                                onClick={() => handleEditTask(index)}
+                              >
+                                <PencilIcon className="h-4 w-4" />
+                                <span className="sr-only">Edit task</span>
+                              </Button>
+                            </div>
+                            <DottedSeparator className="my-2" />
+                            <p className="text-sm text-muted-foreground">
+                              {generatedTasks["Task description"][index]}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+                
+                <DottedSeparator className="my-4" />
+                
+                <div className="flex justify-end">
+                  <Button
+                    variant="solid"
+                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white"
+                    onClick={handleAddTasksToProject}
+                    disabled={isAddingTasks}
+                  >
+                    {isAddingTasks ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Adding Tasks...
+                      </>
+                    ) : (
+                      <>
+                        <PlusCircleIcon className="mr-2 h-4 w-4" />
+                        Add Tasks to Project
+                      </>
+                    )}
+                  </Button>
                 </div>
-              </ScrollArea>
+              </>
             )}
           </CardContent>
         </Card>

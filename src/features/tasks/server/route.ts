@@ -11,6 +11,7 @@ import { Search } from "lucide-react";
 import { createAdminClient } from "@/lib/appwrite";
 import { Project } from "@/features/projects/types";
 import { Description } from "@radix-ui/react-dialog";
+import { bulkCreateTasksSchema } from "@/features/UserStories/schemas";
 
 const app = new Hono()
   .post(
@@ -75,6 +76,61 @@ const app = new Hono()
       return c.json({ data: task })
     }
   )
+  .post(
+    "/bulk-create",
+    sessionMiddleware,
+    zValidator("json", bulkCreateTasksSchema),
+    async(c) => {
+      const user = c.get("user");
+      const databases = c.get("databases");
+      const { tasks } = c.req.valid("json");
+      
+      if (tasks.length === 0) {
+        return c.json({ error: "No tasks provided" }, 400);
+      }
+      
+      // All tasks should belong to the same workspace
+      const workspaceId = tasks[0].workspaceId;
+      
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      });
+
+      if(!member){
+        return c.json({error: "Unauthorized"}, 401);
+      }
+
+      // Create all tasks
+      const createdTasks = await Promise.all(
+        tasks.map(async (taskData) => {
+          const { name, description, status, projectId, assigneeId, dueDate } = taskData;
+          
+          // Default position to 1000
+          const position = 1000;
+          
+          return databases.createDocument(
+            DATABASE_ID,
+            TASKS_ID,
+            ID.unique(),
+            {
+              name,
+              description,
+              status: status || TaskStatus.BACKLOG, // Default to BACKLOG if null
+              workspaceId,
+              projectId,
+              dueDate,
+              assigneeId,
+              position
+            }
+          );
+        })
+      );
+
+      return c.json({ data: createdTasks });
+    }
+  )
   .get(
     "/",
     sessionMiddleware,
@@ -131,7 +187,7 @@ const app = new Hono()
 
       
       if(search){
-        console.log("projectId : ", search);
+        console.log("search : ", search);
         query.push(Query.search("name", search));
       }
 
@@ -141,37 +197,45 @@ const app = new Hono()
         query,
       );  
 
-      const projectIds = tasks.documents.map((task) => task.projectId);
-      const assigneeIds = tasks.documents.map((task) => task.assigneeId);
+      // Filter out null or undefined projectIds and assigneeIds
+      const projectIds = tasks.documents
+        .map((task) => task.projectId)
+        .filter(Boolean);
+      
+      // Filter out null or undefined assigneeIds
+      const assigneeIds = tasks.documents
+        .map((task) => task.assigneeId)
+        .filter(Boolean);
 
       const projects = await databases.listDocuments<Project>(
         DATABASE_ID,
         PROJECTS_ID,
-        projectIds.length > 0 ? [Query.contains("$id",projectIds)] : [],
+        projectIds.length > 0 ? [Query.contains("$id", projectIds)] : [],
       );
 
       const members = await databases.listDocuments(
         DATABASE_ID,
         MEMBERS_ID,
-        assigneeIds.length > 0 ? [Query.contains("$id",assigneeIds)] : [],
+        assigneeIds.length > 0 ? [Query.contains("$id", assigneeIds)] : [],
       );
 
       const assignees = await Promise.all(
-        members.documents.map(async (member) =>{
-
+        members.documents.map(async (member) => {
           const user = await users.get(member.userId);
+          const username = user.email.split('@')[0];
 
           return {
             ...member,
-            name:user,
+            name: user.name || username,
             email: user.email,
           };
         })
-      )
+      );
 
       const populatedTasks = tasks.documents.map((task) => {
-        const project = projects.documents.find((project) => project.$id === task.projectId);
-        const assignee = assignees.find((assignee) => assignee.$id === task.assigneeId);
+        const project = task.projectId ? projects.documents.find((project) => project.$id === task.projectId) : null;
+        const assignee = task.assigneeId ? assignees.find((assignee) => assignee.$id === task.assigneeId) : null;
+        
         return {
           ...task,
           project,
@@ -180,7 +244,6 @@ const app = new Hono()
       });
 
       return c.json({ data : { ...tasks , documents: populatedTasks } });
-
     },
   )
   .delete(
@@ -300,25 +363,33 @@ const app = new Hono()
         return c.json({error: "Unauthorized"}, 401);
       }
 
-      const project = await databases.getDocument<Project>(
+      const project = task.projectId ? await databases.getDocument<Project>(
         DATABASE_ID,
         PROJECTS_ID,
         task.projectId
-      )
+      ) : null;
 
-      const member = await databases.getDocument(
-        DATABASE_ID,
-        MEMBERS_ID,
-        task.assigneeId,
-      )
-
-      const user = await users.get(member.userId);
-      const username = user.email.split('@')[0];
-      const assignee = {
-        ...member,
-        name: user.name || username,
-        email: user.email,
-      };
+      let assignee = null;
+      
+      if (task.assigneeId) {
+        try {
+          const member = await databases.getDocument(
+            DATABASE_ID,
+            MEMBERS_ID,
+            task.assigneeId,
+          );
+          
+          const user = await users.get(member.userId);
+          const username = user.email.split('@')[0];
+          assignee = {
+            ...member,
+            name: user.name || username,
+            email: user.email,
+          };
+        } catch (error) {
+          console.error("Error fetching assignee:", error);
+        }
+      }
 
       return c.json({
         data: {

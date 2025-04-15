@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 import { client } from "@/lib/rpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -24,18 +25,8 @@ export const useDeleteTask = () => {
         },
         onSuccess: ({data}) => {
           toast.success("Task Deleted!");
-          queryClient.invalidateQueries({queryKey: ["tasks"]});
-          queryClient.invalidateQueries({queryKey: ["task", data.$id]});
-          
-          // Invalidate workspace analytics
-          if (data.workspaceId) {
-            queryClient.invalidateQueries({queryKey: ["project-analytics", data.workspaceId]});
-          }
-          
-          // Invalidate project analytics if the task is assigned to a project
-          if (data.projectId) {
-            queryClient.invalidateQueries({queryKey: ["project-analytics", data.projectId]});
-          }
+          queryClient.invalidateQueries({queryKey: ["tasks"]})
+          queryClient.invalidateQueries({queryKey: ["task",data.$id]})
         },
         onError: (e) => {
           console.log(e);

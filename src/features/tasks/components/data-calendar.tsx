@@ -9,6 +9,7 @@ import {
   startOfWeek,
   addMonths,
   subMonths,
+  isValid,
 } from "date-fns";
 
 import { enUS } from "date-fns/locale";
@@ -71,19 +72,28 @@ const CustomToolbar = ({ date, onNavigate }: CustomToolbarProps) => {
 }
 
 export const DataCalendar = ({data}: DataCalendarProps) => {
+  // Filter out tasks without dueDate (we must have a date for calendar events)
+  const filteredData = data.filter((task) => {
+    return task.dueDate && isValid(new Date(task.dueDate));
+  });
+  
   const [value, setValue] = useState(
-    data.length > 0 ? new Date(data[0].dueDate) : new Date()  
+    new Date()  
   );
 
-  const events = data.map((task) => ({
-    start: new Date(task.dueDate),
-    end: new Date(task.dueDate),
-    title: task.name,
-    project: task.project,
-    assignee: task.assignee,
-    status: task.status,
-    id: task.$id,
-  }));
+  const events = filteredData.map((task) => {
+    const dueDate = new Date(task.dueDate);
+    
+    return {
+      start: dueDate,
+      end: dueDate,
+      title: task.name || "Unnamed Task",
+      project: task.project,
+      assignee: task.assignee,
+      status: task.status,
+      id: task.$id,
+    };
+  });
 
   const handelNavigation = (action: "PREV" | "NEXT" | "TODAY") => {
     if(action === "PREV"){
@@ -102,7 +112,6 @@ export const DataCalendar = ({data}: DataCalendarProps) => {
       events={events}
       views={["month"]}
       defaultView="month"
-      toolbar
       showAllEvents
       className="h-full"
       max={new Date(new Date().setFullYear(new Date().getFullYear() + 1))}

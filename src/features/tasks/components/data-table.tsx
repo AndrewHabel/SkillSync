@@ -78,6 +78,7 @@ export function DataTable<TData, TValue>({columns,data,}: DataTableProps<TData, 
                     <TableRow
                         key={row.id}
                         data-state={row.getIsSelected() && "selected"}
+                        className="bg-card hover:bg-muted/50"
                     >
                         {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>

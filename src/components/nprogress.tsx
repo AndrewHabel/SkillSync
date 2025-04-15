@@ -21,10 +21,8 @@ export function NavigationProgress() {
       const target = e.target as HTMLElement;
       const isNavigationElement = 
         target.tagName === 'A' || 
-        target.tagName === 'BUTTON' || 
-        target.closest('a') || 
-        target.closest('button');
-      
+        target.closest('a')
+
       if (isNavigationElement) {
         NProgress.start();
       }
