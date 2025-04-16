@@ -11,6 +11,7 @@ import {
 import { object } from "zod";
 import { KanbanColumnHeader } from "./kanban-column-header";
 import { KanbanCard } from "./kanban-card";
+import { cn } from "@/lib/utils";
 
 const boards: TaskStatus[] = [
     TaskStatus.BACKLOG,
@@ -152,33 +153,43 @@ export const DataKanban = ({ data , onChange }: DataKanbanProps) => {
         <DragDropContext onDragEnd={onDragEnd}>
            <div className="flex overflow-x-auto">
                 {boards.map((board) => {
+                    const columnTasks = tasks[board];
+                    const shouldScroll = columnTasks.length > 5;
+                    
                     return(
-                        <div key={board} className="flex-1 mx-2 bg-muted p-1.5 rounded-md min-w-[200px]">
-                            <KanbanColumnHeader board={board} taskCount={tasks[board].length}/>
+                        <div key={board} className="flex-1 mx-2 bg-muted p-1.5 rounded-md min-w-[200px] flex flex-col">
+                            <KanbanColumnHeader board={board} taskCount={columnTasks.length}/>
                             <Droppable droppableId={board}>
                                 {(provided) => (
-                                    <div
-                                        ref={provided.innerRef}
-                                        {...provided.droppableProps}
-                                        className="min-h-[200px] py-1.5"
+                                    <div 
+                                        className="flex-1 flex flex-col min-h-[200px]"
                                     >
-                                        {tasks[board].map((task, index) => {
-                                            return (
-                                                <Draggable key={task.$id} draggableId={task.$id} index={index}>
-                                                    {(provided) => (
-                                                        <div
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            {...provided.dragHandleProps}
-                                                            className="bg-card p-1 rounded-md mb-1 hover:bg-blue-200/80 hover:border-blue-400 transition-colors"
-                                                        >
-                                                            <KanbanCard task={task}/>
-                                                        </div>
-                                                    )}
-                                                </Draggable>
-                                            );
-                                        })}
-                                        {provided.placeholder}
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                            className={cn(
+                                                "py-1.5 flex-1", 
+                                                shouldScroll && "max-h-[735px] overflow-y-auto pr-1 custom-scrollbar"
+                                            )}
+                                        >
+                                            {columnTasks.map((task, index) => {
+                                                return (
+                                                    <Draggable key={task.$id} draggableId={task.$id} index={index}>
+                                                        {(provided) => (
+                                                            <div
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                className="bg-card p-1 rounded-md mb-1 hover:bg-blue-200/80 hover:border-blue-400 transition-colors"
+                                                            >
+                                                                <KanbanCard task={task}/>
+                                                            </div>
+                                                        )}
+                                                    </Draggable>
+                                                );
+                                            })}
+                                            {provided.placeholder}
+                                        </div>
                                     </div>
                                 )}
                             </Droppable>

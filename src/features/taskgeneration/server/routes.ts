@@ -23,13 +23,13 @@ const app = new Hono()
 
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
         // Create a structured prompt with the user input and specific instructions
         const prompt = `
 ${userInput}
 
-You are given a User Story and its associated Acceptance Criteria. Based on this information, generate a list of Tasks required to fulfill the requirements.
+You are given a User Story and its associated Acceptance Criteria. Based on this information, generate a list of specific and actionable tasks required to fulfill the requirements.
 Your output must follow this exact JSON format:
 
 {
@@ -48,13 +48,16 @@ Your output must follow this exact JSON format:
 Guidelines:
 1)Each task must be:
 
-Clear: Easy to understand
+ Clear–Easy to understand.
 
-Actionable: Describes a specific piece of work
+ Actionable–Describes a specific piece of work that can be independently executed.
 
-Aligned: Directly supports the User Story and Acceptance Criteria
+ Aligned–Directly supports the given User Story and its Acceptance Criteria.
 
-2)Only include tasks for the following roles if and only if they are explicitly required by the Acceptance Criteria:
+2)Each task must be specific to one role only.
+ If a task might apply to more than one role, split it into separate, role-specific tasks.
+
+3)Only include tasks for the following roles if and only if they are explicitly required by the Acceptance Criteria:
 
 Data Analyst
 
@@ -84,9 +87,11 @@ Data Scientist
 
 Business Analyst
 
-3)Do not include tasks for roles that are not relevant to the Acceptance Criteria.
+4)Do not include tasks for any role not mentioned or implied in the Acceptance Criteria.
 
-4)All tasks should be formatted uniformly in both the title and description lists.
+5)It is allowed for multiple tasks to be assigned to the same role — this is encouraged when appropriate.
+
+6)All tasks must be uniformly formatted across both the "Task Titles" and "Task description" lists.
 `;
 
         const result = await model.generateContent(prompt);
