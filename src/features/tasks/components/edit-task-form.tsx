@@ -41,7 +41,17 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
   });
 
   const onSubmit = (values: z.infer<typeof createTaskSchema> ) => {
-    mutate({ json: values, param: { taskId: initialValues.$id }}, {
+
+    const selectedProject = projectOptions.find(project => project.id === values.projectId);
+    const selectedAssignee = memberOptions.find(member => member.id === values.assigneeId);
+    
+    const submissionData = {
+      ...values,
+      projectName: selectedProject?.name || '',
+      assigneeName: selectedAssignee?.name || '',
+    };
+    
+    mutate({ json: submissionData, param: { taskId: initialValues.$id }}, {
       onSuccess: ({ data }) => {
         form.reset();
         onCancel?.();

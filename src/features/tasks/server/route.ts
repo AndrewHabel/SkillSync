@@ -3,7 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { createTaskSchema } from "../schemas";
 import { getMember } from "@/features/members/utils";
-import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID } from "@/config";
+import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID, WORKSPACES_ID } from "@/config";
 import { ID, Query } from "node-appwrite";
 import { z } from "zod";
 import { Task, TaskStatus } from "../types";
@@ -12,6 +12,11 @@ import { createAdminClient } from "@/lib/appwrite";
 import { Project } from "@/features/projects/types";
 import { Description } from "@radix-ui/react-dialog";
 import { bulkCreateTasksSchema } from "@/features/UserStories/schemas";
+import assignedTask, { AssignedTask } from "@/components/emails/you-have-been-assigned-task";
+import { Member } from "@/features/members/types";
+import { getWorkspaces } from "@/features/workspaces/queries";
+import { Workspace } from "@/features/workspaces/types";
+import { sendAssignEmail } from "@/lib/sendEmail";
 
 const app = new Hono()
   .post(
@@ -200,12 +205,12 @@ const app = new Hono()
       // Filter out null or undefined projectIds and assigneeIds
       const projectIds = tasks.documents
         .map((task) => task.projectId)
-        .filter(Boolean);
+        .filter((id): id is string => id !== null && id !== undefined);
       
       // Filter out null or undefined assigneeIds
       const assigneeIds = tasks.documents
         .map((task) => task.assigneeId)
-        .filter(Boolean);
+        .filter((id): id is string => id !== null && id !== undefined);
 
       const projects = await databases.listDocuments<Project>(
         DATABASE_ID,
@@ -288,7 +293,10 @@ const app = new Hono()
   .patch(
     "/:taskId",
     sessionMiddleware,
-    zValidator("json", createTaskSchema.partial()),
+    zValidator("json", createTaskSchema.partial().extend({
+      projectName: z.string().optional(),
+      assigneeName: z.string().optional()
+    })),
     async(c) => {
       const user = c.get("user");
       const databases = c.get("databases");
@@ -299,6 +307,8 @@ const app = new Hono()
         projectId,
         assigneeId,
         dueDate,
+        projectName,
+        assigneeName
       } = c.req.valid("json");
 
       const { taskId } = c.req.param();
@@ -309,17 +319,24 @@ const app = new Hono()
         taskId,
       );
 
-      console.log("projectId : ", projectId);
-
+    
       const member = await getMember({
         databases,
         workspaceId: existingTask.workspaceId,
         userId: user.$id,
       })
 
+      const workSpace = await databases.getDocument<Workspace>(
+        DATABASE_ID,
+        WORKSPACES_ID,
+        existingTask.workspaceId,
+      )
+
       if(!member){
         return c.json({error: "Unauthorized"}, 401);
       }
+
+      const oldAssigneeId = existingTask.assigneeId;
 
       const task = await databases.updateDocument<Task>(
         DATABASE_ID,
@@ -334,6 +351,50 @@ const app = new Hono()
           description,
         },
       );
+
+      console.log("projectId:", projectId);
+      console.log("projectName:", projectName);
+      console.log("assigneeId:", assigneeId);
+      console.log("assigneeName:", assigneeName);
+      console.log("dueDate:", dueDate);
+      console.log("status:", status);
+      console.log("name:", workSpace.name);
+
+      if(!assigneeId){
+        return c.json({data: task});
+      }
+
+      const newAssignee = await databases.getDocument<Member>(
+        DATABASE_ID,
+        MEMBERS_ID,
+        assigneeId,
+      )
+
+      if(oldAssigneeId !== assigneeId ) {
+
+        if (!newAssignee) {
+          console.error("Failed to find the assigned member");
+          return c.json({data: task});
+        }
+
+        // Get the Appwrite user to access their email
+        const { users } = await createAdminClient();
+        try {
+          const userDetails = await users.get(newAssignee.userId);
+          
+          // Now we have the email from the user's Appwrite record
+          await sendAssignEmail(
+            userDetails.email || "",
+            userDetails.name || "",
+            task.name || "",
+            workSpace.name || "",
+            projectName || "",
+            task.dueDate || ""
+          );
+        } catch (error) {
+          console.error("Failed to send assignment notification:", error);
+        }
+      }
 
       return c.json({ data: task })
     }

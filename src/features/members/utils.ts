@@ -26,5 +26,8 @@ export const getMember = async ({
         ]
     );
 
+    console.log("argaebebab",userId)
+    console.log("gargeargaergaerg",workspaceId)
+
     return members.documents[0];
 };

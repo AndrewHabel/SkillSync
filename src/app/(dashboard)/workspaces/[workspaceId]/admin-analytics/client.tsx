@@ -193,7 +193,7 @@ export const AdminAnalyticsClient = () => {
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Task Status Distribution Bar Chart */}
-            <Card>
+            <Card className="analytics-chart-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Task Status Distribution</CardTitle>
               </CardHeader>
@@ -224,7 +224,7 @@ export const AdminAnalyticsClient = () => {
             </Card>
             
             {/* Monthly Task Completion Trends Line Chart */}
-            <Card>
+            <Card className="analytics-chart-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Monthly Task Trends</CardTitle>
               </CardHeader>
@@ -251,7 +251,7 @@ export const AdminAnalyticsClient = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Task Status Distribution Pie Chart */}
-            <Card>
+            <Card className="analytics-chart-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Task Status Distribution (Pie)</CardTitle>
               </CardHeader>
@@ -288,7 +288,7 @@ export const AdminAnalyticsClient = () => {
             </Card>
 
             {/* Tasks per Project chart moved from Task Analytics tab to Overview */}
-            <Card>
+            <Card className="analytics-chart-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Tasks per Project</CardTitle>
               </CardHeader>
@@ -323,7 +323,7 @@ export const AdminAnalyticsClient = () => {
         <TabsContent value="members" className="space-y-4">
           {/* Member Analytics Tab */}
           <div className="grid grid-cols-1 gap-4">
-            <Card>
+            <Card className="analytics-chart-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Member Workload Distribution</CardTitle>
               </CardHeader>
@@ -354,7 +354,7 @@ export const AdminAnalyticsClient = () => {
         <TabsContent value="projects" className="space-y-4">
           {/* Project Analytics Tab */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
+            <Card className="analytics-chart-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Project Distribution</CardTitle>
               </CardHeader>
@@ -387,7 +387,7 @@ export const AdminAnalyticsClient = () => {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="analytics-chart-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Project Completion Rate</CardTitle>
               </CardHeader>

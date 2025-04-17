@@ -538,3 +538,31 @@ body {
   background-color: hsl(var(--auth-oauth-bg-hover));
   border-color: hsl(var(--auth-oauth-border-hover));
 }
+
+/* Analytics chart card styling */
+.analytics-chart-card {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Theme-specific analytics chart card styles */
+.dark .analytics-chart-card {
+  background-color: hsl(var(--secondary));
+  border-color: hsl(var(--border));
+}
+
+.dracula .analytics-chart-card {
+  background-color: hsl(231 15% 21%);
+  border-color: hsl(var(--border));
+}
+
+.nord .analytics-chart-card {
+  background-color: hsl(220 26% 22%);
+  border-color: hsl(var(--border));
+}
+
+.monokai .analytics-chart-card {
+  background-color: hsl(60 6% 18%);
+  border-color: hsl(var(--border));
+}
