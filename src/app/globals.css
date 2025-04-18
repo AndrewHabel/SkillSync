@@ -51,6 +51,8 @@ body {
     --sidebar-ring: 217.2 91.2% 59.8%;
     /* Members list background - light theme */
     --members-list-bg: 0 0% 94%;
+    /* Table background - light theme */
+    --table-background: 210 50% 96%;
     
     /* Landing page specific colors - light theme */
     --landing-background: 0 0% 100%;
@@ -80,6 +82,22 @@ body {
     --auth-oauth-border: 0 0% 89.8%;
     --auth-oauth-bg-hover: 0 0% 94%;
     --auth-oauth-border-hover: 0 0% 89%;
+    
+    /* Workspace specific colors - light theme */
+    --workspace-bg: 0 0% 100%;
+    --workspace-section-bg: 0 0% 96.1%;
+    --workspace-card-bg: 0 0% 100%;
+    --workspace-card-border: 210 20% 93%;
+    --workspace-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    --workspace-header-color: 0 0% 15%;
+    --workspace-title-color: 0 0% 25%;
+    --workspace-text-color: 0 0% 45%;
+    --workspace-task-hover: 210 100% 97%;
+    --workspace-task-hover-border: 210 100% 75%;
+    --workspace-project-hover: 270 100% 97%;
+    --workspace-project-hover-border: 270 100% 75%;
+    --workspace-member-hover: 140 100% 97%;
+    --workspace-member-hover-border: 140 100% 75%;
   }
   
   /* GitHub theme - improved dark theme based on GitHub's dark mode */
@@ -118,6 +136,8 @@ body {
     --sidebar-ring: 212 92% 45%;
     /* Members list background - dark theme */
     --members-list-bg: 220 26% 20%;
+    /* Table background - dark theme */
+    --table-background: 220 26% 16%;
     
     /* Landing page specific colors - dark theme */
     --landing-background: 220 26% 14%;
@@ -147,6 +167,22 @@ body {
     --auth-oauth-border: 220 26% 20%;
     --auth-oauth-bg-hover: 220 26% 22%;
     --auth-oauth-border-hover: 220 26% 24%;
+    
+    /* Workspace specific colors - dark theme */
+    --workspace-bg: 220 26% 14%;
+    --workspace-section-bg: 220 26% 18%;
+    --workspace-card-bg: 220 26% 20%;
+    --workspace-card-border: 220 26% 24%;
+    --workspace-card-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    --workspace-header-color: 210 40% 90%;
+    --workspace-title-color: 210 40% 85%;
+    --workspace-text-color: 215 20% 65%;
+    --workspace-task-hover: 212 92% 20%;
+    --workspace-task-hover-border: 212 92% 45%;
+    --workspace-project-hover: 270 80% 20%;
+    --workspace-project-hover-border: 270 80% 45%;
+    --workspace-member-hover: 140 80% 20%;
+    --workspace-member-hover-border: 140 80% 45%;
   }
   
   /* Dracula theme */
@@ -185,6 +221,8 @@ body {
     --sidebar-ring: 326 100% 74%;
     /* Members list background - dracula theme */
     --members-list-bg: 231 15% 22%;
+    /* Table background - dracula theme */
+    --table-background: 231 15% 21%;
     
     /* Landing page specific colors - dracula theme */
     --landing-background: 231 15% 18%;
@@ -214,6 +252,22 @@ body {
     --auth-oauth-border: 231 15% 28%;
     --auth-oauth-bg-hover: 231 15% 28%;
     --auth-oauth-border-hover: 231 15% 30%;
+    
+    /* Workspace specific colors - dracula theme */
+    --workspace-bg: 231 15% 18%;
+    --workspace-section-bg: 231 15% 22%;
+    --workspace-card-bg: 231 15% 24%;
+    --workspace-card-border: 231 15% 30%;
+    --workspace-card-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    --workspace-header-color: 60 30% 90%;
+    --workspace-title-color: 60 30% 85%;
+    --workspace-text-color: 225 27% 70%;
+    --workspace-task-hover: 326 100% 25%;
+    --workspace-task-hover-border: 326 100% 74%;
+    --workspace-project-hover: 265 89% 25%;
+    --workspace-project-hover-border: 265 89% 78%;
+    --workspace-member-hover: 135 94% 25%;
+    --workspace-member-hover-border: 135 94% 65%;
   }
   
   /* Nord theme */
@@ -252,6 +306,8 @@ body {
     --sidebar-ring: 193 82% 49%;
     /* Members list background - nord theme */
     --members-list-bg: 220 28% 22%;
+    /* Table background - nord theme */
+    --table-background: 220 28% 22%;
     
     /* Landing page specific colors - nord theme */
     --landing-background: 220 28% 18%;
@@ -281,6 +337,22 @@ body {
     --auth-oauth-border: 220 26% 26%;
     --auth-oauth-bg-hover: 220 26% 26%;
     --auth-oauth-border-hover: 220 26% 28%;
+    
+    /* Workspace specific colors - nord theme */
+    --workspace-bg: 220 28% 18%;
+    --workspace-section-bg: 220 28% 22%;
+    --workspace-card-bg: 220 28% 24%;
+    --workspace-card-border: 220 26% 28%;
+    --workspace-card-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    --workspace-header-color: 218 27% 88%;
+    --workspace-title-color: 218 27% 82%;
+    --workspace-text-color: 218 17% 65%;
+    --workspace-task-hover: 193 82% 20%;
+    --workspace-task-hover-border: 193 82% 49%;
+    --workspace-project-hover: 311 20% 20%;
+    --workspace-project-hover-border: 311 20% 63%;
+    --workspace-member-hover: 92 28% 20%;
+    --workspace-member-hover-border: 92 28% 65%;
   }
   
   /* Monokai theme */
@@ -319,6 +391,8 @@ body {
     --sidebar-ring: 75 65% 60%;
     /* Members list background - monokai theme */
     --members-list-bg: 60 6% 19%;
+    /* Table background - monokai theme */
+    --table-background: 60 6% 18%;
     
     /* Landing page specific colors - monokai theme */
     --landing-background: 60 6% 14%;
@@ -348,6 +422,22 @@ body {
     --auth-oauth-border: 60 6% 24%;
     --auth-oauth-bg-hover: 60 6% 24%;
     --auth-oauth-border-hover: 60 6% 26%;
+    
+    /* Workspace specific colors - monokai theme */
+    --workspace-bg: 60 6% 14%;
+    --workspace-section-bg: 60 6% 18%;
+    --workspace-card-bg: 60 6% 20%;
+    --workspace-card-border: 60 6% 24%;
+    --workspace-card-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    --workspace-header-color: 60 11% 90%;
+    --workspace-title-color: 60 11% 85%;
+    --workspace-text-color: 60 5% 64%;
+    --workspace-task-hover: 75 65% 25%;
+    --workspace-task-hover-border: 75 65% 60%;
+    --workspace-project-hover: 338 95% 25%;
+    --workspace-project-hover-border: 338 95% 75%;
+    --workspace-member-hover: 22 90% 25%;
+    --workspace-member-hover-border: 22 90% 66%;
   }
 }
 
@@ -565,4 +655,339 @@ body {
 .monokai .analytics-chart-card {
   background-color: hsl(60 6% 18%);
   border-color: hsl(var(--border));
+}
+
+/* Project table background styling */
+.project-table-bg {
+  background-color: hsl(var(--table-background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+
+/* Table row styling for project view */
+.project-table-row {
+  background-color: hsl(var(--card));
+}
+
+/* Workspace specific styling */
+.workspace-container {
+  background-color: hsl(var(--workspace-bg));
+  padding: 1.5rem;
+  border-radius: var(--radius);
+}
+
+.workspace-section {
+  background-color: hsl(var(--workspace-section-bg));
+  border-radius: var(--radius);
+  box-shadow: hsl(var(--workspace-card-shadow));
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.workspace-section:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.workspace-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.workspace-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: hsl(var(--workspace-header-color));
+}
+
+.workspace-card {
+  background-color: hsl(var(--workspace-card-bg));
+  border: 1px solid hsl(var(--workspace-card-border));
+  border-radius: var(--radius);
+  box-shadow: hsl(var(--workspace-card-shadow));
+  transition: all 0.2s ease-in-out;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+/* Task card styling */
+.workspace-task-card {
+  border-left: 3px solid transparent;
+}
+
+.workspace-task-card:hover {
+  background-color: hsl(var(--workspace-task-hover));
+  border-color: hsl(var(--workspace-task-hover-border));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.workspace-task-title {
+  font-weight: 600;
+  color: hsl(var(--workspace-title-color));
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workspace-task-info {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: hsl(var(--workspace-text-color));
+}
+
+/* Project card styling */
+.workspace-project-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-left: 3px solid transparent;
+}
+
+.workspace-project-card:hover {
+  background-color: hsl(var(--workspace-project-hover));
+  border-color: hsl(var(--workspace-project-hover-border));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.workspace-project-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.workspace-project-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.workspace-project-title {
+  font-weight: 600;
+  color: hsl(var(--workspace-title-color));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workspace-project-tech {
+  font-size: 0.875rem;
+  color: hsl(var(--workspace-text-color));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Member card styling */
+.workspace-member-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.25rem 1rem;
+  border-left: 3px solid transparent;
+}
+
+.workspace-member-card:hover {
+  background-color: hsl(var(--workspace-member-hover));
+  border-color: hsl(var(--workspace-member-hover-border));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.workspace-member-avatar {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  margin-bottom: 0.75rem;
+  object-fit: cover;
+  border: 2px solid hsl(var(--workspace-card-border));
+}
+
+.workspace-member-name {
+  font-weight: 600;
+  color: hsl(var(--workspace-title-color));
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workspace-member-email {
+  font-size: 0.875rem;
+  color: hsl(var(--workspace-text-color));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Analytics card in workspace */
+.workspace-analytics-card {
+  background-color: hsl(var(--workspace-card-bg));
+  border: 1px solid hsl(var(--workspace-card-border));
+  border-radius: var(--radius);
+  box-shadow: hsl(var(--workspace-card-shadow));
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.workspace-analytics-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.workspace-analytics-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: hsl(var(--workspace-header-color));
+  margin-bottom: 1rem;
+}
+
+.workspace-analytics-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  margin-bottom: 0.5rem;
+}
+
+.workspace-analytics-description {
+  font-size: 0.875rem;
+  color: hsl(var(--workspace-text-color));
+}
+
+/* Grid layout improvements for workspace */
+.workspace-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .workspace-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+
+/* Animation utilities for workspace */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.scale-in {
+  animation: scaleIn 0.3s ease-in-out;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Task status indicators */
+.task-status {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.task-status-todo {
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+}
+
+.task-status-in-progress {
+  background-color: hsl(var(--chart-4) / 0.1);
+  color: hsl(var(--chart-4));
+}
+
+.task-status-completed {
+  background-color: hsl(var(--chart-2) / 0.1);
+  color: hsl(var(--chart-2));
+}
+
+.task-status-blocked {
+  background-color: hsl(var(--destructive) / 0.1);
+  color: hsl(var(--destructive));
+}
+
+/* Empty state styling for workspace sections */
+.workspace-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  color: hsl(var(--workspace-text-color));
+  background-color: hsl(var(--workspace-section-bg) / 0.5);
+  border: 1px dashed hsl(var(--workspace-card-border));
+  border-radius: var(--radius);
+}
+
+.workspace-empty-state-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: hsl(var(--workspace-text-color) / 0.5);
+}
+
+.workspace-empty-state-text {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Button variants specific to workspace */
+.workspace-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius);
+  transition: all 0.2s ease;
+}
+
+.workspace-button-primary {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.workspace-button-primary:hover {
+  background-color: hsl(var(--primary) / 0.9);
+  transform: translateY(-1px);
+}
+
+.workspace-button-secondary {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+
+.workspace-button-secondary:hover {
+  background-color: hsl(var(--secondary) / 0.9);
+  transform: translateY(-1px);
+}
+
+.workspace-button-outline {
+  background-color: transparent;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.workspace-button-outline:hover {
+  background-color: hsl(var(--secondary));
+  transform: translateY(-1px);
 }
