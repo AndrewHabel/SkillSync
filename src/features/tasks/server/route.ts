@@ -360,6 +360,8 @@ const app = new Hono()
       console.log("status:", status);
       console.log("name:", workSpace.name);
 
+
+
       if(!assigneeId){
         return c.json({data: task});
       }
@@ -389,7 +391,9 @@ const app = new Hono()
             task.name || "",
             workSpace.name || "",
             projectName || "",
-            task.dueDate || ""
+            task.dueDate || "",
+            task.workspaceId,
+            task.$id,
           );
         } catch (error) {
           console.error("Failed to send assignment notification:", error);

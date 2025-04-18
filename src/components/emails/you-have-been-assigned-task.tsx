@@ -19,6 +19,8 @@ import {
     projectname?: string;
     dueDate?: Date;
     taskname?: string;
+    workSpaceId?: string;
+    taskId?: string;
   }
 
   const baseUrl = process.env.VERCEL_URL
@@ -30,7 +32,10 @@ import {
     workspacename,
     projectname,
     dueDate,
-    taskname}:AssignedTaskProps) => {
+    taskname,
+    workSpaceId,
+    taskId,
+    }:AssignedTaskProps) => {
     const formattedDate = new Intl.DateTimeFormat('en', {
       dateStyle: 'medium',
       timeStyle: 'medium',
@@ -53,7 +58,7 @@ import {
               <Text style={paragraph}>
               Hi {assignename} You have been assigned a task in workspace:{workspacename} in project:{projectname} with due date:{formattedDate} and task name:{taskname}.
               </Text>
-              <Button style={button} href="https://dashboard.stripe.com/login">
+              <Button style={button} href={`http://localhost:3000/workspaces/${workSpaceId}/tasks/${taskId}`}>
                 View The Task
               </Button>
               <Hr style={hr} />
@@ -86,7 +91,9 @@ import {
     workspacename: 'string',
     projectname: 'string',
     dueDate: new Date('June 23, 2022 4:06:00 pm UTC'),
-    taskname: 'string'
+    taskname: 'string',
+    workSpaceId: 'string',
+    taskId: 'string',
   } as AssignedTaskProps;
 
   export default AssignedTask;

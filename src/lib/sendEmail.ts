@@ -14,7 +14,16 @@ export async function sendWelcomeEmail(to: string, name: string) {
   });
 }
 
-export async function sendAssignEmail(to: string, assignename: string , taskname: string , workspacename: string , projectname: string , dueDate: string) {
+export async function sendAssignEmail(
+  to: string, 
+  assignename: string , 
+  taskname: string , 
+  workspacename: string , 
+  projectname: string , 
+  dueDate: string,
+  workSpaceId : string,
+  taskId : string,
+) {
   return await resend.emails.send({
     from: process.env.FROM_EMAIL!,
     to,
@@ -24,7 +33,9 @@ export async function sendAssignEmail(to: string, assignename: string , taskname
                 workspacename: workspacename,
                 projectname: projectname,
                 dueDate: dueDate ? new Date(dueDate) : undefined,
-                taskname: taskname
+                taskname: taskname,
+                workSpaceId: workSpaceId,
+                taskId: taskId,
               }),
   });
 }
