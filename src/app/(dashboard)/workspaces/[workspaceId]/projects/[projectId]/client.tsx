@@ -11,6 +11,7 @@ import { useProjectId } from "@/features/projects/hooks/use-project-id";
 import { TaskViewSwitcher } from "@/features/tasks/components/task-view-switcher";
 import { PencilIcon } from "lucide-react";
 import { BookUserIcon } from "lucide-react";
+import { UsersIcon } from "lucide-react";
 import Link from "next/link";
 
 export const ProjectIdClient = () => {
@@ -36,8 +37,14 @@ export const ProjectIdClient = () => {
           />
           <p className="text-lg font-semibold">{project.name}</p>
         </div>
-        <div>
-        <Button variant="secondary" size="sm" asChild>
+        <div className="flex gap-2">
+          <Button variant="secondary" size="sm" asChild>
+            <Link href={`/workspaces/${project.workspaceId}/projects/${project.$id}/teams`}>
+              <UsersIcon className="size-4 mr-2" />
+              Manage Teams
+            </Link>
+          </Button>
+          <Button variant="secondary" size="sm" asChild>
             <Link href={`/workspaces/${project.workspaceId}/projects/${project.$id}/UserStory`}>
               <BookUserIcon className="size-4 mr-2" />
               Manage User Stories
