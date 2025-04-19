@@ -9,5 +9,5 @@ export type Team = Models.Document & {
   workspaceId: string;
   projectId: string;
   teamtype: TeamType;
-  members?: string[]; // Array of member IDs
+  membersId?: string[]; // Array of member IDs
 };

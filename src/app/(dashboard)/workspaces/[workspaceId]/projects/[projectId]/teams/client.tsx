@@ -15,7 +15,9 @@ import { useCreateTeamModal } from "@/features/teams/hooks/use-create-team-modal
 import { useGetTeams } from "@/features/teams/api/use-get-teams";
 import { useAddTeamMemberModal } from "@/features/teams/hooks/use-add-team-member-modal";
 import { AddTeamMemberModal } from "@/features/teams/components/add-team-member-modal";
+import { useViewTeamModal } from "@/features/teams/hooks/use-view-team-modal";
 import { Team } from "@/features/teams/types"; // Import the Team type
+import { ViewTeamModal } from "@/features/teams/components/view-team-modal";
 
 // Define common interface for team data based on our schema
 interface TeamData {
@@ -35,6 +37,7 @@ export const TeamsClient = () => {
   const { data: teamsData, isLoading: isLoadingTeams } = useGetTeams({ projectId, workspaceId });
   const { open: openCreateTeamModal } = useCreateTeamModal();
   const { open: openAddTeamMemberModal } = useAddTeamMemberModal();
+  const { open: openViewTeamModal } = useViewTeamModal();
 
   const mockTeams: TeamData[] = [
     { id: "1", teamtype: "Frontend Team", memberCount: 3 },
@@ -71,6 +74,7 @@ export const TeamsClient = () => {
     <div className="flex flex-col gap-y-6">
       <CreateTeamModal />
       <AddTeamMemberModal />
+      <ViewTeamModal />
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-x-2">
@@ -111,7 +115,11 @@ export const TeamsClient = () => {
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="flex justify-between items-center">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => openViewTeamModal(team.$id || team.id || "")}
+                      >
                         View Team
                       </Button>
                       <Button
