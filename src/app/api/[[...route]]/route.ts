@@ -9,6 +9,7 @@ import tasks from "@/features/tasks/server/route";
 import userStories from "@/features/UserStories/server/route";
 import taskgeneration from "@/features/taskgeneration/server/routes";
 import teams from "@/features/teams/server/route";
+import codegeneration from "@/features/CodeGeneration/server/routes";
 
 const app = new Hono().basePath("/api");
 
@@ -22,6 +23,7 @@ const routes = app
   .route("/userStories",userStories)
   .route("/taskgeneration",taskgeneration)
   .route("/teams",teams)
+  .route("/codegeneration",codegeneration)
 
 export const GET = handle(app);
 export const POST = handle(app);
