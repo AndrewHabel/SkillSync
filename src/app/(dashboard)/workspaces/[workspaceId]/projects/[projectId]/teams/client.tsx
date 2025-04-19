@@ -52,23 +52,19 @@ export const TeamsClient = () => {
   if (isLoading) return <PageLoader />;
   if (!project) return <PageError message="Project not found" />;
 
-  
   let displayTeams: TeamData[] = mockTeams;
 
-  
   if (teamsData && teamsData.data && teamsData.data.documents && teamsData.data.documents.length > 0) {
-
     displayTeams = teamsData.data.documents.map((doc: Team) => ({
       $id: doc.$id,
       id: doc.$id,
       teamtype: doc.teamtype,
       workspaceId: doc.workspaceId,
       projectId: doc.projectId,
-      membersId: doc.members || [], 
+      membersId: doc.members || [],
       memberCount: doc.memberCount || 0
     }));
   }
-  
 
   return (
     <div className="flex flex-col gap-y-6">
@@ -94,7 +90,7 @@ export const TeamsClient = () => {
 
       <DottedSeparator />
 
-      <Card className="bg-card">
+      <Card className="team-project-card">
         <CardHeader>
           <CardTitle className="flex items-center">
             <UsersIcon className="size-5 mr-2 text-primary" />
@@ -163,7 +159,7 @@ export const TeamsClient = () => {
         </CardContent>
       </Card>
 
-      <Card className="bg-card">
+      <Card className="team-tips-card">
         <CardHeader>
           <CardTitle>Team Management Tips</CardTitle>
         </CardHeader>

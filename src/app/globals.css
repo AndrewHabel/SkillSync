@@ -903,24 +903,29 @@ body {
   font-weight: 500;
 }
 
-.task-status-todo {
-  background-color: hsl(var(--primary) / 0.1);
-  color: hsl(var(--primary));
+/* Teams page custom styling */
+.team-project-card {
+  background-color: hsl(var(--primary) / 0.1) !important;
+  border: 1px solid hsl(var(--primary) / 0.2);
+  transition: all 0.2s ease-in-out;
 }
 
-.task-status-in-progress {
-  background-color: hsl(var(--chart-4) / 0.1);
-  color: hsl(var(--chart-4));
+.team-project-card:hover {
+  background-color: hsl(var(--primary) / 0.15) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
-.task-status-completed {
-  background-color: hsl(var(--chart-2) / 0.1);
-  color: hsl(var(--chart-2));
+.team-tips-card {
+  background-color: hsl(var(--chart-2) / 0.1) !important;
+  border: 1px solid hsl(var(--chart-2) / 0.2);
+  transition: all 0.2s ease-in-out;
 }
 
-.task-status-blocked {
-  background-color: hsl(var(--destructive) / 0.1);
-  color: hsl(var(--destructive));
+.team-tips-card:hover {
+  background-color: hsl(var(--chart-2) / 0.15) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 /* Empty state styling for workspace sections */
