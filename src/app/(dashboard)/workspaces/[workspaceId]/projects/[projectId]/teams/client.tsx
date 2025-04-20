@@ -16,14 +16,14 @@ import { useGetTeams } from "@/features/teams/api/use-get-teams";
 import { useAddTeamMemberModal } from "@/features/teams/hooks/use-add-team-member-modal";
 import { AddTeamMemberModal } from "@/features/teams/components/add-team-member-modal";
 import { useViewTeamModal } from "@/features/teams/hooks/use-view-team-modal";
-import { Team } from "@/features/teams/types"; // Import the Team type
+import { Team } from "@/features/teams/types"; 
 import { ViewTeamModal } from "@/features/teams/components/view-team-modal";
 
-// Define common interface for team data based on our schema
+
 interface TeamData {
   $id?: string;
   id?: string;
-  teamtype: string; // This is a required field in our schema
+  teamtype: string; 
   workspaceId?: string;
   projectId?: string;
   memberCount?: number;
@@ -131,8 +131,6 @@ export const TeamsClient = () => {
                   </CardContent>
                 </Card>
               ))}
-
-              {/* Add Team Card */}
               <Card
                 className="hover:bg-accent/30 transition-colors duration-200 border-dashed cursor-pointer"
                 onClick={openCreateTeamModal}

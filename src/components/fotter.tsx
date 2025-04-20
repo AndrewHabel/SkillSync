@@ -2,25 +2,48 @@ import { motion, useMotionTemplate, useMotionValue, animate } from "framer-motio
 import React, { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 
-const COLORS_TOP = ["#3B82F6", "#1E3A8A", "#3B82F6", "#1E3A8A"];
+// Define theme-specific color sets
+const THEME_COLORS = {
+  default: ["#3B82F6", "#1E3A8A", "#3B82F6", "#1E3A8A"],
+  dracula: ["#BD93F9", "#6272A4", "#BD93F9", "#44475A"],
+  nord: ["#88C0D0", "#5E81AC", "#88C0D0", "#3B4252"]
+};
 
 export const FooterAuroraGradient = () => {
-  const color = useMotionValue(COLORS_TOP[0]);
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [currentColors, setCurrentColors] = useState(THEME_COLORS.default);
+  const color = useMotionValue(currentColors[0]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    animate(color, COLORS_TOP, {
+    if (mounted) {
+      // Set colors based on current theme
+      switch (theme) {
+        case "dracula":
+          setCurrentColors(THEME_COLORS.dracula);
+          break;
+        case "nord":
+          setCurrentColors(THEME_COLORS.nord);
+          break;
+        default:
+          setCurrentColors(THEME_COLORS.default);
+      }
+    }
+  }, [theme, mounted]);
+
+  useEffect(() => {
+    // Restart animation when colors change
+    animate(color, currentColors, {
       ease: "easeInOut",
       duration: 5,
       repeat: Infinity,
       repeatType: "mirror",
     });
-  }, [color]);
+  }, [color, currentColors]);
 
   // Get the appropriate logo based on the current theme
   const getLogo = () => {
