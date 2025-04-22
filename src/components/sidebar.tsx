@@ -33,7 +33,7 @@ export const Sidebar = () => {
     };
 
     return (
-        <aside className="h-full bg-background border-r p-4 w-full transition-colors duration-200">
+        <aside className="h-full border-r p-4 w-full transition-colors duration-200" style={{ backgroundColor: 'hsl(var(--sidebar-background))' }}>
             <div className="flex items-center gap-2">
                 <div className="w-[165px] flex-shrink-0">
                     <Link href="/">

@@ -54,7 +54,7 @@ export function DataTable<TData, TValue>({columns,data,}: DataTableProps<TData, 
   return (
     <div>
         <div className="rounded-md border">
-            <Table>
+            <Table className="tasks-table">
                 <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                     <TableRow key={headerGroup.id}>
@@ -79,7 +79,6 @@ export function DataTable<TData, TValue>({columns,data,}: DataTableProps<TData, 
                     <TableRow
                         key={row.id}
                         data-state={row.getIsSelected() && "selected"}
-                        className="bg-card hover:bg-muted/50"
                     >
                         {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>

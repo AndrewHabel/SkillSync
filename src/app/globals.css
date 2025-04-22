@@ -41,7 +41,7 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 0 0% 94%; /* Darker than 98% */
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
@@ -126,7 +126,7 @@ body {
     --chart-3: 340 65% 60%;
     --chart-4: 280 65% 60%;
     --chart-5: 130 55% 45%;
-    --sidebar-background: 220 26% 14%;
+    --sidebar-background: 220 26% 10%; /* Darker than 14% */
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 212 92% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -211,7 +211,7 @@ body {
     --chart-3: 135 94% 65%;
     --chart-4: 191 97% 77%;
     --chart-5: 31 100% 71%;
-    --sidebar-background: 231 15% 18%;
+    --sidebar-background: 231 15% 14%; /* Darker than 18% */
     --sidebar-foreground: 60 30% 96%;
     --sidebar-primary: 326 100% 74%;
     --sidebar-primary-foreground: 231 15% 18%;
@@ -296,7 +296,7 @@ body {
     --chart-3: 179 25% 65%;
     --chart-4: 92 28% 65%;
     --chart-5: 311 20% 63%;
-    --sidebar-background: 220 28% 18%;
+    --sidebar-background: 220 28% 14%; /* Darker than 18% */
     --sidebar-foreground: 218 27% 92%;
     --sidebar-primary: 193 82% 49%;
     --sidebar-primary-foreground: 218 27% 92%;
@@ -353,6 +353,8 @@ body {
     --workspace-project-hover-border: 311 20% 63%;
     --workspace-member-hover: 92 28% 20%;
     --workspace-member-hover-border: 92 28% 65%;
+    --button-lists-dashboard:220 26% 23%;
+
   }
   
   /* Monokai theme */
@@ -381,7 +383,7 @@ body {
     --chart-3: 22 90% 66%;
     --chart-4: 210 90% 65%;
     --chart-5: 267 85% 78%;
-    --sidebar-background: 60 6% 14%;
+    --sidebar-background: 60 6% 10%; /* Darker than 14% */
     --sidebar-foreground: 60 11% 98%;
     --sidebar-primary: 75 65% 60%;
     --sidebar-primary-foreground: 60 6% 14%;
@@ -448,6 +450,11 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Add the .bg-sidebar utility class to use the --sidebar-background variable */
+.bg-sidebar {
+  background-color: hsl(var(--sidebar-background));
 }
 
 .hide-scrollbar{
@@ -662,6 +669,30 @@ body {
   background-color: hsl(var(--table-background));
   border: 1px solid hsl(var(--border));
   border-radius: var(--radius);
+}
+
+/* Tasks table specific styling */
+.tasks-table {
+  background-color: hsl(var(--background));
+  border-radius: var(--radius);
+}
+
+.project-table-bg .tasks-table {
+  background-color: hsl(var(--background));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.tasks-table tbody tr {
+  border-bottom: 1px solid hsl(var(--border));
+  transition: background-color 0.2s ease;
+}
+
+.tasks-table tbody tr:hover {
+  background-color: hsl(var(--primary) / 0.05);
+}
+
+.tasks-table tbody tr:last-child {
+  border-bottom: none;
 }
 
 /* Table row styling for project view */
@@ -987,9 +1018,7 @@ body {
 }
 
 .workspace-button-outline {
-  background-color: transparent;
-  border: 1px solid hsl(var(--border));
-  color: hsl(var(--foreground));
+  color: hsl(var(--primary));
 }
 
 .workspace-button-outline:hover {

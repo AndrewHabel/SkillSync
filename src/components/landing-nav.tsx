@@ -58,7 +58,7 @@ export const LandingNav = ({ user }: LandingPageClientProps) => {
                     <Button className="landing-page-button group relative inline-flex h-12 min-w-[120px] md:w-32 overflow-hidden rounded-lg p-[3px] focus:outline-none focus:ring-4 focus:ring-slate-400 focus:ring-offset-4 focus:ring-offset-slate-50 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_6px_-5px_rgba(0,0,0,0.4)]">
                         <span className="blue-bg absolute inset-[-1000%] animate-[spin_2.5s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
                         <span className="inline-flex h-full w-full cursor-pointer items-center rounded-lg justify-center gap-2 bg-blue-950 px-6 py-2 text-lg font-medium text-white backdrop-blur-3xl hover:bg-slate-800 transition-colors duration-300">
-                            <Link href="/sign-in" className="flex items-center gap-2 text-card-foreground">
+                            <Link href="/sign-up" className="flex items-center gap-2 text-card-foreground">
                                 sign up
                             </Link>
                         </span>
