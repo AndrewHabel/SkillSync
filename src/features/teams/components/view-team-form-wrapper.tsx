@@ -5,13 +5,11 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { DottedSeparator } from "@/components/dotted-separator";
 import { MembersAvatar } from "@/features/members/components/members-avatar";
 import { Button } from "@/components/ui/button";
-import { UserMinusIcon, Loader, UsersIcon, Trash2Icon } from "lucide-react";
+import { UserMinusIcon, Loader, UsersIcon } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
 import { useGetMembers } from "@/features/members/api/use-get-members";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
-import { useDeleteTeam } from "../api/use-delete-team";
-import { useRouter } from "next/navigation";
 
 interface ViewTeamFormWrapperProps {
   teamId: string;
@@ -19,22 +17,14 @@ interface ViewTeamFormWrapperProps {
 }
 
 export const ViewTeamFormWrapper = ({ teamId, onCancel }: ViewTeamFormWrapperProps) => {
-  const router = useRouter();
   const workspaceId = useWorkspaceId();
   const { data: team, isLoading: isLoadingTeam } = useGetTeam({ teamId });
   const { data: members, isLoading: isLoadingMembers } = useGetMembers({ workspaceId });
   const { mutate: removeTeamMember, isPending: isRemoving } = useRemoveTeamMember();
-  const { mutate: deleteTeam, isPending: isDeleting } = useDeleteTeam();
   
   const [ConfirmDialog, confirm] = useConfirm(
     "Remove Member",
     "Are you sure you want to remove this member from the team?",
-    "destructive"
-  );
-  
-  const [DeleteTeamDialog, confirmTeamDelete] = useConfirm(
-    "Delete Team",
-    "Are you sure you want to delete this team? This action cannot be undone.",
     "destructive"
   );
 
@@ -46,21 +36,6 @@ export const ViewTeamFormWrapper = ({ teamId, onCancel }: ViewTeamFormWrapperPro
       param: {
         teamId,
         memberId
-      }
-    });
-  };
-  
-  const handleDeleteTeam = async () => {
-    const ok = await confirmTeamDelete();
-    if (!ok) return;
-    
-    deleteTeam({ 
-      param: { 
-        teamId 
-      }
-    }, {
-      onSuccess: () => {
-        onCancel(); // Close the modal
       }
     });
   };
@@ -96,7 +71,6 @@ export const ViewTeamFormWrapper = ({ teamId, onCancel }: ViewTeamFormWrapperPro
   return (
     <Card className="w-full border-none shadow-none">
       <ConfirmDialog />
-      <DeleteTeamDialog />
       <CardHeader className="p-7">
         <CardTitle className="text-xl font-bold flex items-center">
           <UsersIcon className="size-5 mr-2 text-primary" />
@@ -155,16 +129,7 @@ export const ViewTeamFormWrapper = ({ teamId, onCancel }: ViewTeamFormWrapperPro
           )}
         </div>
         <DottedSeparator className="my-6" />
-        <div className="flex justify-between items-center">
-          <Button
-            variant="destructive"
-            onClick={handleDeleteTeam}
-            disabled={isDeleting}
-            className="flex items-center gap-2"
-          >
-            <Trash2Icon className="size-4" />
-            Delete Team
-          </Button>
+        <div className="flex justify-end items-center">
           <Button
             variant="secondary"
             onClick={onCancel}

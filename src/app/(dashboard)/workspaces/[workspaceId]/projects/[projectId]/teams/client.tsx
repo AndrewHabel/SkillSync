@@ -18,7 +18,8 @@ import { AddTeamMemberModal } from "@/features/teams/components/add-team-member-
 import { useViewTeamModal } from "@/features/teams/hooks/use-view-team-modal";
 import { Team } from "@/features/teams/types"; 
 import { ViewTeamModal } from "@/features/teams/components/view-team-modal";
-
+import { useDeleteTeam } from "@/features/teams/api/use-delete-team";
+import { useConfirm } from "@/hooks/use-confirm";
 
 interface TeamData {
   $id?: string;
@@ -38,21 +39,33 @@ export const TeamsClient = () => {
   const { open: openCreateTeamModal } = useCreateTeamModal();
   const { open: openAddTeamMemberModal } = useAddTeamMemberModal();
   const { open: openViewTeamModal } = useViewTeamModal();
-
-  const mockTeams: TeamData[] = [
-    { id: "1", teamtype: "Frontend Team", memberCount: 3 },
-    { id: "2", teamtype: "Backend Team", memberCount: 4 },
-    { id: "3", teamtype: "User interface Team", memberCount: 2 },
-  ];
+  const { mutate: deleteTeam, isPending: isDeleting } = useDeleteTeam();
+  
+  const [DeleteTeamDialog, confirmTeamDelete] = useConfirm(
+      "Delete Team",
+      "Are you sure you want to delete this team? This action cannot be undone.",
+      "destructive"
+    );
 
   console.log("Teams Data:", teamsData);
 
   const isLoading = isLoadingProject || isLoadingTeams;
 
+  const handleDeleteTeam = async (teamId:string) => {
+    const ok = await confirmTeamDelete();
+    if (!ok) return;
+    
+    deleteTeam({ 
+      param: { 
+        teamId 
+      }
+    });
+  };
+
   if (isLoading) return <PageLoader />;
   if (!project) return <PageError message="Project not found" />;
 
-  let displayTeams: TeamData[] = mockTeams;
+  let displayTeams: TeamData[] = [];
 
   if (teamsData && teamsData.data && teamsData.data.documents && teamsData.data.documents.length > 0) {
     displayTeams = teamsData.data.documents.map((doc: Team) => ({
@@ -71,7 +84,8 @@ export const TeamsClient = () => {
       <CreateTeamModal />
       <AddTeamMemberModal />
       <ViewTeamModal />
-
+      <DeleteTeamDialog />
+      
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-x-2">
           <Button asChild variant="secondary" size="sm">
@@ -110,19 +124,28 @@ export const TeamsClient = () => {
                     <CardDescription>{team.memberCount} members</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="flex justify-between items-center">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => openViewTeamModal(team.$id || team.id || "")}
-                      >
-                        View Team
-                      </Button>
+                    <div className="flex items-center w-full">
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => openViewTeamModal(team.$id || team.id || "")}
+                        >
+                          View Team
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          onClick={() => handleDeleteTeam(team.$id || team.id || "")}
+                        >
+                          Delete Team
+                        </Button>
+                      </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => openAddTeamMemberModal(team.$id || team.id || "")}
-                        className="hover:bg-primary/10"
+                        className="ml-auto hover:bg-primary/10"
                         title="Add member to this team"
                       >
                         <UserPlusIcon className="size-4" />
