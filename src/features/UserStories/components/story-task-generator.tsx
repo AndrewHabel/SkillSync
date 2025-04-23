@@ -11,7 +11,9 @@ import {
   XIcon, 
   CheckIcon, 
   RocketIcon,
-  ListTodoIcon
+  ListTodoIcon,
+  PlusCircleIcon,
+  CheckCircle2Icon
 } from "lucide-react";
 import { DottedSeparator } from "@/components/dotted-separator";
 import { UserStory } from "../types";
@@ -23,6 +25,8 @@ import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { TaskStatus } from "@/features/tasks/types";
 import { useGetMembers } from "@/features/members/api/use-get-members";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface StoryTaskGeneratorProps {
   userStory: UserStory;
@@ -41,6 +45,10 @@ export const StoryTaskGenerator = ({ userStory }: StoryTaskGeneratorProps) => {
   const [editingTaskIndex, setEditingTaskIndex] = useState<number | null>(null);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
+  // Track the added task indices
+  const [addedTaskIndices, setAddedTaskIndices] = useState<Set<number>>(new Set());
+  // Track loading state for individual task additions
+  const [addingTaskIndex, setAddingTaskIndex] = useState<number | null>(null);
   
   // Get necessary context data
   const workspaceId = useWorkspaceId();
@@ -83,34 +91,86 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
     );
   };
 
-  const handleAddTasksToProject = () => {
+  // Function to add a single task to the project
+  const handleAddSingleTask = (index: number) => {
     if (!generatedTasks) return;
     
-    // Create task objects for each generated task
-    const tasksToCreate = generatedTasks["Task Titles"].map((title, index) => {
-      return {
-        name: title,
-        description: generatedTasks["Task description"][index],
-        status: null,
-        workspaceId,
-        projectId: userStory.projectId,
-        assigneeId: null,
-        dueDate: null,
-        position: 1000
-      };
-    });
+    setAddingTaskIndex(index);
+
+    // Create task object
+    const taskToCreate = {
+      name: generatedTasks["Task Titles"][index],
+      description: generatedTasks["Task description"][index],
+      status: null,
+      workspaceId,
+      projectId: userStory.projectId,
+      assigneeId: null,
+      dueDate: null,
+      position: 1000
+    };
     
-    // Call the bulk create API
+    // Call the bulk create API with a single task
     bulkCreateTasks(
-      { json: { tasks: tasksToCreate } },
+      { json: { tasks: [taskToCreate] } },
       {
         onSuccess: () => {
-          // Close the task generator after successful creation
-          setIsOpen(false);
-          setGeneratedTasks(null);
+          // Mark this task as added
+          setAddedTaskIndices(prev => new Set([...Array.from(prev), index]));
+          setAddingTaskIndex(null);
+        },
+        onError: () => {
+          setAddingTaskIndex(null);
         }
       }
     );
+  };
+
+  const handleAddTasksToProject = () => {
+    if (!generatedTasks) return;
+    
+    // Filter out already added tasks
+    const tasksToCreate = generatedTasks["Task Titles"]
+      .map((title, index) => {
+        if (addedTaskIndices.has(index)) {
+          return null; // Skip already added tasks
+        }
+        return {
+          name: title,
+          description: generatedTasks["Task description"][index],
+          status: null,
+          workspaceId,
+          projectId: userStory.projectId,
+          assigneeId: null,
+          dueDate: null,
+          position: 1000
+        };
+      })
+      .filter(task => task !== null); // Remove null entries
+    
+    // Only proceed if there are tasks to add
+    if (tasksToCreate.length > 0) {
+      // Call the bulk create API
+      bulkCreateTasks(
+        { json: { tasks: tasksToCreate } },
+        {
+          onSuccess: () => {
+            // Mark all tasks as added
+            const allIndices = new Set(Array.from(addedTaskIndices));
+            for (let i = 0; i < generatedTasks["Task Titles"].length; i++) {
+              allIndices.add(i);
+            }
+            setAddedTaskIndices(allIndices);
+            
+            // Close the task generator after successful creation
+            setTimeout(() => {
+              setIsOpen(false);
+              setGeneratedTasks(null);
+              setAddedTaskIndices(new Set());
+            }, 1500);
+          }
+        }
+      );
+    }
   };
 
   const handleEditTask = (index: number) => {
@@ -143,6 +203,12 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
       setGeneratedTasks(updatedTasks);
       setEditingTaskIndex(null);
     }
+  };
+
+  // Count remaining tasks to be added
+  const getRemainingTasksCount = () => {
+    if (!generatedTasks) return 0;
+    return generatedTasks["Task Titles"].length - addedTaskIndices.size;
   };
 
   return (
@@ -187,9 +253,16 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                 <SparklesIcon className="h-5 w-5 text-primary" />
                 <CardTitle className="text-xl font-semibold text-foreground">AI Generated Tasks</CardTitle>
                 {generatedTasks && (
-                  <Badge variant="outline" className="ml-2 bg-primary/10 text-primary">
-                    {generatedTasks["Task Titles"].length} Tasks
-                  </Badge>
+                  <div className="flex gap-2 items-center">
+                    <Badge variant="outline" className="ml-2 bg-primary/10 text-primary">
+                      {generatedTasks["Task Titles"].length} Tasks
+                    </Badge>
+                    {addedTaskIndices.size > 0 && (
+                      <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
+                        {addedTaskIndices.size} Added
+                      </Badge>
+                    )}
+                  </div>
                 )}
               </div>
               <Button 
@@ -210,7 +283,16 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
               <ScrollArea className="h-[350px] pr-4 mb-2">
                 <div className="space-y-3">
                   {generatedTasks["Task Titles"].map((title, index) => (
-                    <div key={index} className="bg-card border rounded-lg p-4 shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-200">
+                    <motion.div 
+                      key={index}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className={cn(
+                        "bg-card border rounded-lg p-4 shadow-sm transition-all duration-200",
+                        addedTaskIndices.has(index) ? "border-green-300 bg-green-50 dark:bg-green-950/20" : "hover:border-primary/30 hover:shadow-md"
+                      )}
+                    >
                       {editingTaskIndex === index ? (
                         <div className="space-y-3">
                           <div>
@@ -256,50 +338,116 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                         <>
                           <div className="flex justify-between items-start">
                             <div className="flex gap-2 items-center">
-                              <ListTodoIcon className="h-4 w-4 text-primary shrink-0 mt-1" />
-                              <h3 className="font-medium text-foreground">{title}</h3>
+                              <ListTodoIcon className={cn("h-4 w-4 shrink-0 mt-1", addedTaskIndices.has(index) ? "text-green-600" : "text-primary")} />
+                              <h3 className={cn("font-medium", addedTaskIndices.has(index) ? "text-green-700 dark:text-green-400" : "text-foreground")}>
+                                {title}
+                              </h3>
+                              {addedTaskIndices.has(index) && (
+                                <Badge className="bg-green-100 text-green-700 border-0 ml-2">Added</Badge>
+                              )}
                             </div>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-7 w-7 p-0 rounded-full hover:bg-primary/10" 
-                              onClick={() => handleEditTask(index)}
-                            >
-                              <PencilIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                              <span className="sr-only">Edit task</span>
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              {!addedTaskIndices.has(index) && (
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="h-7 w-7 p-0 rounded-full hover:bg-primary/10" 
+                                  onClick={() => handleEditTask(index)}
+                                  disabled={addingTaskIndex === index}
+                                >
+                                  <PencilIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span className="sr-only">Edit task</span>
+                                </Button>
+                              )}
+                            </div>
                           </div>
                           <DottedSeparator className="my-2" />
-                          <p className="text-sm text-muted-foreground pl-6">
-                            {generatedTasks["Task description"][index]}
-                          </p>
+                          <div className="flex flex-col">
+                            <p className="text-sm text-muted-foreground pl-6 mb-3">
+                              {generatedTasks["Task description"][index]}
+                            </p>
+                            {!addedTaskIndices.has(index) ? (
+                              <div className="flex justify-end">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className={cn(
+                                    "border-primary/40 text-primary hover:bg-primary/10",
+                                    addingTaskIndex === index && "opacity-80"
+                                  )}
+                                  onClick={() => handleAddSingleTask(index)}
+                                  disabled={addingTaskIndex !== null}
+                                >
+                                  {addingTaskIndex === index ? (
+                                    <>
+                                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                                      Adding...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <PlusCircleIcon className="mr-1 h-3.5 w-3.5" />
+                                      Add This Task
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="flex justify-end">
+                                <span className="text-xs text-green-600 flex items-center gap-1">
+                                  <CheckCircle2Icon className="h-3.5 w-3.5" />
+                                  Added to project
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </>
                       )}
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </ScrollArea>
             )}
           </CardContent>
           <CardFooter className="flex justify-center bg-muted/20 py-4 px-6 mt-2">
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
-              onClick={handleAddTasksToProject}
-              disabled={isAddingTasks}
-            >
-              {isAddingTasks ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Creating Tasks...
-                </>
-              ) : (
-                <>
-                  <RocketIcon className="mr-2 h-5 w-5" />
-                  Add All Tasks to Project
-                </>
-              )}
-            </Button>
+            {getRemainingTasksCount() > 0 ? (
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                onClick={handleAddTasksToProject}
+                disabled={isAddingTasks || addingTaskIndex !== null}
+              >
+                {isAddingTasks ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Creating Tasks...
+                  </>
+                ) : (
+                  <>
+                    <RocketIcon className="mr-2 h-5 w-5" />
+                    Add Remaining {getRemainingTasksCount()} Tasks
+                  </>
+                )}
+              </Button>
+            ) : (
+              <div className="text-center">
+                <p className="text-green-600 font-medium flex items-center justify-center gap-2">
+                  <CheckCircle2Icon className="h-5 w-5" />
+                  All tasks have been added to the project!
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsOpen(false);
+                    setGeneratedTasks(null);
+                    setAddedTaskIndices(new Set());
+                  }}
+                  className="mt-2"
+                >
+                  Close
+                </Button>
+              </div>
+            )}
           </CardFooter>
         </Card>
       )}
