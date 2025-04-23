@@ -42,6 +42,11 @@ Your output must follow this exact JSON format:
     "1. Detailed description of Task Title 1.",
     "2. Detailed description of Task Title 2.",
     ...
+  ],
+  "Task Roles": [
+    "Role for Task 1",
+    "Role for Task 2",
+    ...
   ]
 }
 
@@ -79,19 +84,17 @@ DevOps Engineer
 
 AI Specialist
 
-Mobile Developer
-
-UX Designer
-
 Data Scientist
 
-Business Analyst
+
 
 4)Do not include tasks for any role not mentioned or implied in the Acceptance Criteria.
 
 5)It is allowed for multiple tasks to be assigned to the same role — this is encouraged when appropriate.
 
 6)All tasks must be uniformly formatted across both the "Task Titles" and "Task description" lists.
+
+7)For each task, provide a specific role from the list above in the "Task Roles" array. The role must match exactly one from the roles list.
 `;
 
         const result = await model.generateContent(prompt);

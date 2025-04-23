@@ -16,7 +16,7 @@ import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { DatePicker } from "@/components/date-picker";
 import { Select, SelectValue ,SelectTrigger, SelectContent , SelectItem} from "@/components/ui/select";
 import { MembersAvatar } from "@/features/members/components/members-avatar";
-import { TaskStatus } from "../types";
+import { PreferredRole, TaskStatus, getPreferredRoleDisplay } from "../types";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 
 
@@ -154,6 +154,60 @@ export const CreateTaskForm = ({ onCancel , projectOptions , memberOptions }: Cr
                       </SelectItem>
                       <SelectItem value={TaskStatus.DONE}>
                         Done
+                      </SelectItem>
+                    </SelectContent>
+                   </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField 
+                control={form.control}
+                name="preferredRole"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                    Preferred Role
+                    </FormLabel>
+                   <Select defaultValue={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Preferred Role"/>
+                      </SelectTrigger>
+                    </FormControl>
+                    <FormMessage />
+                    <SelectContent>
+                      <SelectItem value={PreferredRole.DATA_ANALYST}>
+                        {getPreferredRoleDisplay(PreferredRole.DATA_ANALYST)}
+                      </SelectItem>
+                      <SelectItem value={PreferredRole.FRONTEND_DEVELOPER}>
+                        {getPreferredRoleDisplay(PreferredRole.FRONTEND_DEVELOPER)}
+                      </SelectItem>
+                      <SelectItem value={PreferredRole.SECURITY_SPECIALIST}>
+                        {getPreferredRoleDisplay(PreferredRole.SECURITY_SPECIALIST)}
+                      </SelectItem>
+                      <SelectItem value={PreferredRole.UI_DESIGNER}>
+                        {getPreferredRoleDisplay(PreferredRole.UI_DESIGNER)}
+                      </SelectItem>
+                      <SelectItem value={PreferredRole.PERFORMANCE_ENGINEER}>
+                        {getPreferredRoleDisplay(PreferredRole.PERFORMANCE_ENGINEER)}
+                      </SelectItem>
+                      <SelectItem value={PreferredRole.TESTER}>
+                        {getPreferredRoleDisplay(PreferredRole.TESTER)}
+                      </SelectItem>
+                      <SelectItem value={PreferredRole.BACKEND_DEVELOPER}>
+                        {getPreferredRoleDisplay(PreferredRole.BACKEND_DEVELOPER)}
+                      </SelectItem>
+                      <SelectItem value={PreferredRole.DATABASE_ADMINISTRATOR}>
+                        {getPreferredRoleDisplay(PreferredRole.DATABASE_ADMINISTRATOR)}
+                      </SelectItem>
+                      <SelectItem value={PreferredRole.DEVOPS_ENGINEER}>
+                        {getPreferredRoleDisplay(PreferredRole.DEVOPS_ENGINEER)}
+                      </SelectItem>
+                      <SelectItem value={PreferredRole.AI_SPECIALIST}>
+                        {getPreferredRoleDisplay(PreferredRole.AI_SPECIALIST)}
+                      </SelectItem>
+                      <SelectItem value={PreferredRole.DATA_SCIENTIST}>
+                        {getPreferredRoleDisplay(PreferredRole.DATA_SCIENTIST)}
                       </SelectItem>
                     </SelectContent>
                    </Select>
