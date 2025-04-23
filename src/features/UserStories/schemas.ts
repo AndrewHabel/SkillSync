@@ -17,6 +17,7 @@ export const bulkCreateTasksSchema = z.object({
     projectId: z.string().trim().min(1, "Required"),
     assigneeId: z.string().trim().optional().nullable(),
     dueDate: z.coerce.date().optional().nullable(),
-    position: z.number().optional().default(1000)
+    position: z.number().optional().default(1000),
+    role: z.string().optional()
   }))
 })

@@ -22,11 +22,57 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useBulkCreateTasks } from "@/features/tasks/api/use-bulk-create-tasks";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
-import { TaskStatus } from "@/features/tasks/types";
+import { PreferredRole, TaskStatus, getPreferredRoleDisplay } from "@/features/tasks/types";
 import { useGetMembers } from "@/features/members/api/use-get-members";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { 
+  Select, 
+  SelectContent, 
+  SelectGroup, 
+  SelectItem, 
+  SelectLabel, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+
+// Helper function to map role strings to string values acceptable for preferredRole
+const mapRoleToPreferredRole = (roleString: string | null | undefined): string | undefined => {
+  if (!roleString) return undefined;
+  
+  // Remove any spaces and convert to uppercase to match the enum format
+  const formattedRole = roleString.replace(/\s+/g, '_').toUpperCase();
+  
+  // Check if the formatted role exists in the PreferredRole enum
+  if (Object.values(PreferredRole).includes(formattedRole as PreferredRole)) {
+    return formattedRole;
+  }
+  
+  // Handle common cases that might not exactly match the enum
+  switch (formattedRole) {
+    case 'FRONTEND_DEV':
+    case 'FRONT_END_DEVELOPER':
+      return PreferredRole.FRONTEND_DEVELOPER;
+    case 'BACKEND_DEV':
+    case 'BACK_END_DEVELOPER':
+      return PreferredRole.BACKEND_DEVELOPER;
+    case 'UI_DESIGN':
+      return PreferredRole.UI_DESIGNER;
+    case 'QA':
+    case 'QUALITY_ASSURANCE':
+      return PreferredRole.TESTER;
+    case 'DBA':
+    case 'DATABASE_ADMIN':
+      return PreferredRole.DATABASE_ADMINISTRATOR;
+    case 'DEVOPS':
+      return PreferredRole.DEVOPS_ENGINEER;
+    case 'AI_ENGINEER':
+      return PreferredRole.AI_SPECIALIST;
+    default:
+      return undefined;
+  }
+};
 
 interface StoryTaskGeneratorProps {
   userStory: UserStory;
@@ -35,6 +81,7 @@ interface StoryTaskGeneratorProps {
 interface GeneratedTasks {
   "Task Titles": string[];
   "Task description": string[];
+  "Task Roles": string[];
 }
 
 export const StoryTaskGenerator = ({ userStory }: StoryTaskGeneratorProps) => {
@@ -45,6 +92,7 @@ export const StoryTaskGenerator = ({ userStory }: StoryTaskGeneratorProps) => {
   const [editingTaskIndex, setEditingTaskIndex] = useState<number | null>(null);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
+  const [editedRole, setEditedRole] = useState<string | null>(null);
   // Track the added task indices
   const [addedTaskIndices, setAddedTaskIndices] = useState<Set<number>>(new Set());
   // Track loading state for individual task additions
@@ -106,7 +154,8 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
       projectId: userStory.projectId,
       assigneeId: null,
       dueDate: null,
-      position: 1000
+      position: 1000,
+      role: mapRoleToPreferredRole(generatedTasks["Task Roles"]?.[index]) || undefined
     };
     
     // Call the bulk create API with a single task
@@ -142,7 +191,8 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
           projectId: userStory.projectId,
           assigneeId: null,
           dueDate: null,
-          position: 1000
+          position: 1000,
+          role: mapRoleToPreferredRole(generatedTasks["Task Roles"]?.[index]) || null
         };
       })
       .filter(task => task !== null); // Remove null entries
@@ -151,7 +201,7 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
     if (tasksToCreate.length > 0) {
       // Call the bulk create API
       bulkCreateTasks(
-        { json: { tasks: tasksToCreate } },
+        { json: { tasks: tasksToCreate.map(task => ({ ...task, role: task.role ?? undefined })) } },
         {
           onSuccess: () => {
             // Mark all tasks as added
@@ -178,6 +228,7 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
       setEditingTaskIndex(index);
       setEditedTitle(generatedTasks["Task Titles"][index]);
       setEditedDescription(generatedTasks["Task description"][index]);
+      setEditedRole(generatedTasks["Task Roles"]?.[index] || null);
     }
   };
 
@@ -185,6 +236,7 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
     setEditingTaskIndex(null);
     setEditedTitle("");
     setEditedDescription("");
+    setEditedRole(null);
   };
 
   const handleSaveTask = (index: number) => {
@@ -192,12 +244,14 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
       // Create a copy of the current tasks
       const updatedTasks = {
         "Task Titles": [...generatedTasks["Task Titles"]],
-        "Task description": [...generatedTasks["Task description"]]
+        "Task description": [...generatedTasks["Task description"]],
+        "Task Roles": [...(generatedTasks["Task Roles"] || [])] // Preserve existing roles or default to an empty array
       };
       
       // Update the specific task
       updatedTasks["Task Titles"][index] = editedTitle;
       updatedTasks["Task description"][index] = editedDescription;
+      updatedTasks["Task Roles"][index] = editedRole || "";
       
       // Update state
       setGeneratedTasks(updatedTasks);
@@ -314,6 +368,27 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                               rows={3}
                             />
                           </div>
+                          <div>
+                            <label htmlFor={`task-role-${index}`} className="block text-sm font-medium mb-1">Task Role</label>
+                            <Select
+                              value={editedRole || ""}
+                              onValueChange={(value) => setEditedRole(value)}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select a role" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectLabel>Roles</SelectLabel>
+                                  {Object.values(PreferredRole).map((role) => (
+                                    <SelectItem key={role} value={role}>
+                                      {getPreferredRoleDisplay(role)}
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                          </div>
                           <div className="flex justify-end space-x-2">
                             <Button 
                               size="sm" 
@@ -361,6 +436,14 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                               )}
                             </div>
                           </div>
+                          {/* Display task role */}
+                          {generatedTasks["Task Roles"] && generatedTasks["Task Roles"][index] && (
+                            <Badge
+                              className="ml-6 mt-1 mb-2 bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200"
+                            >
+                              {generatedTasks["Task Roles"][index]}
+                            </Badge>
+                          )}
                           <DottedSeparator className="my-2" />
                           <div className="flex flex-col">
                             <p className="text-sm text-muted-foreground pl-6 mb-3">

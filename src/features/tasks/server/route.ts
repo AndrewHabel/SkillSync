@@ -6,7 +6,7 @@ import { getMember } from "@/features/members/utils";
 import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID, WORKSPACES_ID } from "@/config";
 import { ID, Query } from "node-appwrite";
 import { z } from "zod";
-import { Task, TaskStatus } from "../types";
+import { PreferredRole, Task, TaskStatus } from "../types";
 import { Search } from "lucide-react";
 import { createAdminClient } from "@/lib/appwrite";
 import { Project } from "@/features/projects/types";
@@ -33,6 +33,7 @@ const app = new Hono()
         projectId,
         assigneeId,
         dueDate,
+        preferredRole
       } = c.req.valid("json");
 
       console.log("projectId : ", projectId);
@@ -74,7 +75,8 @@ const app = new Hono()
           projectId,
           dueDate,
           assigneeId,
-          position: newPosition
+          position: newPosition,
+          preferredRole
         },
       );
 
@@ -110,7 +112,7 @@ const app = new Hono()
       // Create all tasks
       const createdTasks = await Promise.all(
         tasks.map(async (taskData) => {
-          const { name, description, status, projectId, assigneeId, dueDate } = taskData;
+          const { name, description, status, projectId, assigneeId, dueDate, role } = taskData;
           
           // Default position to 1000
           const position = 1000;
@@ -127,7 +129,8 @@ const app = new Hono()
               projectId,
               dueDate,
               assigneeId,
-              position
+              position,
+              preferredRole: role
             }
           );
         })
@@ -308,7 +311,8 @@ const app = new Hono()
         assigneeId,
         dueDate,
         projectName,
-        assigneeName
+        assigneeName,
+        preferredRole
       } = c.req.valid("json");
 
       const { taskId } = c.req.param();
@@ -349,6 +353,7 @@ const app = new Hono()
           dueDate,
           assigneeId,
           description,
+          preferredRole
         },
       );
 
