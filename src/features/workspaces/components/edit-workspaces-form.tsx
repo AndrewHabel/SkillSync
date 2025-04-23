@@ -102,7 +102,7 @@ export const EditWorkspaceForm = ({ onCancel , initialValues}: EditWorkspaceForm
       <DeleteConfirmationDialog />
       <ResetDialog />
       
-      <Card className="w-full h-full bg-muted shadow border border-border">
+      <Card className="w-full h-full shadow border border-border auth-card">
         <CardHeader className="flex flex-row items-center gap-x-4 p-7 space-y-0">
           <Button size="sm" variant="secondary" onClick={onCancel ? onCancel : () => router.push(`/workspaces/${initialValues.$id}`)}>
             <ArrowLeftIcon className="size-4px mr-2" />
@@ -114,7 +114,7 @@ export const EditWorkspaceForm = ({ onCancel , initialValues}: EditWorkspaceForm
         </CardHeader>      
       </Card>
 
-      <Card className="w-full h-full bg-muted shadow border border-border">
+      <Card className="auth-card w-full h-full bg-muted shadow border border-border">
       <CardContent className="p-7">
       <div className="flex flex-col">
             <h3 className="font-bold">Edit Workspace</h3>
@@ -217,7 +217,7 @@ export const EditWorkspaceForm = ({ onCancel , initialValues}: EditWorkspaceForm
       </CardContent>
       </Card>
 
-      <Card className="w-full h-full bg-muted shadow border border-border">
+      <Card className="auth-card w-full h-full bg-muted shadow border border-border">
         <CardContent className="p-7">
           <div className="flex flex-col">
             <h3 className="font-bold">Invite Members</h3>
@@ -241,7 +241,7 @@ export const EditWorkspaceForm = ({ onCancel , initialValues}: EditWorkspaceForm
         </CardContent>       
       </Card>
 
-      <Card className="w-full h-full bg-muted shadow border border-border">
+      <Card className="auth-card w-full h-full bg-muted shadow border border-border">
         <CardContent className="p-7">
           <div className="flex flex-col">
             <h3 className="font-bold">Delete Workspace</h3>

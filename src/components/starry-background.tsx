@@ -29,7 +29,6 @@ export const StarryBackground = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { theme } = useTheme();
   
-  // Get star color based on current theme
   const getStarColor = () => {
     switch (theme) {
       case "light":
@@ -58,14 +57,12 @@ export const StarryBackground = ({
     let stars: Star[] = [];
     let starColor = getStarColor();
 
-    // Handle resize
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      initStars(); // Reinitialize stars when resizing
+      initStars(); 
     };
 
-    // Initialize stars
     const initStars = () => {
       stars = [];
       for (let i = 0; i < starCount; i++) {
@@ -79,24 +76,19 @@ export const StarryBackground = ({
       }
     };
 
-    // Animation loop
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Update star color if theme changes
       starColor = getStarColor();
       
-      // Draw and update stars
       stars.forEach((star) => {
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${starColor.r}, ${starColor.g}, ${starColor.b}, ${star.opacity})`;
         ctx.fill();
 
-        // Move star
         star.y += star.speed;
 
-        // Reset star if it goes off-screen
         if (star.y > canvas.height) {
           star.y = 0;
           star.x = Math.random() * canvas.width;
@@ -108,12 +100,10 @@ export const StarryBackground = ({
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    // Set up canvas and start animation
     handleResize();
     window.addEventListener("resize", handleResize);
     animate();
 
-    // Cleanup
     return () => {
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationFrameId);
