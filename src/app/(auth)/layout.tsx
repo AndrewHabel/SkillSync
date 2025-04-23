@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ModeToggle } from "@/components/mode-toggle";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { StarryBackground } from "@/components/starry-background";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -38,6 +39,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
 
   return (
     <main className="auth-page bg-background min-h-screen">
+      <StarryBackground starCount={200} minSize={0.5} maxSize={2.5} />
       <div className="w-full border-b">
         <nav className="flex justify-between items-center mx-auto max-w-screen-2xl p-4">
           <Image src={getLogo()} height={56} width={152} alt="Logo" />

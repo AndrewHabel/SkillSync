@@ -22,7 +22,7 @@ import { DottedSeparator } from "@/components/dotted-separator";
 import { useRouter } from "next/navigation";
 import { useUpdateMember } from "../api/use-update-member"; 
 import Image from "next/image";
-
+import { StarryBackground } from "@/components/starry-background";
 
 export const MemberProfile = () => {
 
@@ -33,7 +33,6 @@ export const MemberProfile = () => {
     const { mutate: updateMember , isPending } = useUpdateMember(); 
 
     const inputRef = useRef<HTMLInputElement>(null);
-
 
     const form = useForm<z.infer<typeof UpdateMemberSchema>>({
         resolver: zodResolver(UpdateMemberSchema),
@@ -85,7 +84,8 @@ export const MemberProfile = () => {
     }
 
     return (
-        <div className="flex flex-col gap-y-4">
+        <div className="flex flex-col gap-y-4 relative">
+            <StarryBackground starCount={180} minSize={0.5} maxSize={2} />
             <Card className="w-full h-full border-none shadow-none">
                 <CardHeader className="flex flex-row items-center gap-x-4 p-7 space-y-0">
                     <Button size="sm" variant="secondary" onClick={() => router.push(`/workspaces/${workspaceId}`)}>
