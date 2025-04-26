@@ -1,7 +1,7 @@
 "use client";
 // navigation.tsx
 import { cn } from '@/lib/utils';
-import { BarChart2Icon, SettingsIcon, UsersIcon } from 'lucide-react';
+import { BarChart2Icon, GithubIcon, SettingsIcon, UsersIcon } from 'lucide-react';
 import Link from 'next/link';
 import { GoCheckCircle, GoCheckCircleFill, GoHome, GoHomeFill } from 'react-icons/go';
 import type { IconType } from 'react-icons';
@@ -31,9 +31,15 @@ const routes: RouteItem[] = [
     },
     {
         label: "My Tasks",
-        href: "/tasks",
+        href: "/my-tasks",
         icon: GoCheckCircle,
         activeIcon: GoCheckCircleFill,
+    },
+    {
+        label: "GitHub",
+        href: "/github-integration",
+        icon: GithubIcon,
+        activeIcon: GithubIcon,
     },
     {
         label: "Settings",
@@ -81,6 +87,33 @@ export const Navigation = () => {
     return (
         <ul className="flex flex-col gap-1">
             {allRoutes.map((item) => {
+                // Special case for GitHub integration which is in standalone layout
+                if (item.label === "GitHub") {
+                    const isActive = pathname === "/github-integration";
+                    const Icon = isActive ? item.activeIcon : item.icon;
+                    
+                    return (
+                        <li key={item.href}>
+                            <Link
+                                href="/github-integration"
+                                className={cn(
+                                    "flex items-center gap-2.5 p-2.5 rounded-md font-medium transition-all duration-300 ease-in-out group text-muted-foreground hover:text-primary hover:bg-accent",
+                                    isActive && "bg-card shadow-sm hover:opacity-100 text-primary"
+                                )}
+                            >
+                               <Icon className={cn(
+                                    "size-5 text-muted-foreground transition-colors duration-300 group-hover:text-primary group-hover:scale-110",
+                                    isActive && "text-primary"
+                                )} />
+                                <span className="group-hover:translate-x-2 transition-transform duration-300">
+                                    {item.label}
+                                </span>
+                            </Link>
+                        </li>
+                    );
+                }
+                
+                // Regular workspace routes
                 const fullHref = `/workspaces/${workspaceId}${item.href}`;
                 const isActive = pathname === fullHref;
                 const Icon = isActive ? item.activeIcon : item.icon;

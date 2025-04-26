@@ -14,6 +14,14 @@ const pathnameMap = {
         title: "My Project",
         description: "View all the tasks of your project here"
     },
+    "my-tasks": {
+        title: "My Tasks",
+        description: "Monitor all tasks assigned to you here"
+    },
+    "admin-analytics": {
+        title: "Admin Analytics",
+        description: "View workspace analytics and performance metrics"
+    },
 }   
 
 const defaultMap = {
