@@ -10,13 +10,15 @@ import { DottedSeparator } from "@/components/dotted-separator";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCreateProject } from "../api/use-create-projects";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from "next/image";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+import { TechStackSelector } from "./tech-stack-selector";
+import { Badge } from "@/components/ui/badge";
 
 interface CreateProjectFormProps {
   onCancel?: () => void;
@@ -27,11 +29,13 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
   const router = useRouter();
   const { mutate, isPending } = useCreateProject();
   const inputRef = useRef<HTMLInputElement>(null);
+  const [techSelectorOpen, setTechSelectorOpen] = useState(false);
 
   const form = useForm<z.infer<typeof createProjectSchema>>({
     resolver: zodResolver(createProjectSchema.omit({ workspaceId: true })),
     defaultValues: {
       name: "",
+      ProjectTechStack: [],
     },
   });
 
@@ -40,7 +44,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
       ...values,
       workspaceId,
       image: values.image instanceof File ? values.image : "",
-      ProjectTechStack: values.ProjectTechStack.join(","),
+      ProjectTechStack: values.ProjectTechStack,
     };
 
     mutate({ form: { ...finalValues, ProjectTechStack: values.ProjectTechStack.join(",") } }, {
@@ -56,6 +60,14 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
     if (file) {
       form.setValue("image", file);
     }
+  };
+
+  // Get the current selected tech stack
+  const selectedTechStack = form.watch("ProjectTechStack") || [];
+
+  // Handle tech stack selection
+  const handleTechStackSelection = (selected: string[]) => {
+    form.setValue("ProjectTechStack", selected);
   };
 
   return (
@@ -93,12 +105,38 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Project Tech Stack</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="e.g., React, Node.js, MongoDB"
+                    <div className="flex flex-col gap-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setTechSelectorOpen(true)}
+                        className="flex justify-between w-full"
+                      >
+                        <span className={cn(field.value.length === 0 && "text-muted-foreground")}>
+                          {field.value.length > 0 
+                            ? `${field.value.length} technologies selected` 
+                            : "Select technologies for your project"}
+                        </span>
+                        <Plus size={16} />
+                      </Button>
+                      
+                      {field.value.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                          {field.value.map((tech) => (
+                            <Badge key={tech} variant="secondary">
+                              {tech}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <TechStackSelector
+                        open={techSelectorOpen}
+                        onOpenChange={setTechSelectorOpen}
+                        selectedTech={field.value}
+                        onSelect={handleTechStackSelection}
                       />
-                    </FormControl>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -160,7 +198,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                           <Button
                             type="button"
                             disabled={isPending}
-                            variant="teritary"
+                            variant="tertiary"
                             size="xs"
                             className="w-fit mt-2"
                             onClick={() => inputRef.current?.click()}

@@ -7,9 +7,12 @@ export const createProjectSchema = z.object({
     z.string().transform((value) => (value === "" ? undefined : value)),
   ]).optional(),
   workspaceId: z.string(),
-  ProjectTechStack: z.string().transform((value) => 
-    value.split(',').map(tech => tech.trim()) // Split by comma and trim whitespace
-  ),
+  ProjectTechStack: z.union([
+    z.string().transform((value) => 
+      value ? value.split(',').map(tech => tech.trim()) : []
+    ),
+    z.array(z.string())
+  ]),
 });
 
 export const UpdateProjectSchema = z.object({
@@ -18,5 +21,11 @@ export const UpdateProjectSchema = z.object({
       z.instanceof(File),
       z.string().transform((value) => value === "" ? undefined : value),
   ])
-  .optional()
+  .optional(),
+  ProjectTechStack: z.union([
+    z.string().transform((value) => 
+      value ? value.split(',').map(tech => tech.trim()) : []
+    ),
+    z.array(z.string())
+  ]).optional(),
 });
