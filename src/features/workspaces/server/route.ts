@@ -13,6 +13,7 @@ import { Workspace } from "../types";
 import { json } from "stream/consumers";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { TaskStatus } from "@/features/tasks/types";
+import { sendInvitedToWorkspace } from "@/lib/sendEmail";
 
 
 const app = new Hono()
@@ -478,7 +479,69 @@ const app = new Hono()
                         OverdueTaskDifference,
                     }
                 })
-            })
+    })
+    .post(
+        "/:workspaceId/invite",
+        sessionMiddleware,
+        zValidator("json", z.object({ 
+            email: z.string().email(), 
+            name: z.string(),
+        })),
+        async (c) => {
+            const { workspaceId } = c.req.param();
+            const { email, name } = c.req.valid("json");
+            
+            const databases = c.get("databases");
+            const user = c.get("user");
+            
+            // Check if the user is a member and has admin role
+            const member = await getMember({
+                databases,
+                workspaceId,
+                userId: user.$id,
+            });
+            
+            if (!member || member.role !== MemberRole.ADMIN) {
+                return c.json({ error: "Unauthorized" }, 401);
+            }
+            
+            // Get the workspace details
+            const workspace = await databases.getDocument<Workspace>(
+                DATABASE_ID,
+                WORKSPACES_ID,
+                workspaceId
+            );
+            
+            if (!workspace) {
+                return c.json({ error: "Workspace not found" }, 404);
+            }
+            
+            try {
+                // Send invitation email
+                await sendInvitedToWorkspace(
+                    email,
+                    name,
+                    workspace.name,
+                    workspaceId,
+                    user.name || "Workspace Admin",
+                    workspace.inviteCode
+                );
+                
+                return c.json({ 
+                    data: { 
+                        message: "Invitation sent successfully",
+                        email,
+                        workspaceId
+                    } 
+                });
+            } catch (error) {
+                console.error("Error sending invitation:", error);
+                return c.json({ 
+                    error: "Failed to send invitation email" 
+                }, 500);
+            }
+        }
+    )
         
     
 export default app;

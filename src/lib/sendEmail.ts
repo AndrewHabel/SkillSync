@@ -1,6 +1,7 @@
 // lib/sendEmail.ts
 import SkillSyncHelloEmail from "@/components/emails/welcomemail";
 import AssignedTask from "@/components/emails/you-have-been-assigned-task";
+import InvitedToWorkspace from "@/components/emails/you-have-been-invited-to-workspace";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -36,6 +37,28 @@ export async function sendAssignEmail(
                 taskname: taskname,
                 workSpaceId: workSpaceId,
                 taskId: taskId,
+              }),
+  });
+}
+
+export async function sendInvitedToWorkspace(
+  to: string, 
+  invitedUserName: string, 
+  workspacename: string, 
+  workSpaceId : string,
+  workspaceOwner : string,
+  inviteCode: string,
+) {
+  return await resend.emails.send({
+    from: process.env.FROM_EMAIL!,
+    to,
+    subject: "Welcome to the App! 🎉",
+    react: InvitedToWorkspace({
+                invitedUserName: invitedUserName,
+                workspacename: workspacename,
+                workSpaceId: workSpaceId,
+                workspaceOwner: workspaceOwner,
+                inviteLink: inviteCode,
               }),
   });
 }

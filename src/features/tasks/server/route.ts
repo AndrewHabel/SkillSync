@@ -36,8 +36,6 @@ const app = new Hono()
         preferredRole
       } = c.req.valid("json");
 
-      console.log("projectId : ", projectId);
-
       const member = await getMember({
         databases,
         workspaceId,
@@ -79,6 +77,46 @@ const app = new Hono()
           preferredRole
         },
       );
+
+      const workSpace = await databases.getDocument<Workspace>(
+        DATABASE_ID,
+        WORKSPACES_ID,
+        workspaceId,
+      )
+
+      const assigne = await databases.getDocument<Member>(
+        DATABASE_ID,
+        MEMBERS_ID,
+        assigneeId
+      )
+
+      const project = task.projectId ? await databases.getDocument<Project>(
+        DATABASE_ID,
+        PROJECTS_ID,
+        task.projectId
+      ) : null;
+
+      const { users } = await createAdminClient();
+      const userDetails = await users.get(assigne.userId);
+
+      console.log("userDetails : ", userDetails);
+      console.log("workSpace : ", workSpace);
+      console.log("project : ", project);
+      
+      try {
+        await sendAssignEmail(
+          userDetails.email || "",
+          userDetails.name || "",
+          task.name || "",
+          workSpace.name || "",
+          (project?.name) || "",
+          task.dueDate || "",
+          task.workspaceId,
+          task.$id,
+        )         
+      } catch (error) {
+        console.error("Failed to send assignment notification:", error);
+      }
 
       return c.json({ data: task })
     }
@@ -323,7 +361,6 @@ const app = new Hono()
         taskId,
       );
 
-    
       const member = await getMember({
         databases,
         workspaceId: existingTask.workspaceId,
@@ -384,12 +421,12 @@ const app = new Hono()
           return c.json({data: task});
         }
 
-        // Get the Appwrite user to access their email
         const { users } = await createAdminClient();
         try {
           const userDetails = await users.get(newAssignee.userId);
           
-          // Now we have the email from the user's Appwrite record
+          console.log("userDetails : ", userDetails);
+          
           await sendAssignEmail(
             userDetails.email || "",
             userDetails.name || "",
@@ -399,7 +436,7 @@ const app = new Hono()
             task.dueDate || "",
             task.workspaceId,
             task.$id,
-          );
+          )         
         } catch (error) {
           console.error("Failed to send assignment notification:", error);
         }

@@ -24,6 +24,9 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { useDeleteWorkspace } from "../api/use-delete-workspace";
 import { toast } from "sonner";
 import { useResetInviteCode } from "../api/use-reset-invite-code-workspace";
+import { useInviteUserModal } from "../hooks/use-invite-user-modal";
+import { InviteUserModal } from "./invite-user-modal";
+import { UserPlusIcon } from "lucide-react";
 
 interface EditWorkspaceFormProps {
   onCancel?: () => void;
@@ -33,7 +36,7 @@ interface EditWorkspaceFormProps {
 export const EditWorkspaceForm = ({ onCancel , initialValues}: EditWorkspaceFormProps) => {
 
   const router = useRouter();
-
+  const { open: openInviteUser } = useInviteUserModal();
   const {mutate, isPending} = useUpdateWorkspace();
 
   const {mutate:resetInviteCode, isPending:isResetingInviteCode} = useResetInviteCode();
@@ -101,6 +104,11 @@ export const EditWorkspaceForm = ({ onCancel , initialValues}: EditWorkspaceForm
     <div className="flex flex-col gap-y-4">
       <DeleteConfirmationDialog />
       <ResetDialog />
+      <InviteUserModal 
+        workspaceName={initialValues.name} 
+        workspaceOwner={initialValues.ownerName || "Workspace Admin"}
+        inviteCode={initialValues.inviteCode}
+      />
       
       <Card className="w-full h-full shadow border border-border auth-card">
         <CardHeader className="flex flex-row items-center gap-x-4 p-7 space-y-0">
@@ -228,15 +236,35 @@ export const EditWorkspaceForm = ({ onCancel , initialValues}: EditWorkspaceForm
             <div className="mt-4">
               <div className="flex items-center gap-x-2">
                 <Input disabled value={fullInviteLink}/>
-                  <Button className="size-12" variant={"secondary"} onClick={handelCopyInviteLink} >
-                    <CopyIcon className="size-5"/>
-                  </Button>
+                <Button className="size-12" variant={"secondary"} onClick={handelCopyInviteLink} >
+                  <CopyIcon className="size-5"/>
+                </Button>
               </div>
             </div>
             <DottedSeparator className="py-7" />
-            <Button className="mt-6 w-fit ml-auto" size="sm" variant="destructive" type="button" disabled={isPending || isResetingInviteCode} onClick={handelResetInviteCode}>
-              Reset Invite Link
-            </Button>
+            <div className="flex items-center justify-between">
+              <Button 
+                className="mt-1" 
+                size="sm" 
+                variant="solid" 
+                type="button" 
+                onClick={openInviteUser}
+                disabled={isPending}
+              >
+                <UserPlusIcon className="size-4 mr-2" />
+                Invite via Email
+              </Button>
+              <Button 
+                className="mt-1" 
+                size="sm" 
+                variant="destructive" 
+                type="button" 
+                disabled={isPending || isResetingInviteCode} 
+                onClick={handelResetInviteCode}
+              >
+                Reset Invite Link
+              </Button>
+            </div>
           </div>
         </CardContent>       
       </Card>
