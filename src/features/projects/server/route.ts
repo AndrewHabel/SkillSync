@@ -114,7 +114,7 @@ const app = new Hono()
                 const user = c.get("user");
     
                 const { projectId } = c.req.param();
-                const { name, image } = c.req.valid("form");
+                const { name, image, ProjectTechStack } = c.req.valid("form");
 
                 const existingProject = await databases.getDocument<Project>(
                     DATABASE_ID,
@@ -151,14 +151,17 @@ const app = new Hono()
                     uploadedImageUrl = `data:${image.type};base64,${buffer.toString("base64")}`;
                 }
     
+                const updateData: Record<string, any> = {};
+                
+                if (name) updateData.name = name;
+                if (uploadedImageUrl) updateData.imageUrl = uploadedImageUrl;
+                if (ProjectTechStack !== undefined) updateData.ProjectTechStack = ProjectTechStack;
+
                 const project = await databases.updateDocument(
                     DATABASE_ID,
                     PROJECTS_ID,
                     projectId,
-                    {
-                        name,
-                        imageUrl: uploadedImageUrl,
-                    }
+                    updateData
                 )
                 return c.json({data:project});
             }

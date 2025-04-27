@@ -9,76 +9,91 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Avatar, AvatarFallback} from "@/components/ui/avatar";
 import Image from "next/image";
-import { ArrowLeftIcon, ImageIcon } from "lucide-react";
+import { ArrowLeftIcon, ImageIcon, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Project } from "../types";
 import { useUpdateProject } from "../api/use-update-project";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useDeleteProject } from "../api/use-delete-project";
+import { TechStackSelector } from "./tech-stack-selector";
+import { Badge } from "@/components/ui/badge";
 
 
 interface EditProjectFormProps {
   onCancel?: () => void;
-  initialValues:Project;
+  initialValues: Project;
 }
 
-export const EditProjectForm = ({ onCancel , initialValues}: EditProjectFormProps) => {
-
+export const EditProjectForm = ({ onCancel, initialValues}: EditProjectFormProps) => {
   const router = useRouter();
-
   const {mutate, isPending} = useUpdateProject();
-
-  const {mutate:deleteProject, 
-   isPending:isDeleteingProject} = useDeleteProject();
-
+  const {mutate: deleteProject, isPending: isDeleteingProject} = useDeleteProject();
   const [DeleteConfirmationDialog, confirmDelete] = useConfirm("Delete project", "Are you sure you want to delete this Project?", "destructive");
-
   const inputRef = useRef<HTMLInputElement>(null);
+  const [techSelectorOpen, setTechSelectorOpen] = useState(false);
+
+  // Parse the initial tech stack from string to array if needed
+  const initialTechStack = initialValues.ProjectTechStack 
+    ? typeof initialValues.ProjectTechStack === 'string'
+      ? initialValues.ProjectTechStack.split(',').map(tech => tech.trim())
+      : initialValues.ProjectTechStack
+    : [];
 
   const form = useForm<z.infer<typeof UpdateProjectSchema>>({
     resolver: zodResolver(UpdateProjectSchema),
     defaultValues: {
       ...initialValues,
-      image:initialValues.imageUrl ?? "",
+      image: initialValues.imageUrl ?? "",
+      ProjectTechStack: initialTechStack,
     },
   });
 
-  const onSubmit = (values: z.infer<typeof UpdateProjectSchema> ) => {
+  const onSubmit = (values: z.infer<typeof UpdateProjectSchema>) => {
     const finalValues = {
       ...values,
       image: values.image instanceof File ? values.image : "",
-    } 
-    mutate({ form: finalValues , param:{projectId:initialValues.$id}}, {
-     
-    });
+      ProjectTechStack: Array.isArray(values.ProjectTechStack) 
+        ? values.ProjectTechStack.join(",") 
+        : values.ProjectTechStack,
+    };
+    
+    mutate({ form: finalValues, param: {projectId: initialValues.$id}});
   };
 
   const handelImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if(file) { 
-      form.setValue("image", file)
+      form.setValue("image", file);
     }
-  }
+  };
+
+  // Handle tech stack selection
+  const handleTechStackSelection = (selected: string[]) => {
+    form.setValue("ProjectTechStack", selected);
+  };
 
   const handelDelete = async () => {
     const ok = await confirmDelete();
     if(!ok) return;
-    deleteProject({param : {projectId:initialValues.$id},}, {
+    deleteProject({param: {projectId: initialValues.$id}}, {
       onSuccess: () => {
         window.location.href = `/workspaces/${initialValues.workspaceId}`;
       }
     });
   };
 
+  // Get the current selected tech stack
+  const selectedTechStack = form.watch("ProjectTechStack") || [];
+
   return(
-    <div className="flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-4 bg-slate-300 dark:bg-slate-900 rounded-md p-4">
       <DeleteConfirmationDialog />
    
-      <Card className="w-full h-full border-none shadow-none">
+      <Card className="w-full h-full border-none shadow-none bg-slate-300 dark:bg-slate-900">
         <CardHeader className="flex flex-row items-center gap-x-4 p-7 space-y-0">
           <Button size="sm" variant="secondary" onClick={onCancel ? onCancel : () => router.push(`/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}`)}>
             <ArrowLeftIcon className="size-4px mr-2" />
@@ -90,7 +105,7 @@ export const EditProjectForm = ({ onCancel , initialValues}: EditProjectFormProp
         </CardHeader>      
       </Card>
 
-      <Card className="w-full h-full border-none shadow-none">
+      <Card className="w-full h-full border-none shadow-none bg-slate-300 dark:bg-slate-900">
       <CardContent className="p-7">
       <div className="flex flex-col">
             <h3 className="font-bold">Edit Project</h3>
@@ -114,6 +129,48 @@ export const EditProjectForm = ({ onCancel , initialValues}: EditProjectFormProp
                         placeholder="Project name"
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="ProjectTechStack"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Tech Stack</FormLabel>
+                    <div className="flex flex-col gap-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setTechSelectorOpen(true)}
+                        className="flex justify-between w-full"
+                      >
+                        <span className={cn(field.value?.length === 0 && "text-muted-foreground")}>
+                          {field.value?.length > 0 
+                            ? `${field.value.length} technologies selected` 
+                            : "Select technologies for your project"}
+                        </span>
+                        <Plus size={16} />
+                      </Button>
+                      
+                      {field.value?.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                          {field.value.map((tech) => (
+                            <Badge key={tech} variant="secondary">
+                              {tech}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <TechStackSelector
+                        open={techSelectorOpen}
+                        onOpenChange={setTechSelectorOpen}
+                        selectedTech={field.value || []}
+                        onSelect={handleTechStackSelection}
+                      />
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -193,7 +250,7 @@ export const EditProjectForm = ({ onCancel , initialValues}: EditProjectFormProp
       </CardContent>
       </Card>
 
-      <Card className="w-full h-full border-none shadow-none">
+      <Card className="w-full h-full border-none shadow-none bg-slate-300 dark:bg-slate-900">
         <CardContent className="p-7">
           <div className="flex flex-col">
             <h3 className="font-bold">Delete Workspace</h3>
