@@ -48,7 +48,6 @@ const app = new Hono()
                     return {
                         ...member,
                         name:user.name || username,
-                        skills:member.skills || [],
                         image:member.imageUrl || null,
                         email:user.email,
                         role:member.role,
@@ -98,7 +97,6 @@ const app = new Hono()
                 name:user.name,
                 email:user.email,
                 role:memberProfle.documents[0].role,
-                skills:memberProfle.documents[0].skills,
                 image:memberProfle.documents[0].imageUrl,
             }});
         }
@@ -161,7 +159,7 @@ const app = new Hono()
        async (c) => {
 
             const {memberId} = c.req.param();
-            const { role ,name , skills , image} = c.req.valid("form");
+            const { role ,name , image} = c.req.valid("form");
             const user = c.get("user");
             const databases = c.get("databases");
             const { account } = await createSessionClient();
@@ -218,17 +216,18 @@ const app = new Hono()
                 uploadedImageUrl = `data:${image.type};base64,${buffer.toString("base64")}`;
             }
 
-            await databases.updateDocument(
-                DATABASE_ID,
-                MEMBERS_ID,
-                memberId,
-                {
-                    role,
-                    skills,
-                    imageUrl: uploadedImageUrl,
-                }
-            )
-
+            if(uploadedImageUrl){
+                await databases.updateDocument(
+                    DATABASE_ID,
+                    MEMBERS_ID,
+                    memberId,
+                    {
+                        role,
+                        imageUrl: uploadedImageUrl,
+                    }
+                )
+            }
+        
             return c.json({data:{$id:memberToUpdate.$id}});
 
        }

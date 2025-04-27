@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { useUpdateMember } from "../api/use-update-member"; 
 import Image from "next/image";
 import { StarryBackground } from "@/components/starry-background";
+import { ManageSkills } from "@/features/skill/components/manage-skills";
 
 export const MemberProfile = () => {
 
@@ -38,7 +39,6 @@ export const MemberProfile = () => {
         resolver: zodResolver(UpdateMemberSchema),
         defaultValues: {
             name: data?.name,
-            skills: data?.skills.join(", "), 
         },
     });
 
@@ -46,7 +46,6 @@ export const MemberProfile = () => {
         if (data) {
             form.reset({ 
                 name: data.name,
-                skills: data.skills.join(", "),
             });
         }
     }, [data, form.reset]);
@@ -67,7 +66,6 @@ export const MemberProfile = () => {
     const onSubmit = async (values: z.infer<typeof UpdateMemberSchema> ) => {
         const finalValues = {
             ...values,
-            skills : values.skills.join(","),
             image: values.image instanceof File ? values.image : "",
           } 
           updateMember({ form: finalValues , param:{memberId:data.id}}, {
@@ -110,7 +108,6 @@ export const MemberProfile = () => {
                                 <p className="text-lg font-bold text-primary">Name: <span className="text-foreground font-normal">{data?.name}</span></p>
                                 <p className="text-lg font-bold text-primary">Email: <span className="text-foreground font-normal">{data?.email}</span></p>
                                 <p className="text-lg font-bold text-primary">Role: <span className="text-foreground font-normal">{data?.role.toLowerCase()}</span></p>
-                                <p className="text-lg font-bold text-primary">Skills: <span className="text-foreground font-normal">{data?.skills.join(" , ")}</span></p>
                                 <DottedSeparator className="py-7" />
                                 <div className="flex justify-end">
                                     <Button className="w-28" size="sm" onClick={handleEdit}>
@@ -189,19 +186,6 @@ export const MemberProfile = () => {
                                         </FormItem>
                                     )}
                                 />
-                                <FormField
-                                    control={form.control}
-                                    name="skills"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Skills</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} placeholder="Member skills (comma separated)" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
                                 <DottedSeparator className="py-7" />
                                 <div className="flex items-center justify-end gap-4">
                                     <Button type="button" size="sm" variant="secondary" onClick={handleCancel}>
@@ -217,6 +201,9 @@ export const MemberProfile = () => {
                     </div>
                 </CardContent>
             </Card>
+            
+            {/* Add the ManageSkills component */}
+            <ManageSkills userId={data.id} />
         </div>
     );
 };
