@@ -51,6 +51,15 @@ export const MembersList = () => {
     const [membersWithSkills, setMembersWithSkills] = useState<any[]>([]);
     const [isLoadingSkills, setIsLoadingSkills] = useState(true);
 
+    const [expandedSkillCards, setExpandedSkillCards] = useState<Record<string, boolean>>({});
+
+    const toggleSkillsExpand = (memberId: string) => {
+        setExpandedSkillCards(prev => ({
+            ...prev,
+            [memberId]: !prev[memberId]
+        }));
+    };
+
     console.log(skillsData, "skillsData");
     console.log(data, "membersData");
 
@@ -194,13 +203,6 @@ export const MembersList = () => {
                         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 3xl:grid-cols-5 gap-4 md:gap-5  p-4 md:p-6 rounded-lg"
                     >
                         {membersWithSkills.map((member, index) => {
-                            // Define accent color based on role
-                            const roleColors = {
-                                [MemberRole.ADMIN]: "border-l-amber-500",
-                                [MemberRole.MEMBER]: "border-l-blue-500"
-                            };
-                            const borderAccent = roleColors[member.role] || "border-l-primary";
-                            
                             return (
                                 <motion.div
                                     key={member.$id}
@@ -216,7 +218,10 @@ export const MembersList = () => {
                                     }}
                                     className="h-full"
                                 >
-                                    <Card className={`member-card border shadow-sm hover:shadow-md transition-shadow duration-200 border-l-4 ${borderAccent} h-full flex flex-col`}>
+                                    <Card 
+                                        className="member-card border shadow-sm hover:shadow-md transition-shadow duration-200 h-full flex flex-col overflow-hidden" 
+                                        data-role={member.role}
+                                    >
                                         <CardHeader className="p-5 pb-3">
                                             <div className="flex items-center gap-4">
                                                 <MembersAvatar
@@ -256,7 +261,7 @@ export const MembersList = () => {
                                             </h4>
                                             {member.skills && member.skills.length > 0 ? (
                                                 <div className="flex flex-wrap gap-2">
-                                                    {member.skills.slice(0, 5).map((skill: any, skillIndex: number) => (
+                                                    {member.skills.slice(0, expandedSkillCards[member.$id] ? member.skills.length : 3).map((skill: any, skillIndex: number) => (
                                                         <Badge 
                                                             key={`${member.$id}-skill-${skillIndex}`}
                                                             variant="outline"
@@ -268,9 +273,16 @@ export const MembersList = () => {
                                                             </span>
                                                         </Badge>
                                                     ))}
-                                                    {member.skills.length > 5 && (
-                                                        <Badge variant="outline" className="bg-card py-1.5 px-2.5">
-                                                            +{member.skills.length - 5} more
+                                                    {member.skills.length > 3 && (
+                                                        <Badge 
+                                                            variant="outline" 
+                                                            className="bg-card py-1.5 px-2.5 cursor-pointer hover:bg-accent/50 transition-colors"
+                                                            onClick={() => toggleSkillsExpand(member.$id)}
+                                                        >
+                                                            {expandedSkillCards[member.$id] 
+                                                                ? "Show Less" 
+                                                                : `+${member.skills.length - 3} more`
+                                                            }
                                                         </Badge>
                                                     )}
                                                 </div>
@@ -278,17 +290,7 @@ export const MembersList = () => {
                                                 <p className="text-xs text-muted-foreground italic">No skills listed</p>
                                             )}
                                         </CardContent>
-                                        <CardFooter className="p-5 pt-3 border-t flex justify-between items-center mt-auto">
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm" 
-                                                asChild
-                                                className="text-xs"
-                                            >
-                                                <Link href={`/workspaces/${workspaceId}/memberprofile/${member.userId}`}>
-                                                    View Profile
-                                                </Link>
-                                            </Button>
+                                        <CardFooter className="p-5 pt-3 border-t flex justify-end items-center mt-auto card-footer">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button className="ml-auto" variant="ghost" size="icon">
