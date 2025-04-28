@@ -4,6 +4,7 @@ import { Analytics } from "@/components/analytics";
 import { DottedSeparator } from "@/components/dotted-separator";
 import { PageError } from "@/components/page-error";
 import { PageLoader } from "@/components/page-loader";
+import { GitHubProfileCard } from "@/components/github/github-profile";
 import { Button } from "@/components/ui/button";
 import { useGetMembers } from "@/features/members/api/use-get-members";
 import { useGetProjects } from "@/features/projects/api/use-get-projects";
@@ -48,7 +49,10 @@ export const WorkSpaceIdClient = () => {
                     <TaskList data={tasks.documents} total={tasks.total} />
                     <ProjectList data={projects.documents} total={projects.total} />
                 </div>
-                <MembersList data={members.documents} total={members.total} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <MembersList data={members.documents} total={members.total} />
+                    <GitHubProfileCard />
+                </div>
             </div>
         </div>
     )
@@ -180,7 +184,11 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
                                                         {project.name}
                                                     </p>
                                                     <p className="workspace-project-tech">
-                                                        {project.ProjectTechStack.join(" • ")}
+                                                        {project.ProjectTechStack 
+                                                            ? Array.isArray(project.ProjectTechStack) 
+                                                                ? project.ProjectTechStack.join(" • ")
+                                                                : project.ProjectTechStack
+                                                            : "No tech stack specified"}
                                                     </p>
                                                 </div>
                                             </CardContent>

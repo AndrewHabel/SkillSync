@@ -8,4 +8,5 @@ export const UpdateMemberSchema = z.object({
         z.instanceof(File),
         z.string().transform((value) => value === "" ? undefined : value),
     ]).optional(),
+  gitHubToken: z.string().optional(),
 });
