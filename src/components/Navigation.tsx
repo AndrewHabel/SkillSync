@@ -125,13 +125,13 @@ export const Navigation = () => {
                             className={cn(
                                 "flex items-center gap-2.5 p-2.5 rounded-md font-medium transition-all duration-300 ease-in-out group text-muted-foreground hover:text-primary hover:bg-accent",
                                 isActive && "bg-card shadow-sm hover:opacity-100 text-primary",
-                                item.adminOnly && "text-blue-500 hover:text-blue-600"
+                                item.adminOnly && "text-muted-foreground"
                             )}
                         >
                            <Icon className={cn(
                                 "size-5 text-muted-foreground transition-colors duration-300 group-hover:text-primary group-hover:scale-110",
                                 isActive && "text-primary",
-                                item.adminOnly && "text-blue-500 group-hover:text-blue-600"
+                                item.adminOnly && "text-muted-foreground"
                             )} />
                             <span className="group-hover:translate-x-2 transition-transform duration-300">
                                 {item.label}

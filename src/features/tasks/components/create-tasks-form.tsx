@@ -16,9 +16,9 @@ import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { DatePicker } from "@/components/date-picker";
 import { Select, SelectValue ,SelectTrigger, SelectContent , SelectItem} from "@/components/ui/select";
 import { MembersAvatar } from "@/features/members/components/members-avatar";
-import { PreferredRole, TaskStatus, getPreferredRoleDisplay } from "../types";
+import { TaskStatus } from "../types";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
-
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateTaskFormProps {
   onCancel?: () => void;
@@ -49,7 +49,7 @@ export const CreateTaskForm = ({ onCancel , projectOptions , memberOptions }: Cr
   };
 
   return(
-    <Card className="w-full h-full border-none shadow-none">
+    <Card className="w-full h-full border-none shadow-none max-w-5xl mx-auto">
       <CardHeader className="flex p-7">
         <CardTitle className="text-xl font-bold">
           Create a new Task!
@@ -61,7 +61,7 @@ export const CreateTaskForm = ({ onCancel , projectOptions , memberOptions }: Cr
       <CardContent className="p-7">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="flex flex-col gap-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
               <FormField 
                 control={form.control}
                 name="name"
@@ -90,6 +90,25 @@ export const CreateTaskForm = ({ onCancel , projectOptions , memberOptions }: Cr
                     </FormLabel>
                     <FormControl>
                       <DatePicker {...field}/>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField 
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="col-span-1 md:col-span-2">
+                    <FormLabel>
+                    Description
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="Describe the task in detail"
+                        rows={4}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -162,60 +181,6 @@ export const CreateTaskForm = ({ onCancel , projectOptions , memberOptions }: Cr
               />
               <FormField 
                 control={form.control}
-                name="preferredRole"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                    Preferred Role
-                    </FormLabel>
-                   <Select defaultValue={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Preferred Role"/>
-                      </SelectTrigger>
-                    </FormControl>
-                    <FormMessage />
-                    <SelectContent>
-                      <SelectItem value={PreferredRole.DATA_ANALYST}>
-                        {getPreferredRoleDisplay(PreferredRole.DATA_ANALYST)}
-                      </SelectItem>
-                      <SelectItem value={PreferredRole.FRONTEND_DEVELOPER}>
-                        {getPreferredRoleDisplay(PreferredRole.FRONTEND_DEVELOPER)}
-                      </SelectItem>
-                      <SelectItem value={PreferredRole.SECURITY_SPECIALIST}>
-                        {getPreferredRoleDisplay(PreferredRole.SECURITY_SPECIALIST)}
-                      </SelectItem>
-                      <SelectItem value={PreferredRole.UI_DESIGNER}>
-                        {getPreferredRoleDisplay(PreferredRole.UI_DESIGNER)}
-                      </SelectItem>
-                      <SelectItem value={PreferredRole.PERFORMANCE_ENGINEER}>
-                        {getPreferredRoleDisplay(PreferredRole.PERFORMANCE_ENGINEER)}
-                      </SelectItem>
-                      <SelectItem value={PreferredRole.TESTER}>
-                        {getPreferredRoleDisplay(PreferredRole.TESTER)}
-                      </SelectItem>
-                      <SelectItem value={PreferredRole.BACKEND_DEVELOPER}>
-                        {getPreferredRoleDisplay(PreferredRole.BACKEND_DEVELOPER)}
-                      </SelectItem>
-                      <SelectItem value={PreferredRole.DATABASE_ADMINISTRATOR}>
-                        {getPreferredRoleDisplay(PreferredRole.DATABASE_ADMINISTRATOR)}
-                      </SelectItem>
-                      <SelectItem value={PreferredRole.DEVOPS_ENGINEER}>
-                        {getPreferredRoleDisplay(PreferredRole.DEVOPS_ENGINEER)}
-                      </SelectItem>
-                      <SelectItem value={PreferredRole.AI_SPECIALIST}>
-                        {getPreferredRoleDisplay(PreferredRole.AI_SPECIALIST)}
-                      </SelectItem>
-                      <SelectItem value={PreferredRole.DATA_SCIENTIST}>
-                        {getPreferredRoleDisplay(PreferredRole.DATA_SCIENTIST)}
-                      </SelectItem>
-                    </SelectContent>
-                   </Select>
-                  </FormItem>
-                )}
-              />
-              <FormField 
-                control={form.control}
                 name="projectId"
                 render={({ field }) => (
                   <FormItem>
@@ -240,6 +205,29 @@ export const CreateTaskForm = ({ onCancel , projectOptions , memberOptions }: Cr
                       ))}
                     </SelectContent>
                    </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField 
+                control={form.control}
+                name="estimatedHours"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Estimated Hours
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        placeholder="Enter estimated hours to complete"
+                        value={field.value || ''}
+                        onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />

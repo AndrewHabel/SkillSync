@@ -51,5 +51,6 @@ export type Task = Models.Document & {
   projectId?: string,
   projectName?: string,
   assigneeName?: string,
-  preferredRole?: PreferredRole
+  preferredRole?: PreferredRole,
+  estimatedHours?: number
 }
