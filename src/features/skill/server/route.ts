@@ -3,10 +3,10 @@ import { sessionMiddleware } from "@/lib/session-middleware";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { z } from "zod";
-import { DATABASE_ID, SKILLS_ID } from "@/config";
+import { DATABASE_ID, MEMBERS_ID, SKILLS_ID } from "@/config";
 import { ID, Query } from "node-appwrite";
 
-import { ExpertiseLevel } from "../types";
+import { ExpertiseLevel, Skill } from "../types";
 import { bulkCreateSkillSchema } from "../schema";
 import { getMember } from "@/features/members/utils";
 
@@ -24,7 +24,7 @@ const app = new Hono()
             const user = c.get("user");
             const { workspaceId, userId } = c.req.valid("query");
 
-             const member = await getMember({
+            const member = await getMember({
                 databases,
                 workspaceId: workspaceId,
                 userId: user.$id,
@@ -34,19 +34,67 @@ const app = new Hono()
                 return c.json({ error: "Member not found" }, 404);
             }
 
-            const filters = [];
+            let filters: any[] = [];
                 
             if (userId) {
+                console.log("Filtering skills for specific user:", userId);
                 filters.push(Query.equal("userId", userId));
+            } else {
+                try {
+                    const workspaceMembers = await databases.listDocuments(
+                        DATABASE_ID,
+                        MEMBERS_ID,
+                        [Query.equal("workspaceId", workspaceId)]
+                    );
+                    
+                    console.log("Workspace members:", workspaceMembers.documents);
+
+                    if (workspaceMembers.documents.length > 0) {
+                        // Extract all userIds from the workspace members
+                        const memberUserIds = workspaceMembers.documents.map(member => member.$id);
+                        
+                        console.log("Member userIds:", memberUserIds);
+
+                        if (memberUserIds.length === 1) {
+                            filters.push(Query.equal("userId", memberUserIds[0]));
+                        } else if (memberUserIds.length > 1) {
+                            
+                            try {
+                                
+                                filters = [Query.equal("userId", memberUserIds)];
+                            } catch (error) {
+                                console.error("Error creating multi-value filter, falling back to multiple filters:", error);
+                                
+                                const userIdFilters = memberUserIds.map(userId => 
+                                    Query.equal("userId", userId)
+                                );
+                                
+                                if (userIdFilters.length > 0) {
+                                    filters.push(...userIdFilters);
+                                }
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error fetching workspace members:", error);
+                    return c.json({ error: "Failed to fetch workspace members" }, 500);
+                }
+            }
+
+            console.log("Final filters:", filters);
+
+            if (filters.length === 0) {
+                console.log("No filters specified, returning empty results");
+                return c.json({ data: { documents: [], total: 0 } });
             }
 
             const skills = await databases.listDocuments(
                 DATABASE_ID,
                 SKILLS_ID,
-                filters
+                filters,
             );
 
-            console.log(skills.documents);
+            console.log("Skills result:", skills);
 
             return c.json({ data: skills });
         }

@@ -474,6 +474,35 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+/* Member card styling */
+.member-card {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease-in-out;
+}
+
+.dark .member-card {
+  background-color: hsl(220 26% 17%);
+}
+
+.dracula .member-card {
+  background-color: hsl(231 15% 22%);
+}
+
+.nord .member-card {
+  background-color: hsl(220 28% 22%);
+}
+
+.monokai .member-card {
+  background-color: hsl(60 6% 17%);
+}
+
+.member-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
 /* Custom scrollbar styling */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
