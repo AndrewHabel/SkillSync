@@ -33,7 +33,9 @@ const app = new Hono()
         projectId,
         assigneeId,
         dueDate,
-        preferredRole
+        preferredRole,
+        estimatedHours,
+        description
       } = c.req.valid("json");
 
       const member = await getMember({
@@ -74,7 +76,9 @@ const app = new Hono()
           dueDate,
           assigneeId,
           position: newPosition,
-          preferredRole
+          preferredRole,
+          estimatedHours,
+          description
         },
       );
 
@@ -350,7 +354,8 @@ const app = new Hono()
         dueDate,
         projectName,
         assigneeName,
-        preferredRole
+        preferredRole,
+        estimatedHours
       } = c.req.valid("json");
 
       const { taskId } = c.req.param();
@@ -390,7 +395,8 @@ const app = new Hono()
           dueDate,
           assigneeId,
           description,
-          preferredRole
+          preferredRole,
+          estimatedHours
         },
       );
 

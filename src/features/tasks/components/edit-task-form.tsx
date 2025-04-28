@@ -17,6 +17,7 @@ import { MembersAvatar } from "@/features/members/components/members-avatar";
 import { TaskStatus, Task, PreferredRole, getPreferredRoleDisplay } from "../types";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { useUpdateTask } from "../api/use-update-tasks";
+import { Textarea } from "@/components/ui/textarea";
 
 
 interface EditTaskFormProps {
@@ -33,7 +34,7 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
   const inputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof createTaskSchema>>({
-    resolver: zodResolver(createTaskSchema.omit({workspaceId : true, description: true,})),
+    resolver: zodResolver(createTaskSchema.omit({workspaceId : true})),
     defaultValues: {
       ...initialValues,
       dueDate: initialValues.dueDate? new Date(initialValues.dueDate) : undefined,
@@ -60,7 +61,7 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
   };
 
   return(
-    <Card className="w-full h-full border-none shadow-none">
+    <Card className="w-full h-full border-none shadow-none max-w-5xl mx-auto">
       <CardHeader className="flex p-7">
         <CardTitle className="text-xl font-bold">
           Edit Task!
@@ -72,7 +73,7 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
       <CardContent className="p-7">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="flex flex-col gap-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
               <FormField 
                 control={form.control}
                 name="name"
@@ -101,6 +102,26 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
                     </FormLabel>
                     <FormControl>
                       <DatePicker {...field}/>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField 
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="col-span-1 md:col-span-2">
+                    <FormLabel>
+                    Description
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="Describe the task in detail"
+                        rows={4}
+                        value={field.value || ''}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -197,6 +218,29 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
                       ))}
                     </SelectContent>
                    </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField 
+                control={form.control}
+                name="estimatedHours"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Estimated Hours
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        placeholder="Enter estimated hours to complete"
+                        value={field.value || ''}
+                        onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
