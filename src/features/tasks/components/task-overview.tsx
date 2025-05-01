@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Task } from "../types";
-import { Clock, PencilIcon, User, Calendar, BarChart } from "lucide-react";
+import { Clock, PencilIcon, User, Calendar, BarChart, Brain } from "lucide-react";
 import { DottedSeparator } from "@/components/dotted-separator";
 import { OverviewProperty } from "./overview-property";
 import { MembersAvatar } from "@/features/members/components/members-avatar";
@@ -8,7 +8,7 @@ import { TaskDate } from "./task-date";
 import { Badge } from "@/components/ui/badge";
 import { snakeCaseToTitleCase } from "@/lib/utils";
 import { useEditTaskModal } from "../hooks/use-edit-task-modal";
-import { getPreferredRoleDisplay } from "../types";
+import { getExpertiseLevelDisplay, getPreferredRoleDisplay } from "../types";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -128,6 +128,20 @@ export const TaskOverview = ({ task }: TaskOverviewProps) => {
                                 )}
                             >
                                 {task.preferredRole ? getPreferredRoleDisplay(task.preferredRole) : 'Not specified'}
+                            </Badge>
+                        </OverviewProperty>
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                        <OverviewProperty label="Expertise Level" icon={<Brain className="size-4 text-muted-foreground" />}>
+                            <Badge 
+                                variant="outline" 
+                                className={cn(
+                                    "py-1 font-normal", 
+                                    task.expertiseLevel ? "border-primary/30 bg-primary/5" : ""
+                                )}
+                            >
+                                {task.expertiseLevel ? getExpertiseLevelDisplay(task.expertiseLevel) : 'Not specified'}
                             </Badge>
                         </OverviewProperty>
                     </motion.div>

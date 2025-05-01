@@ -1,7 +1,7 @@
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Badge } from "@/components/ui/badge";
-import { Task, getPreferredRoleDisplay } from "../types";
-import { ClockIcon, TargetIcon } from "lucide-react";
+import { Task, getPreferredRoleDisplay, getExpertiseLevelDisplay } from "../types";
+import { ClockIcon, TargetIcon, BookIcon } from "lucide-react";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { MembersAvatar } from "@/features/members/components/members-avatar";
 import { TaskDate } from "./task-date";
@@ -73,6 +73,19 @@ export const TaskDetails = ({ task }: TaskDetailsProps) => {
                                 </div>
                             ) : (
                                 <p className="text-sm text-muted-foreground">Any Role</p>
+                            )}
+                        </div>
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Expertise Level</p>
+                        <div className="flex items-center gap-x-2">
+                            {task.expertiseLevel ? (
+                                <div className="flex items-center gap-x-2">
+                                    <BookIcon className="size-4 text-muted-foreground" />
+                                    <p className="font-semibold">{getExpertiseLevelDisplay(task.expertiseLevel)}</p>
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">Not specified</p>
                             )}
                         </div>
                     </div>

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TaskStatus, PreferredRole } from "./types";
+import { TaskStatus, PreferredRole, ExpertiseLevel } from "./types";
 
 export const createTaskSchema = z.object({
   name: z.string().min(1,"Required"),
@@ -11,4 +11,5 @@ export const createTaskSchema = z.object({
   description: z.string().optional(),
   estimatedHours: z.number().positive().optional(),
   preferredRole: z.nativeEnum(PreferredRole).optional(),
+  expertiseLevel: z.nativeEnum(ExpertiseLevel).optional(),
 })
