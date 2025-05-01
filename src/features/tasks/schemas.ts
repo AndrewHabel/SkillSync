@@ -7,7 +7,7 @@ export const createTaskSchema = z.object({
   workspaceId: z.string().trim().min(1, "Required"),
   projectId: z.string().trim().min(1, "Required"),
   dueDate: z.coerce.date(),
-  assigneeId: z.string().trim().min(1, "Required"),
+  assigneeId: z.string().trim().min(1, "Required").optional(),
   description: z.string().optional(),
   estimatedHours: z.number().positive().optional(),
   preferredRole: z.nativeEnum(PreferredRole).optional(),

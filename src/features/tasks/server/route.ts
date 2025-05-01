@@ -90,11 +90,18 @@ const app = new Hono()
         workspaceId,
       )
 
-      const assigne = await databases.getDocument<Member>(
-        DATABASE_ID,
-        MEMBERS_ID,
-        assigneeId
-      )
+      // Only try to get assignee if assigneeId is provided
+      let userDetails = null;
+      if (assigneeId) {
+        const assigne = await databases.getDocument<Member>(
+          DATABASE_ID,
+          MEMBERS_ID,
+          assigneeId
+        );
+        
+        const { users } = await createAdminClient();
+        userDetails = await users.get(assigne.userId);
+      }
 
       const project = task.projectId ? await databases.getDocument<Project>(
         DATABASE_ID,
@@ -102,26 +109,22 @@ const app = new Hono()
         task.projectId
       ) : null;
 
-      const { users } = await createAdminClient();
-      const userDetails = await users.get(assigne.userId);
-
-      console.log("userDetails : ", userDetails);
-      console.log("workSpace : ", workSpace);
-      console.log("project : ", project);
-      
-      try {
-        await sendAssignEmail(
-          userDetails.email || "",
-          userDetails.name || "",
-          task.name || "",
-          workSpace.name || "",
-          (project?.name) || "",
-          task.dueDate || "",
-          task.workspaceId,
-          task.$id,
-        )         
-      } catch (error) {
-        console.error("Failed to send assignment notification:", error);
+      // Only attempt to send email if we have assignee details
+      if (userDetails) {
+        try {
+          await sendAssignEmail(
+            userDetails.email || "",
+            userDetails.name || "",
+            task.name || "",
+            workSpace.name || "",
+            (project?.name) || "",
+            task.dueDate || "",
+            task.workspaceId,
+            task.$id,
+          )         
+        } catch (error) {
+          console.error("Failed to send assignment notification:", error);
+        }
       }
 
       return c.json({ data: task })

@@ -8,6 +8,7 @@ import projects from "@/features/projects/server/route";
 import tasks from "@/features/tasks/server/route";
 import userStories from "@/features/UserStories/server/route";
 import taskgeneration from "@/features/taskgeneration/server/routes";
+import taskInfoGeneration from "@/features/TaskInfoGeneration/server/routes";
 import teams from "@/features/teams/server/route";
 import codegeneration from "@/features/CodeGeneration/server/routes";
 import skill from "@/features/skill/server/route";
@@ -23,6 +24,7 @@ const routes = app
   .route("/tasks",tasks)
   .route("/userStories",userStories)
   .route("/taskgeneration",taskgeneration)
+  .route("/taskInfoGeneration",taskInfoGeneration)
   .route("/teams",teams)
   .route("/codegeneration",codegeneration)
   .route("/skill", skill)
