@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { DatePicker } from "@/components/date-picker";
 import { Select, SelectValue ,SelectTrigger, SelectContent , SelectItem} from "@/components/ui/select";
 import { MembersAvatar } from "@/features/members/components/members-avatar";
-import { TaskStatus, Task, PreferredRole, getPreferredRoleDisplay } from "../types";
+import { TaskStatus, Task, PreferredRole, getPreferredRoleDisplay, ExpertiseLevel, getExpertiseLevelDisplay } from "../types";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { useUpdateTask } from "../api/use-update-tasks";
 import { Textarea } from "@/components/ui/textarea";
@@ -105,7 +105,7 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
+                )} 
               />
               <FormField 
                 control={form.control}
@@ -292,6 +292,39 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
                       </SelectItem>
                       <SelectItem value={PreferredRole.DATA_SCIENTIST}>
                         {getPreferredRoleDisplay(PreferredRole.DATA_SCIENTIST)}
+                      </SelectItem>
+                    </SelectContent>
+                   </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField 
+                control={form.control}
+                name="expertiseLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                    Expertise Level Needed
+                    </FormLabel>
+                   <Select defaultValue={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Expertise Level"/>
+                      </SelectTrigger>
+                    </FormControl>
+                    <FormMessage />
+                    <SelectContent>
+                      <SelectItem value={ExpertiseLevel.BEGINNER}>
+                        {getExpertiseLevelDisplay(ExpertiseLevel.BEGINNER)}
+                      </SelectItem>
+                      <SelectItem value={ExpertiseLevel.INTERMEDIATE}>
+                        {getExpertiseLevelDisplay(ExpertiseLevel.INTERMEDIATE)}
+                      </SelectItem>
+                      <SelectItem value={ExpertiseLevel.ADVANCED}>
+                        {getExpertiseLevelDisplay(ExpertiseLevel.ADVANCED)}
+                      </SelectItem>
+                      <SelectItem value={ExpertiseLevel.EXPERT}>
+                        {getExpertiseLevelDisplay(ExpertiseLevel.EXPERT)}
                       </SelectItem>
                     </SelectContent>
                    </Select>

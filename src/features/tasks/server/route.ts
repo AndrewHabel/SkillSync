@@ -35,7 +35,8 @@ const app = new Hono()
         dueDate,
         preferredRole,
         estimatedHours,
-        description
+        description,
+        expertiseLevel
       } = c.req.valid("json");
 
       const member = await getMember({
@@ -78,7 +79,8 @@ const app = new Hono()
           position: newPosition,
           preferredRole,
           estimatedHours,
-          description
+          description,
+          expertiseLevel
         },
       );
 
@@ -154,7 +156,7 @@ const app = new Hono()
       // Create all tasks
       const createdTasks = await Promise.all(
         tasks.map(async (taskData) => {
-          const { name, description, status, projectId, assigneeId, dueDate, role } = taskData;
+          const { name, description, status, projectId, assigneeId, dueDate, role, expertiseLevel } = taskData;
           
           // Default position to 1000
           const position = 1000;
@@ -172,7 +174,8 @@ const app = new Hono()
               dueDate,
               assigneeId,
               position,
-              preferredRole: role
+              preferredRole: role,
+              expertiseLevel
             }
           );
         })
@@ -355,7 +358,8 @@ const app = new Hono()
         projectName,
         assigneeName,
         preferredRole,
-        estimatedHours
+        estimatedHours,
+        expertiseLevel
       } = c.req.valid("json");
 
       const { taskId } = c.req.param();
@@ -396,7 +400,8 @@ const app = new Hono()
           assigneeId,
           description,
           preferredRole,
-          estimatedHours
+          estimatedHours,
+          expertiseLevel
         },
       );
 

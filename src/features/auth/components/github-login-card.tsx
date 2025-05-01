@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { DottedSeparator } from "@/components/dotted-separator";
@@ -53,6 +54,14 @@ export const GithubLoginCard = () => {
 
   return (
     <Card className="auth-card w-full h-full md:w-[487px] border-none shadow-none">
+      <div className="flex items-center p-4">
+        <Button variant="ghost" size="sm" asChild className="flex items-center gap-2">
+          <Link href="/">
+            <ArrowLeft size={16} />
+            <span>Back to Dashboard</span>
+          </Link>
+        </Button>
+      </div>
       <CardHeader className="flex items-center justify-center text-center p-7 ">
         <CardTitle className="text-2xl">
           GitHub Integration

@@ -8,6 +8,13 @@ export enum TaskStatus {
   DONE = "DONE"
 };
 
+export enum ExpertiseLevel {
+  BEGINNER = "BEGINNER",
+  INTERMEDIATE = "INTERMEDIATE",
+  ADVANCED = "ADVANCED",
+  EXPERT = "EXPERT"
+}
+
 export enum PreferredRole {
   DATA_ANALYST = "DATA_ANALYST",
   FRONTEND_DEVELOPER = "FRONTEND_DEVELOPER", 
@@ -40,6 +47,17 @@ export const getPreferredRoleDisplay = (role: PreferredRole): string => {
   }
 }
 
+// Helper function to get display names for ExpertiseLevel values
+export const getExpertiseLevelDisplay = (level: ExpertiseLevel): string => {
+  switch (level) {
+    case ExpertiseLevel.BEGINNER: return "Beginner";
+    case ExpertiseLevel.INTERMEDIATE: return "Intermediate";
+    case ExpertiseLevel.ADVANCED: return "Advanced";
+    case ExpertiseLevel.EXPERT: return "Expert";
+    default: return String(level);
+  }
+}
+
 export type Task = Models.Document & {
   name: string,
   status: TaskStatus,
@@ -52,5 +70,6 @@ export type Task = Models.Document & {
   projectName?: string,
   assigneeName?: string,
   preferredRole?: PreferredRole,
+  expertiseLevel?: ExpertiseLevel,
   estimatedHours?: number
 }
