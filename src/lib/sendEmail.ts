@@ -2,16 +2,23 @@
 import SkillSyncHelloEmail from "@/components/emails/welcomemail";
 import AssignedTask from "@/components/emails/you-have-been-assigned-task";
 import InvitedToWorkspace from "@/components/emails/you-have-been-invited-to-workspace";
-import { Resend } from "resend";
+import sgMail from '@sendgrid/mail';
+import { render, renderAsync } from '@react-email/render';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendWelcomeEmail(to: string, name: string) {
-  return await resend.emails.send({
-    from: process.env.FROM_EMAIL!,
-    to,
-    subject: "Welcome to the App! 🎉",
-    react: SkillSyncHelloEmail({username: name}),
+
+  const html = await render(SkillSyncHelloEmail({username: name}));
+
+  sgMail.setApiKey(process.env.SEND_GRID_API_KEY!);
+  
+  const FROM_EMAIL = 'mohammedadnan.cs@hotmail.com';
+
+  return await sgMail.send({
+    from: FROM_EMAIL,
+    to:to,
+    subject: "Welcome to SkillSync! 🎉",
+    html,
   });
 }
 
@@ -25,21 +32,35 @@ export async function sendAssignEmail(
   workSpaceId : string,
   taskId : string,
 ) {
-  return await resend.emails.send({
-    from: process.env.FROM_EMAIL!,
-    to,
-    subject: "Welcome to the App! 🎉",
-    react: AssignedTask({
-                assignename: assignename,
-                workspacename: workspacename,
-                projectname: projectname,
-                dueDate: dueDate ? new Date(dueDate) : undefined,
-                taskname: taskname,
-                workSpaceId: workSpaceId,
-                taskId: taskId,
-              }),
+
+  const emailContent = AssignedTask({
+    assignename: assignename,
+    workspacename: workspacename,
+    projectname: projectname,
+    dueDate: dueDate ? new Date(dueDate) : undefined,
+    taskname: taskname,
+    workSpaceId: workSpaceId,
+    taskId: taskId,
+  });
+  
+    // Initialize SendGrid with API key
+  sgMail.setApiKey(process.env.SEND_GRID_API_KEY!);
+
+  // Set the sender email
+  const FROM_EMAIL = 'mohammedadnan.cs@hotmail.com';
+
+  // Render React component to HTML
+  const html = await render(emailContent);
+
+  // Send the email using SendGrid
+  return await sgMail.send({
+    from: FROM_EMAIL,
+    to:to,
+    subject: "You've been assigned a task in SkillSync",
+    html,
   });
 }
+
 
 export async function sendInvitedToWorkspace(
   to: string, 
@@ -49,16 +70,28 @@ export async function sendInvitedToWorkspace(
   workspaceOwner : string,
   inviteCode: string,
 ) {
-  return await resend.emails.send({
-    from: process.env.FROM_EMAIL!,
-    to,
-    subject: "Welcome to the App! 🎉",
-    react: InvitedToWorkspace({
-                invitedUserName: invitedUserName,
-                workspacename: workspacename,
-                workSpaceId: workSpaceId,
-                workspaceOwner: workspaceOwner,
-                inviteLink: inviteCode,
-              }),
+  const emailContent = InvitedToWorkspace({
+    invitedUserName: invitedUserName,
+    workspacename: workspacename,
+    workSpaceId: workSpaceId,
+    workspaceOwner: workspaceOwner,
+    inviteLink: inviteCode,
+  });
+
+  // Initialize SendGrid with API key
+  sgMail.setApiKey(process.env.SEND_GRID_API_KEY!);
+
+  // Set the sender email
+  const FROM_EMAIL = 'mohammedadnan.cs@hotmail.com';
+  
+  // Render React component to HTML
+  const html = await render(emailContent);
+
+  // Send the email using SendGrid
+  return await sgMail.send({
+    from: FROM_EMAIL,
+    to:to,
+    subject: "You've been invited to join a workspace in SkillSync",
+    html,
   });
 }

@@ -40,7 +40,7 @@ import {
           <Container style={container}>
             <Section style={box}>
               <Img
-                src="https://res.cloudinary.com/dixm4mirt/image/upload/v1744252839/logo_fehkzk.svg"
+                src="https://res.cloudinary.com/dixm4mirt/image/upload/v1748194355/logo-skillsync_dwfgvg.png"
                 width="210"
                 height="70"
                 alt="Stripe"
