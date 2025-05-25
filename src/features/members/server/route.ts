@@ -4,11 +4,12 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getMember} from "../utils";
-import { DATABASE_ID, IMAGES_BUCKET_ID, MEMBERS_ID } from "@/config";
+import { DATABASE_ID, IMAGES_BUCKET_ID, MEMBERS_ID, TASKS_ID } from "@/config";
 import { ID, Query } from "node-appwrite";
 import { get } from "http";
 import { Member, MemberRole } from "../types";
 import { UpdateMemberSchema } from "../schema";
+import { TaskStatus } from "@/features/tasks/types";
 
 const app = new Hono()
     .get(
@@ -231,6 +232,103 @@ const app = new Hono()
             return c.json({data:{$id:memberToUpdate.$id}});
 
        }
+    )
+    .get(
+        "/:memberId/workload",
+        sessionMiddleware,
+        zValidator("query", z.object({ 
+            workspaceId: z.string(),
+            projectId: z.string().optional()
+        })),
+        async (c) => {
+            const databases = c.get("databases");
+            const user = c.get("user");
+            const { workspaceId, projectId } = c.req.valid("query");
+            const { memberId } = c.req.param();
+
+            console.log("MemberId", memberId);
+            console.log("WorkspaceId", workspaceId);
+            console.log("ProjectId", projectId);
+
+            // Check if the target member exists in this workspace
+            const targetMember = await databases.getDocument(
+                DATABASE_ID,
+                MEMBERS_ID,
+                memberId
+            );
+
+            if (!targetMember || targetMember.workspaceId !== workspaceId) {
+                return c.json({ error: "Member not found in this workspace" }, 404);
+            }
+
+            // Prepare query conditions for tasks
+            const conditions = [
+                Query.equal("workspaceId", workspaceId),
+                Query.equal("assigneeId", memberId),
+            ];
+            
+            // Add projectId filter if provided
+            if (projectId) {
+                conditions.push(Query.equal("projectId", projectId));
+            }
+
+            // Get all tasks assigned to this member
+            const tasks = await databases.listDocuments(
+                DATABASE_ID,
+                TASKS_ID,
+                conditions
+            );
+
+            console.log("Tasks", tasks);
+
+            // Calculate the total estimated hours
+            let totalHours = 0;
+            let todoHours = 0;
+            let inProgressHours = 0;
+            let inReviewHours = 0;
+            let backlogHours = 0;
+            let doneHours = 0;
+
+            tasks.documents.forEach(task => {
+                const hours = task.estimatedHours || 0;
+                totalHours += hours;
+
+                // Calculate hours by status
+                switch (task.status) {
+                    case TaskStatus.BACKLOG:
+                        backlogHours += hours;
+                        break;
+                    case TaskStatus.TODO:
+                        todoHours += hours;
+                        break;
+                    case TaskStatus.IN_PROGRESS:
+                        inProgressHours += hours;
+                        break;
+                    case TaskStatus.IN_REVIEW:
+                        inReviewHours += hours;
+                        break;
+                    case TaskStatus.DONE:
+                        doneHours += hours;
+                        break;
+                }
+            });
+
+            return c.json({
+                data: {
+                    memberId,
+                    totalHours,
+                    activeHours: totalHours - doneHours,
+                    taskCount: tasks.total,
+                    byStatus: {
+                        backlog: backlogHours,
+                        todo: todoHours,
+                        inProgress: inProgressHours,
+                        inReview: inReviewHours,
+                        done: doneHours
+                    }
+                }
+            });
+        }
     )
 
 export default app;

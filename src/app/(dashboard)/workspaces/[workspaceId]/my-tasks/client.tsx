@@ -20,20 +20,18 @@ import { DataCalendar } from "@/features/tasks/components/data-calendar";
 import { useCreateTaskModal } from "@/features/tasks/hooks/use-create-task-modal";
 import { Badge } from "@/components/ui/badge";
 import { useGetMembers } from "@/features/members/api/use-get-members";
+import { useGetMemberWorkload } from "@/features/members/api/use-get-member-workload";
 
 export const MyTasksClient = () => {
   const workspaceId = useWorkspaceId();
   const { data: user } = useCurrent();
   const { open } = useCreateTaskModal();
   const { data: members } = useGetMembers({ workspaceId });
-  
-  // First, get the user ID
   const userId = user?.$id;
   
-  // Then, find the corresponding member ID
+
   const [memberId, setMemberId] = useState<string | null>(null);
   
-  // Get the member ID based on the user ID
   useEffect(() => {
     if (user && members && members.documents) {
       const currentMember = members.documents.find(member => member.userId === userId);
@@ -43,13 +41,12 @@ export const MyTasksClient = () => {
     }
   }, [user, members, userId]);
   
-  // Get tasks for the current member (not user)
   const { data: tasks, isLoading } = useGetTasks({
     workspaceId,
-    assigneeId: memberId || userId, // Try both member ID and user ID
+    assigneeId: memberId || userId,
   });
   
-  // Debugging - show what IDs we're using and the task data
+
   useEffect(() => {
     if (user && members) {
       console.log("User ID:", userId);
@@ -60,6 +57,10 @@ export const MyTasksClient = () => {
       console.log("Tasks:", tasks.documents);
     }
   }, [user, userId, memberId, members, tasks]);
+  
+
+  const activeTasks = tasks?.documents.filter(task => task.status !== TaskStatus.DONE) || [];
+  const completedTasks = tasks?.documents.filter(task => task.status === TaskStatus.DONE) || [];
   
   const [view, setView] = useQueryState("my-task-view", {
     defaultValue: "table"
@@ -82,19 +83,23 @@ export const MyTasksClient = () => {
     backlog: tasks?.documents.filter(task => task.status === TaskStatus.BACKLOG).length || 0,
   };
 
+  // Calculate total workload in hours
+  const totalEstimatedHours = tasks?.documents.reduce((total, task) => {
+    return total + (task.estimatedHours || 0);
+  }, 0) || 0;
+
+  // Calculate workload by status
+  const workloadByStatus = {
+    todo: tasks?.documents.filter(task => task.status === TaskStatus.TODO)
+      .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
+    inProgress: tasks?.documents.filter(task => task.status === TaskStatus.IN_PROGRESS)
+      .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
+    inReview: tasks?.documents.filter(task => task.status === TaskStatus.IN_REVIEW)
+      .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
+  };
+
   return (
     <div className="h-full flex flex-col space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">My Tasks</h1>
-          <p className="text-muted-foreground">Manage all tasks assigned to you</p>
-        </div>
-        <Button onClick={open} variant="gradient">
-          <PlusIcon className="size-4 mr-2" />
-          New Task
-        </Button>
-      </div>
-      
       <DottedSeparator />
       
       {/* Task status summary cards */}
@@ -136,9 +141,81 @@ export const MyTasksClient = () => {
         </Card>
       </div>
       
+      <Card>
+        <CardHeader>
+          <CardTitle>My Workload Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Total Estimated Hours</h3>
+              <div className="flex items-end gap-2">
+                <p className="text-3xl font-bold">{totalEstimatedHours}</p>
+                <p className="text-muted-foreground mb-1">hours</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                To Do
+              </h3>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-semibold">{workloadByStatus.todo}</p>
+                <p className="text-xs text-muted-foreground">hours</p>
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div 
+                  className="bg-blue-500 h-2 rounded-full" 
+                  style={{ width: `${totalEstimatedHours ? (workloadByStatus.todo / totalEstimatedHours) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
+                In Progress
+              </h3>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-semibold">{workloadByStatus.inProgress}</p>
+                <p className="text-xs text-muted-foreground">hours</p>
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div 
+                  className="bg-yellow-500 h-2 rounded-full" 
+                  style={{ width: `${totalEstimatedHours ? (workloadByStatus.inProgress / totalEstimatedHours) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+                In Review
+              </h3>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-semibold">{workloadByStatus.inReview}</p>
+                <p className="text-xs text-muted-foreground">hours</p>
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div 
+                  className="bg-orange-500 h-2 rounded-full" 
+                  style={{ width: `${totalEstimatedHours ? (workloadByStatus.inReview / totalEstimatedHours) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Active Tasks Section */}
       <Card className="flex-1">
-        <CardHeader className="pb-0">
-          <CardTitle>Task List</CardTitle>
+        <CardHeader className="pb-0 flex flex-row items-center justify-between">
+          <CardTitle>Active Tasks</CardTitle>
+          <Badge variant={TaskStatus.TODO} className="px-3 py-1">
+              {activeTasks.length} {activeTasks.length === 1 ? 'Task' : 'Tasks'}
+            </Badge>
         </CardHeader>
         <CardContent className="pt-2">
           <Tabs defaultValue={view} onValueChange={setView}>
@@ -161,17 +238,35 @@ export const MyTasksClient = () => {
             </TabsList>
             
             <TabsContent value="table" className="mt-0">
-              <DataTable columns={columns} data={tasks?.documents || []} />
+              <DataTable columns={columns} data={activeTasks} />
             </TabsContent>
             <TabsContent value="kanban" className="mt-0">
-              <DataKanban onChange={onKanbanChange} data={tasks?.documents || []} />
+              <DataKanban onChange={onKanbanChange} data={activeTasks} />
             </TabsContent>
             <TabsContent value="calendar" className="mt-0 h-[600px]">
-              <DataCalendar data={tasks?.documents || []} />
+              <DataCalendar data={activeTasks} />
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
+      
+      {/* Completed Tasks Section */}
+      {completedTasks.length > 0 && (
+        <Card>
+          <CardHeader className="pb-0 flex flex-row items-center justify-between">
+            <CardTitle>Completed Tasks</CardTitle>
+            <Badge variant={TaskStatus.DONE} className="px-3 py-1">
+              {completedTasks.length} {completedTasks.length === 1 ? 'Task' : 'Tasks'}
+            </Badge>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <DataTable 
+              columns={columns} 
+              data={completedTasks} 
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
