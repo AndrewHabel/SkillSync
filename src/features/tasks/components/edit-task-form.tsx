@@ -41,16 +41,28 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
       dueDate: initialValues.dueDate? new Date(initialValues.dueDate) : undefined,
     },
   });
-
   const onSubmit = (values: z.infer<typeof createTaskSchema> ) => {
-
     const selectedProject = projectOptions.find(project => project.id === values.projectId);
-    const selectedAssignee = memberOptions.find(member => member.id === values.assigneeId);
     
+    // Handle special "unassigned" value for assigneeId
+    const assigneeId = values.assigneeId === "unassigned" ? undefined : values.assigneeId;
+    const selectedAssignee = assigneeId 
+      ? memberOptions.find(member => member.id === assigneeId)
+      : null;
+      
+    // Handle special values for preferred role and expertise level
+    const preferredRole = values.preferredRole === "none_role" ? undefined : values.preferredRole;
+    const expertiseLevel = values.expertiseLevel === "none_expertise" ? undefined : values.expertiseLevel;
+      
+    // Process values to handle optional fields correctly
     const submissionData = {
       ...values,
+      assigneeId,
+      preferredRole,
+      expertiseLevel,
       projectName: selectedProject?.name || '',
-      assigneeName: selectedAssignee?.name || '',
+      // Only include assigneeName if assigneeId is provided
+      ...(assigneeId ? { assigneeName: selectedAssignee?.name || '' } : { assigneeName: '' }),
     };
     
     mutate({ json: submissionData, param: { taskId: initialValues.$id }}, {
@@ -205,16 +217,23 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Assignee
+                        Assignee (optional)
                       </FormLabel>
-                      <Select defaultValue={field.value} onValueChange={field.onChange}>
+                      <Select 
+                        defaultValue={field.value} 
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Assignee"/>
                           </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                        <SelectContent>
+                        <FormMessage />                        <SelectContent>
+                          <SelectItem value="unassigned">
+                            <div className="flex items-center gap-x-2 text-muted-foreground">
+                              None (Unassigned)
+                            </div>
+                          </SelectItem>
                           {memberOptions.map((member) => (
                             <SelectItem key={member.id} value={member.id}>
                               <div className="flex items-center gap-x-2">
@@ -234,16 +253,23 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Preferred Role
+                        Preferred Role (optional)
                       </FormLabel>
-                      <Select defaultValue={field.value} onValueChange={field.onChange}>
+                      <Select 
+                        defaultValue={field.value} 
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Preferred Role"/>
                           </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                        <SelectContent>
+                        <FormMessage />                        <SelectContent>
+                          <SelectItem value="none_role">
+                            <div className="text-muted-foreground">
+                              None (No specific role required)
+                            </div>
+                          </SelectItem>
                           <SelectItem value={PreferredRole.DATA_ANALYST}>
                             {getPreferredRoleDisplay(PreferredRole.DATA_ANALYST)}
                           </SelectItem>
@@ -288,16 +314,23 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Expertise Level Needed
+                        Expertise Level Needed (optional)
                       </FormLabel>
-                      <Select defaultValue={field.value} onValueChange={field.onChange}>
+                      <Select 
+                        defaultValue={field.value} 
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Expertise Level"/>
                           </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                        <SelectContent>
+                        <FormMessage />                        <SelectContent>
+                          <SelectItem value="none_expertise">
+                            <div className="text-muted-foreground">
+                              None (No specific expertise level required)
+                            </div>
+                          </SelectItem>
                           <SelectItem value={ExpertiseLevel.BEGINNER}>
                             {getExpertiseLevelDisplay(ExpertiseLevel.BEGINNER)}
                           </SelectItem>
@@ -321,7 +354,7 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Estimated Hours
+                        Estimated Hours (optional)
                       </FormLabel>
                       <FormControl>
                         <Input

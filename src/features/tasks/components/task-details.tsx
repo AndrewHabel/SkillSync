@@ -5,6 +5,7 @@ import { ClockIcon, TargetIcon, BookIcon } from "lucide-react";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { MembersAvatar } from "@/features/members/components/members-avatar";
 import { TaskDate } from "./task-date";
+import { SmartTaskAllocation } from "./smart-task-allocation";
 
 interface TaskDetailsProps {
     task: Task;
@@ -27,9 +28,11 @@ export const TaskDetails = ({ task }: TaskDetailsProps) => {
                                 <p className="text-sm text-muted-foreground">No Project</p>
                             )}
                         </div>
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Assignee</p>
+                    </div>                    <div>
+                        <div className="flex items-center justify-between">
+                            <p className="text-sm text-muted-foreground">Assignee</p>
+                            {!task.assignee && <SmartTaskAllocation task={task} />}
+                        </div>
                         <div className="flex items-center gap-x-2">
                             {task.assignee ? (
                                 <>

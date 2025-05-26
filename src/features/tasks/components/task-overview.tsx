@@ -12,6 +12,7 @@ import { getExpertiseLevelDisplay, getPreferredRoleDisplay } from "../types";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { SmartTaskAllocation } from "./smart-task-allocation";
 
 interface TaskOverviewProps {
     task: Task;
@@ -83,13 +84,20 @@ export const TaskOverview = ({ task }: TaskOverviewProps) => {
 
                 <DottedSeparator className="my-3" />
 
-                <div className="flex flex-col gap-y-5">
-                    <motion.div variants={itemVariants}>
-                        <OverviewProperty label="Assignee" icon={<User className="size-4 text-muted-foreground" />}>
-                            <div className="flex items-center gap-x-3">
-                                <MembersAvatar name={task.assignee.name} className="size-7 border-2 border-background" />
-                                <p className="text-sm font-medium">{task.assignee.name}</p>
-                            </div>
+                <div className="flex flex-col gap-y-5">                    <motion.div variants={itemVariants}>
+                        <OverviewProperty 
+                            label="Assignee" 
+                            icon={<User className="size-4 text-muted-foreground" />}
+                            rightElement={!task.assignee ? <SmartTaskAllocation task={task} /> : undefined}
+                        >
+                            {task.assignee ? (
+                                <div className="flex items-center gap-x-3">
+                                    <MembersAvatar name={task.assignee.name} className="size-7 border-2 border-background" />
+                                    <p className="text-sm font-medium">{task.assignee.name}</p>
+                                </div>
+                            ) : (
+                                <p className="text-sm font-medium text-muted-foreground italic">No assignee</p>
+                            )}
                         </OverviewProperty>
                     </motion.div>
 
