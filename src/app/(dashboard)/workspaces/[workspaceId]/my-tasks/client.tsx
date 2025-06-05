@@ -29,7 +29,6 @@ export const MyTasksClient = () => {
   const { data: members } = useGetMembers({ workspaceId });
   const userId = user?.$id;
   
-
   const [memberId, setMemberId] = useState<string | null>(null);
   
   useEffect(() => {
@@ -58,8 +57,28 @@ export const MyTasksClient = () => {
     }
   }, [user, userId, memberId, members, tasks]);
   
-
-  const activeTasks = tasks?.documents.filter(task => task.status !== TaskStatus.DONE) || [];
+  // Identify overdue tasks - tasks with due date before current date that are not completed
+  const today = new Date();
+  const overdueTasks = tasks?.documents.filter(task => {
+    if (!task.dueDate || task.status === TaskStatus.DONE) return false;
+    const dueDate = new Date(task.dueDate);
+    return dueDate < today;
+  }) || [];
+  
+  // Filter active tasks (not done and not overdue)
+  const activeTasks = tasks?.documents.filter(task => {
+    // Exclude completed tasks
+    if (task.status === TaskStatus.DONE) return false;
+    
+    // Exclude overdue tasks
+    if (task.dueDate) {
+      const dueDate = new Date(task.dueDate);
+      if (dueDate < today) return false;
+    }
+    
+    return true;
+  }) || [];
+  
   const completedTasks = tasks?.documents.filter(task => task.status === TaskStatus.DONE) || [];
   
   const [view, setView] = useQueryState("my-task-view", {
@@ -80,7 +99,7 @@ export const MyTasksClient = () => {
     inProgress: tasks?.documents.filter(task => task.status === TaskStatus.IN_PROGRESS).length || 0,
     inReview: tasks?.documents.filter(task => task.status === TaskStatus.IN_REVIEW).length || 0,
     done: tasks?.documents.filter(task => task.status === TaskStatus.DONE).length || 0,
-    backlog: tasks?.documents.filter(task => task.status === TaskStatus.BACKLOG).length || 0,
+    overdue: overdueTasks.length || 0,
   };
 
   // Calculate total workload in hours
@@ -96,6 +115,8 @@ export const MyTasksClient = () => {
       .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
     inReview: tasks?.documents.filter(task => task.status === TaskStatus.IN_REVIEW)
       .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
+    overdue: overdueTasks
+      .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
   };
 
   return (
@@ -103,7 +124,7 @@ export const MyTasksClient = () => {
       <DottedSeparator />
       
       {/* Task status summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <Card>
           <CardContent className="p-4 flex flex-col items-center justify-center">
             <p className="text-sm text-muted-foreground">To Do</p>
@@ -132,16 +153,17 @@ export const MyTasksClient = () => {
             <Badge variant={TaskStatus.DONE} className="mt-2">Done</Badge>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="p-1 flex flex-col items-center justify-center">
           <CardContent className="p-4 flex flex-col items-center justify-center">
-            <p className="text-sm text-muted-foreground">Backlog</p>
-            <p className="text-3xl font-bold">{statusCounts.backlog}</p>
-            <Badge variant={TaskStatus.BACKLOG} className="mt-2">Backlog</Badge>
+            <p className="text-sm text-muted-foreground">Overdue</p>
+            <p className={"text-3xl font-bold"}>
+              {statusCounts.overdue}
+            </p>
+            <Badge variant="destructive" className="mt-2">Overdue</Badge>
           </CardContent>
         </Card>
       </div>
-      
-      <Card>
+        <Card style={{ backgroundColor: 'hsl(var(--table-background))' }}>
         <CardHeader>
           <CardTitle>My Workload Summary</CardTitle>
         </CardHeader>
@@ -205,12 +227,29 @@ export const MyTasksClient = () => {
                 />
               </div>
             </div>
+            
+            {workloadByStatus.overdue > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full bg-red-500"></div>
+                  Overdue
+                </h3>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-2xl font-semibold text-red-500">{workloadByStatus.overdue}</p>
+                  <p className="text-xs text-muted-foreground">hours</p>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div 
+                    className="bg-red-500 h-2 rounded-full" 
+                    style={{ width: `${totalEstimatedHours ? (workloadByStatus.overdue / totalEstimatedHours) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
-      </Card>
-      
-      {/* Active Tasks Section */}
-      <Card className="flex-1">
+      </Card>      {/* Active Tasks Section */}
+      <Card className="flex-1" style={{ backgroundColor: 'hsl(var(--table-background))' }}>
         <CardHeader className="pb-0 flex flex-row items-center justify-between">
           <CardTitle>Active Tasks</CardTitle>
           <Badge variant={TaskStatus.TODO} className="px-3 py-1">
@@ -218,7 +257,7 @@ export const MyTasksClient = () => {
             </Badge>
         </CardHeader>
         <CardContent className="pt-2">
-          <Tabs defaultValue={view} onValueChange={setView}>
+          <Tabs defaultValue={view} onValueChange={setView} className="flex-1 w-full project-table-bg">
             <TabsList className="bg-secondary p-1 mb-4">
               <TabsTrigger 
                 className="h-8 data-[state=inactive]:bg-background data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" 
@@ -238,7 +277,9 @@ export const MyTasksClient = () => {
             </TabsList>
             
             <TabsContent value="table" className="mt-0">
-              <DataTable columns={columns} data={activeTasks} />
+              <div className="tasks-table rounded-md">
+                <DataTable columns={columns} data={activeTasks} />
+              </div>
             </TabsContent>
             <TabsContent value="kanban" className="mt-0">
               <DataKanban onChange={onKanbanChange} data={activeTasks} />
@@ -248,11 +289,8 @@ export const MyTasksClient = () => {
             </TabsContent>
           </Tabs>
         </CardContent>
-      </Card>
-      
-      {/* Completed Tasks Section */}
-      {completedTasks.length > 0 && (
-        <Card>
+      </Card>      {completedTasks.length > 0 && (
+        <Card style={{ backgroundColor: 'hsl(var(--table-background))' }}>
           <CardHeader className="pb-0 flex flex-row items-center justify-between">
             <CardTitle>Completed Tasks</CardTitle>
             <Badge variant={TaskStatus.DONE} className="px-3 py-1">
@@ -260,10 +298,36 @@ export const MyTasksClient = () => {
             </Badge>
           </CardHeader>
           <CardContent className="pt-4">
-            <DataTable 
-              columns={columns} 
-              data={completedTasks} 
-            />
+            <div className="project-table-bg p-4">
+              <div className="tasks-table">
+                <DataTable 
+                  columns={columns} 
+                  data={completedTasks} 
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}      {/* Overdue Tasks Section */}
+      {overdueTasks.length > 0 && (
+        <Card style={{ backgroundColor: 'hsl(var(--table-background))' }}>
+          <CardHeader className="pb-0 flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-x-2">
+              Overdue Tasks
+            </CardTitle>
+            <Badge variant="destructive" className="px-3 py-1">
+              {overdueTasks.length} {overdueTasks.length === 1 ? 'Task' : 'Tasks'}
+            </Badge>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="project-table-bg p-4">
+              <div className="tasks-table">
+                <DataTable 
+                  columns={columns} 
+                  data={overdueTasks}
+                />
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
