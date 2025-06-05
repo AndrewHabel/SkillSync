@@ -56,11 +56,10 @@ export const MyTasksClient = () => {
       console.log("Tasks:", tasks.documents);
     }
   }, [user, userId, memberId, members, tasks]);
-  
-  // Identify overdue tasks - tasks with due date before current date that are not completed
+    // Identify overdue tasks - tasks with due date before current date (including completed ones)
   const today = new Date();
   const overdueTasks = tasks?.documents.filter(task => {
-    if (!task.dueDate || task.status === TaskStatus.DONE) return false;
+    if (!task.dueDate) return false;
     const dueDate = new Date(task.dueDate);
     return dueDate < today;
   }) || [];
@@ -79,7 +78,10 @@ export const MyTasksClient = () => {
     return true;
   }) || [];
   
-  const completedTasks = tasks?.documents.filter(task => task.status === TaskStatus.DONE) || [];
+  // Filter completed tasks (only those that aren't overdue)
+  const completedTasks = tasks?.documents.filter(task => 
+    task.status === TaskStatus.DONE && (!task.dueDate || new Date(task.dueDate) >= today)
+  ) || [];
   
   const [view, setView] = useQueryState("my-task-view", {
     defaultValue: "table"
@@ -92,22 +94,20 @@ export const MyTasksClient = () => {
   }, [bulkUpdate]);
   
   if (!userId) return <PageError message="User profile not found" />;
-  
-  // Count tasks by status
+    // Count tasks by status
   const statusCounts = {
     todo: tasks?.documents.filter(task => task.status === TaskStatus.TODO).length || 0,
     inProgress: tasks?.documents.filter(task => task.status === TaskStatus.IN_PROGRESS).length || 0,
     inReview: tasks?.documents.filter(task => task.status === TaskStatus.IN_REVIEW).length || 0,
-    done: tasks?.documents.filter(task => task.status === TaskStatus.DONE).length || 0,
+    done: tasks?.documents.filter(task => task.status === TaskStatus.DONE && (!task.dueDate || new Date(task.dueDate) >= today)).length || 0,
     overdue: overdueTasks.length || 0,
   };
-
-  // Calculate total workload in hours
-  const totalEstimatedHours = tasks?.documents.reduce((total, task) => {
-    return total + (task.estimatedHours || 0);
-  }, 0) || 0;
-
-  // Calculate workload by status
+  // Calculate total workload in hours (excluding done tasks)
+  const totalEstimatedHours = tasks?.documents
+    .filter(task => task.status !== TaskStatus.DONE) // Exclude done tasks
+    .reduce((total, task) => {
+      return total + (task.estimatedHours || 0);
+    }, 0) || 0;  // Calculate workload by status (only active tasks)
   const workloadByStatus = {
     todo: tasks?.documents.filter(task => task.status === TaskStatus.TODO)
       .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
@@ -116,6 +116,7 @@ export const MyTasksClient = () => {
     inReview: tasks?.documents.filter(task => task.status === TaskStatus.IN_REVIEW)
       .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
     overdue: overdueTasks
+      .filter(task => task.status !== TaskStatus.DONE) // Only count hours for non-completed overdue tasks
       .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
   };
 
@@ -152,14 +153,20 @@ export const MyTasksClient = () => {
             <p className="text-3xl font-bold">{statusCounts.done}</p>
             <Badge variant={TaskStatus.DONE} className="mt-2">Done</Badge>
           </CardContent>
-        </Card>
-        <Card className="p-1 flex flex-col items-center justify-center">
+        </Card>        <Card className="p-1 flex flex-col items-center justify-center">
           <CardContent className="p-4 flex flex-col items-center justify-center">
             <p className="text-sm text-muted-foreground">Overdue</p>
-            <p className={"text-3xl font-bold"}>
+            <p className="text-3xl font-bold">
               {statusCounts.overdue}
             </p>
-            <Badge variant="destructive" className="mt-2">Overdue</Badge>
+            <div className="flex flex-col items-center gap-2 mt-2">
+              <Badge variant="destructive" className="px-3 py-1">Overdue</Badge>
+              {overdueTasks.filter(task => task.status === TaskStatus.DONE).length > 0 && (
+                <div className="flex items-center justify-center rounded-full border border-red-400/30 bg-red-400/10 dark:bg-red-900/20 px-3 py-1 text-xs text-red-500 dark:text-red-400">
+                  <span className="mr-1 font-medium">{overdueTasks.filter(task => task.status === TaskStatus.DONE).length}</span> completed
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -288,8 +295,62 @@ export const MyTasksClient = () => {
               <DataCalendar data={activeTasks} />
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>      {completedTasks.length > 0 && (
+        </CardContent>      </Card>      {/* Overdue Tasks Section */}
+      {overdueTasks.length > 0 && (
+        <Card style={{ backgroundColor: 'hsl(var(--table-background))' }}>
+          <CardHeader className="pb-0 flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-x-2">
+              Overdue Tasks
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Badge variant="destructive" className="px-3 py-1">
+                {overdueTasks.length} {overdueTasks.length === 1 ? 'Task' : 'Tasks'}
+              </Badge>
+              {overdueTasks.filter(task => task.status === TaskStatus.DONE).length > 0 && (
+                <div className="flex items-center justify-center rounded-md border border-red-400/30 bg-red-400/10 dark:bg-red-900/20 px-2 py-1 text-xs text-red-500 dark:text-red-400">
+                  <span className="mr-1 font-medium">{overdueTasks.filter(task => task.status === TaskStatus.DONE).length}</span> completed
+                </div>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <Tabs defaultValue="table" className="flex-1 w-full project-table-bg">
+              <TabsList className="bg-secondary p-1 mb-4">
+                <TabsTrigger 
+                  className="h-8 data-[state=inactive]:bg-background data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" 
+                  value="table">
+                  Table
+                </TabsTrigger>
+                <TabsTrigger 
+                  className="h-8 data-[state=inactive]:bg-background data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" 
+                  value="kanban">
+                  Kanban
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="table" className="mt-0">
+                <div className="tasks-table rounded-md">
+                  <DataTable columns={columns} data={overdueTasks} />
+                </div>
+              </TabsContent>
+              <TabsContent value="kanban" className="mt-0">
+                <DataKanban onChange={onKanbanChange} data={overdueTasks} />
+              </TabsContent>
+              
+              {overdueTasks.some(task => task.status === TaskStatus.DONE) && (
+                <div className="mt-3 p-2 border border-amber-200 rounded bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/50">
+                  <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    Completed overdue tasks are included in the count but contribute 0 hours to workload.
+                  </p>
+                </div>
+              )}
+            </Tabs>
+          </CardContent>
+        </Card>
+      )}      {completedTasks.length > 0 && (
         <Card style={{ backgroundColor: 'hsl(var(--table-background))' }}>
           <CardHeader className="pb-0 flex flex-row items-center justify-between">
             <CardTitle>Completed Tasks</CardTitle>
@@ -305,30 +366,7 @@ export const MyTasksClient = () => {
                   data={completedTasks} 
                 />
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}      {/* Overdue Tasks Section */}
-      {overdueTasks.length > 0 && (
-        <Card style={{ backgroundColor: 'hsl(var(--table-background))' }}>
-          <CardHeader className="pb-0 flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-x-2">
-              Overdue Tasks
-            </CardTitle>
-            <Badge variant="destructive" className="px-3 py-1">
-              {overdueTasks.length} {overdueTasks.length === 1 ? 'Task' : 'Tasks'}
-            </Badge>
-          </CardHeader>
-          <CardContent className="pt-4">
-            <div className="project-table-bg p-4">
-              <div className="tasks-table">
-                <DataTable 
-                  columns={columns} 
-                  data={overdueTasks}
-                />
-              </div>
-            </div>
-          </CardContent>
+            </div>          </CardContent>
         </Card>
       )}
     </div>
