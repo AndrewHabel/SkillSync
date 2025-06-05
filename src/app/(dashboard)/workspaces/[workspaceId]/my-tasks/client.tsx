@@ -21,6 +21,8 @@ import { useCreateTaskModal } from "@/features/tasks/hooks/use-create-task-modal
 import { Badge } from "@/components/ui/badge";
 import { useGetMembers } from "@/features/members/api/use-get-members";
 import { useGetMemberWorkload } from "@/features/members/api/use-get-member-workload";
+import { calculatePerformanceScore } from "@/features/members/utils/performance-score";
+import { calculateWorkloadSummary } from "@/features/members/utils/workload-summary";
 
 export const MyTasksClient = () => {
   const workspaceId = useWorkspaceId();
@@ -55,9 +57,10 @@ export const MyTasksClient = () => {
     if (tasks) {
       console.log("Tasks:", tasks.documents);
     }
-  }, [user, userId, memberId, members, tasks]);
-    // Identify overdue tasks - tasks with due date before current date (including completed ones)
+  }, [user, userId, memberId, members, tasks]);  // Define today for date comparisons
   const today = new Date();
+  
+  // Identify overdue tasks - tasks with due date before current date (including completed ones)
   const overdueTasks = tasks?.documents.filter(task => {
     if (!task.dueDate) return false;
     const dueDate = new Date(task.dueDate);
@@ -92,33 +95,24 @@ export const MyTasksClient = () => {
   const onKanbanChange = useCallback((tasks: { $id: string, status: TaskStatus, position: number }[]) => {
     bulkUpdate({ json: { tasks } });
   }, [bulkUpdate]);
+    if (!userId) return <PageError message="User profile not found" />;
   
-  if (!userId) return <PageError message="User profile not found" />;
-    // Count tasks by status
-  const statusCounts = {
-    todo: tasks?.documents.filter(task => task.status === TaskStatus.TODO).length || 0,
-    inProgress: tasks?.documents.filter(task => task.status === TaskStatus.IN_PROGRESS).length || 0,
-    inReview: tasks?.documents.filter(task => task.status === TaskStatus.IN_REVIEW).length || 0,
-    done: tasks?.documents.filter(task => task.status === TaskStatus.DONE && (!task.dueDate || new Date(task.dueDate) >= today)).length || 0,
-    overdue: overdueTasks.length || 0,
-  };
-  // Calculate total workload in hours (excluding done tasks)
-  const totalEstimatedHours = tasks?.documents
-    .filter(task => task.status !== TaskStatus.DONE) // Exclude done tasks
-    .reduce((total, task) => {
-      return total + (task.estimatedHours || 0);
-    }, 0) || 0;  // Calculate workload by status (only active tasks)
-  const workloadByStatus = {
-    todo: tasks?.documents.filter(task => task.status === TaskStatus.TODO)
-      .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
-    inProgress: tasks?.documents.filter(task => task.status === TaskStatus.IN_PROGRESS)
-      .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
-    inReview: tasks?.documents.filter(task => task.status === TaskStatus.IN_REVIEW)
-      .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
-    overdue: overdueTasks
-      .filter(task => task.status !== TaskStatus.DONE) // Only count hours for non-completed overdue tasks
-      .reduce((total, task) => total + (task.estimatedHours || 0), 0) || 0,
-  };
+  const {
+    performanceScore,
+    completionScore,
+    activeTasksScore,
+    onTimeScore,
+    completedTasksCount,
+    activeTasksCount,
+    overdueTasksCount,
+    totalTasksCount
+  } = calculatePerformanceScore(tasks?.documents);
+
+  const {
+    totalEstimatedHours,
+    workloadByStatus,
+    statusCounts
+  } = calculateWorkloadSummary(tasks?.documents);
 
   return (
     <div className="h-full flex flex-col space-y-4">
@@ -146,14 +140,14 @@ export const MyTasksClient = () => {
             <p className="text-3xl font-bold">{statusCounts.inReview}</p>
             <Badge variant={TaskStatus.IN_REVIEW} className="mt-2">In Review</Badge>
           </CardContent>
-        </Card>
-        <Card>
+        </Card>        <Card>
           <CardContent className="p-4 flex flex-col items-center justify-center">
             <p className="text-sm text-muted-foreground">Done</p>
             <p className="text-3xl font-bold">{statusCounts.done}</p>
             <Badge variant={TaskStatus.DONE} className="mt-2">Done</Badge>
           </CardContent>
-        </Card>        <Card className="p-1 flex flex-col items-center justify-center">
+        </Card>
+        <Card className="p-1 flex flex-col items-center justify-center">
           <CardContent className="p-4 flex flex-col items-center justify-center">
             <p className="text-sm text-muted-foreground">Overdue</p>
             <p className="text-3xl font-bold">
@@ -169,7 +163,89 @@ export const MyTasksClient = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+        <Card className="p-1 flex flex-col items-center justify-center">
+          <CardContent className="p-4 flex flex-col items-center justify-center">
+            <p className="text-sm text-muted-foreground">Performance</p>
+            <p className="text-3xl font-bold">{performanceScore}</p>
+            <div className="mt-2">
+              {performanceScore >= 90 ? (
+                <Badge className="bg-green-600 hover:bg-green-700 text-white">Excellent</Badge>
+              ) : performanceScore >= 75 ? (
+                <Badge className="bg-blue-600 hover:bg-blue-700 text-white">Good</Badge>
+              ) : performanceScore >= 60 ? (
+                <Badge className="bg-yellow-600 hover:bg-yellow-700 text-white">Average</Badge>
+              ) : (
+                <Badge className="bg-orange-600 hover:bg-orange-700 text-white">Needs Improvement</Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>        <Card style={{ backgroundColor: 'hsl(var(--table-background))' }}>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Performance Score Breakdown</CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-medium">Score: </div>
+            <div className="text-2xl font-bold">{performanceScore}</div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="space-y-2">              <div className="flex justify-between">
+                <span className="text-sm font-medium">Task Completion (50%)</span>
+                <span className="text-sm font-medium">
+                  {Math.round(completionScore * 10) / 10}
+                </span>
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div 
+                  className="bg-green-500 h-2 rounded-full" 
+                  style={{ width: `${totalTasksCount > 0 ? (completedTasksCount / totalTasksCount) * 100 : 0}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {completedTasksCount} of {totalTasksCount} tasks completed
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium">Active Tasks (30%)</span>
+                <span className="text-sm font-medium">
+                  {Math.round(activeTasksScore * 10) / 10}
+                </span>
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div 
+                  className="bg-blue-500 h-2 rounded-full" 
+                  style={{ width: `${totalTasksCount > 0 ? (activeTasksCount / totalTasksCount) * 100 : 0}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {activeTasksCount} of {totalTasksCount} tasks in progress
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium">Avoiding Overdue (20%)</span>
+                <span className="text-sm font-medium">
+                  {Math.round(onTimeScore * 10) / 10}
+                </span>
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div 
+                  className="bg-orange-500 h-2 rounded-full" 
+                  style={{ width: `${totalTasksCount > 0 ? ((totalTasksCount - overdueTasksCount) / totalTasksCount) * 100 : 0}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {totalTasksCount - overdueTasksCount} of {totalTasksCount} tasks on time
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
         <Card style={{ backgroundColor: 'hsl(var(--table-background))' }}>
         <CardHeader>
           <CardTitle>My Workload Summary</CardTitle>
@@ -341,7 +417,7 @@ export const MyTasksClient = () => {
                 <div className="mt-3 p-2 border border-amber-200 rounded bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/50">
                   <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zm-4 4a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                     Completed overdue tasks are included in the count but contribute 0 hours to workload.
                   </p>
