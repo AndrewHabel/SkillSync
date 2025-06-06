@@ -3,13 +3,15 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { createTeamSchema, updateTeamSchema } from "../schemas";
 import { getMember } from "@/features/members/utils";
-import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TEAMS_ID, WORKSPACES_ID } from "@/config";
+import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, SKILLS_ID, TASKS_ID, TEAMS_ID, WORKSPACES_ID } from "@/config";
 import { ID, Query } from "node-appwrite";
 import { z } from "zod";
 import { Team } from "../types";
 import { createAdminClient } from "@/lib/appwrite";
 import { Project } from "@/features/projects/types";
 import { Member } from "@/features/members/types";
+import { calculatePerformanceScore } from "@/features/members/utils/performance-score";
+import { calculateWorkloadSummary } from "@/features/members/utils/workload-summary";
 
 const app = new Hono()
   .post(
@@ -114,9 +116,7 @@ const app = new Hono()
         DATABASE_ID,
         MEMBERS_ID,
         memberIds.length > 0 ? [Query.contains("$id", memberIds)] : [],
-      );
-
-      const teamMembers = await Promise.all(
+      );      const teamMembers = await Promise.all(
         members.documents.map(async (member) => {
           const user = await users.get(member.userId);
           const username = user.email.split('@')[0];
@@ -128,7 +128,36 @@ const app = new Hono()
           };
         })
       );
+      
+      // Get all skills for team members
+      let memberSkills: any[] = [];
+      try {
+        // Get all skills from the database
+        const skillsData = await databases.listDocuments(
+          DATABASE_ID,
+          SKILLS_ID,
+          []
+        );
+        
+        memberSkills = skillsData.documents;
+      } catch (error) {
+        console.error("Error fetching member skills:", error);
+      }
 
+      // Get all tasks for team members
+      let memberTasks: any[] = [];
+      try {
+        // Get all tasks from the database
+        const tasksData = await databases.listDocuments(
+          DATABASE_ID,
+          TASKS_ID,
+          []
+        );
+        
+        memberTasks = tasksData.documents;
+      } catch (error) {
+        console.error("Error fetching member tasks:", error);
+      }
 
       const populatedTeams = teams.documents.map((team) => {
         const project = team.projectId 
@@ -139,13 +168,32 @@ const app = new Hono()
           ? teamMembers.filter((member) => team.membersId?.includes(member.$id))
           : [];
         
-        
+        // Add skills, tasks, performance scores and workload summaries to each team member
+        const teamMembersWithDetails = teamMembersList.map(member => {
+          // Find all skills belonging to this member
+          const skills = memberSkills.filter(skill => skill.userId === member.$id);
+          
+          // Find all tasks assigned to this member
+          const tasks = memberTasks.filter(task => task.assigneeId === member.$id);
+          
+          // Calculate performance score and workload summary
+          const performanceScore = calculatePerformanceScore(tasks);
+          const workloadSummary = calculateWorkloadSummary(tasks);
+          
+          return {
+            ...member,
+            skills: skills || [],
+            tasks: tasks || [],
+            performanceScore,
+            workloadSummary
+          };
+        });
 
         return {
           ...team,
           project,
-          membersList: teamMembersList,
-          memberCount: teamMembersList.length
+          membersList: teamMembersWithDetails,
+          memberCount: teamMembersWithDetails.length
         };
       });
 
@@ -181,9 +229,7 @@ const app = new Hono()
         DATABASE_ID,
         PROJECTS_ID,
         team.projectId
-      ) : null;
-
-      // Get team members
+      ) : null;      // Get team members
       const memberIds = team.members || [];
       let teamMembers: any[] = [];
       
@@ -205,7 +251,57 @@ const app = new Hono()
                 email: user.email,
               };
             })
-          );
+          );          
+          // Get all skills for team members
+          let memberSkills: any[] = [];
+          try {
+            // Get all skills from the database
+            const skillsData = await databases.listDocuments(
+              DATABASE_ID,
+              SKILLS_ID,
+              []
+            );
+            
+            memberSkills = skillsData.documents;
+            
+            // Get all tasks for team members
+            let memberTasks: any[] = [];
+            try {
+              // Get all tasks from the database
+              const tasksData = await databases.listDocuments(
+                DATABASE_ID,
+                TASKS_ID,
+                []
+              );
+              
+              memberTasks = tasksData.documents;
+              
+              // Add skills, tasks, performance scores and workload summaries to each team member
+              teamMembers = teamMembers.map(member => {
+                // Find all skills belonging to this member
+                const skills = memberSkills.filter(skill => skill.userId === member.$id);
+                
+                // Find all tasks assigned to this member
+                const tasks = memberTasks.filter(task => task.assigneeId === member.$id);
+                
+                // Calculate performance score and workload summary
+                const performanceScore = calculatePerformanceScore(tasks);
+                const workloadSummary = calculateWorkloadSummary(tasks);
+                
+                return {
+                  ...member,
+                  skills: skills || [],
+                  tasks: tasks || [],
+                  performanceScore,
+                  workloadSummary
+                };
+              });
+            } catch (error) {
+              console.error("Error fetching member tasks:", error);
+            }
+          } catch (error) {
+            console.error("Error fetching member skills:", error);
+          }
         } catch (error) {
           console.error("Error fetching team members:", error);
         }

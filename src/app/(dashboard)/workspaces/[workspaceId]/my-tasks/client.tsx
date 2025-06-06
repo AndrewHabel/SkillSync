@@ -44,7 +44,7 @@ export const MyTasksClient = () => {
   
   const { data: tasks, isLoading } = useGetTasks({
     workspaceId,
-    assigneeId: memberId || userId,
+    assigneeId: memberId ,
   });
   
 

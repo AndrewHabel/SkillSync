@@ -98,8 +98,8 @@ const app = new Hono()
 
             return c.json({ data: skills });
         }
-    )
-    .post(
+    )        
+   .post(
         "/bulk-create",
         sessionMiddleware,
         zValidator("json", bulkCreateSkillSchema),

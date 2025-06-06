@@ -139,7 +139,7 @@ export const columns: ColumnDef<Task>[] = [
     cell: ({ row }) => {
       const id = row.original.$id;
       const projectId = row.original.projectId;
-
+      if (!projectId) return null;
       return (
         <TaskActions id={id} projectId={projectId}>
           <Button variant="ghost" className="size-8 p-0">
