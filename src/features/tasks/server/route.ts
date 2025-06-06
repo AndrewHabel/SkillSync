@@ -17,6 +17,7 @@ import { Member } from "@/features/members/types";
 import { getWorkspaces } from "@/features/workspaces/queries";
 import { Workspace } from "@/features/workspaces/types";
 import { sendAssignEmail } from "@/lib/sendEmail";
+import autoAssignRoute from "./auto-assign";
 
 const app = new Hono()
   .post(
@@ -575,5 +576,8 @@ const app = new Hono()
     
     }
   )
+
+// Register the auto-assign route
+app.route("", autoAssignRoute);
 
 export default app;
