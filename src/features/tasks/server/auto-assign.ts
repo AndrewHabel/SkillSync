@@ -192,42 +192,54 @@ const app = new Hono()
         const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
         if (!apiKey) {
           return c.json({ error: "API key is missing" }, 500);
-        }
-
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });        // Create a structured prompt for Gemini
-        const prompt = `
-        You are an AI task assignment system for a project management tool. 
-        Your job is to analyze team members' skills, workload, and past performance 
-        to assign a task to the most suitable team member from a specific project team.
-
-        Task details:
-        ${JSON.stringify(taskDetails, null, 2)}
-
-        Team type: ${teamType}
+        }        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
         
-        Team members data (all from ${teamType}):
-        ${JSON.stringify(teamMembersData, null, 2)}
-
-        Based on the following criteria:
-        1. Skills match: Does the member have skills relevant to the task's preferred role?
-        2. Experience level: Does the member's skill level match the task's required expertise?
-        3. Current workload: How many tasks and estimated hours does the member already have?
-        4. Past performance: How well has the member completed tasks previously?
-
-        Select the most suitable team member for this task and explain your reasoning.
-        Include in your reasoning why this member from the ${teamType} is specifically qualified for this task.
-
-        IMPORTANT: Return your response as a valid JSON object WITHOUT markdown formatting, code blocks, or backticks.
-        Do not wrap the JSON in \`\`\` markers. Just return plain JSON as follows:
+        // Create a structured prompt for Gemini
+        const promptParts = [
+          "You are an AI task assignment system for a project management tool.",
+          "Your job is to analyze team members' skills, workload, and past performance",
+          "to assign a task to the most suitable team member from a specific project team.",
+          "",
+          "Task details:",
+          JSON.stringify(taskDetails, null, 2),
+          "",
+          `Team type: ${teamType}`,
+          "",
+          `Team members data (all from ${teamType}):`,
+          JSON.stringify(teamMembersData, null, 2),
+          "",
+          "Based on the following criteria:",
+          "1. Skills match: Does the member have skills relevant to the task's preferred role?",
+          "2. Experience level: Does the member's skill level match the task's required expertise?",
+          "3. Current workload: How many tasks and estimated hours does the member already have?",
+          "4. Past performance: How well has the member completed tasks previously?",
+          "",
+          "Select the most suitable team member for this task and explain your reasoning.",
+          `Include in your reasoning why this member from the ${teamType} is specifically qualified for this task.`,
+          "",
+          "IMPORTANT: If no team member is suitable for this task (e.g., missing required skills or experience level),",
+          "set \"selectedMemberId\" to null and provide detailed reasoning explaining why no one is suitable.",
+          "",
+          "Return your response as a valid JSON object WITHOUT markdown formatting, code blocks, or backticks.",
+          "Do not wrap the JSON in ``` markers. Just return plain JSON as follows:",
+          "",
+          "If you find a suitable match:",
+          "{",
+          "  \"selectedMemberId\": \"the-member-id\",",
+          "  \"reasoning\": \"detailed reasoning why this member is suitable\"",
+          "}",
+          "",
+          "If there is no suitable match:",
+          "{",
+          "  \"selectedMemberId\": null,",
+          "  \"reasoning\": \"detailed reasoning why no member is suitable\"",
+          "}",
+          "",
+          "Your response must be parseable by JavaScript's JSON.parse() function."
+        ];
         
-        {
-          "selectedMemberId": "string",
-          "reasoning": "string"
-        }
-        
-        Your response must be parseable by JavaScript's JSON.parse() function.
-        `;const result = await model.generateContent(prompt);
+        const prompt = promptParts.join("\n");const result = await model.generateContent(prompt);
         const responseText = result.response.text();
         
         console.log("Original AI response:", responseText);
@@ -252,19 +264,59 @@ const app = new Hono()
           
           // Parse AI response
           const aiResponse = JSON.parse(cleanedResponse);
-          
-          // Validate required fields
-          if (!aiResponse.selectedMemberId) {
-            throw new Error("AI response is missing selectedMemberId");
-          }
-          
+            // Check if AI found a suitable member
           const selectedMemberId = aiResponse.selectedMemberId;
+            // Case where no suitable member was found
+          if (!selectedMemberId || selectedMemberId === "null" || selectedMemberId === null) {
+            console.log("AI determined no suitable team member is available");
+            
+            // Return the original task with the reasoning, but no assignment
+            return c.json({ 
+              data: {
+                $id: task.$id,
+                name: task.name,
+                projectId: task.projectId,
+                workspaceId: task.workspaceId,
+                status: task.status,
+                position: task.position,
+                dueDate: task.dueDate,
+                preferredRole: task.preferredRole,
+                expertiseLevel: task.expertiseLevel,
+                estimatedHours: task.estimatedHours,
+                description: task.description,
+                assigneeId: null,
+                assignee: null,
+                aiReasoning: aiResponse.reasoning || "No reasoning provided"
+              }
+            });
+          }
           
           // Verify the selected member exists
           const selectedMember = teamMembersData.find(m => m.id === selectedMemberId);
           
           if (!selectedMember) {
-            return c.json({ error: "AI selected an invalid team member" }, 400);
+            console.log("AI selected an invalid team member:", selectedMemberId);
+            
+            // Return the original task with the reasoning, but no assignment
+            return c.json({ 
+              data: {
+                $id: task.$id,
+                name: task.name,
+                projectId: task.projectId,
+                workspaceId: task.workspaceId,
+                status: task.status,
+                position: task.position,
+                dueDate: task.dueDate,
+                preferredRole: task.preferredRole,
+                expertiseLevel: task.expertiseLevel,
+                estimatedHours: task.estimatedHours,
+                description: task.description,
+                assigneeId: null,
+                assignee: null,
+                aiReasoning: aiResponse.reasoning || 
+                  "AI selected a team member that doesn't exist. Please try again."
+              }
+            });
           }
           
           // Update the task with the selected assignee
@@ -320,15 +372,60 @@ const app = new Hono()
             if (jsonMatch) {
               const jsonString = jsonMatch[0];
               console.log("Attempting to parse extracted JSON:", jsonString);
-              
-              const aiResponse = JSON.parse(jsonString);
+                const aiResponse = JSON.parse(jsonString);
               const selectedMemberId = aiResponse.selectedMemberId;
               
-              // Continue with the same logic as above
+              // Check if AI found a suitable member
+              if (!selectedMemberId || selectedMemberId === "null" || selectedMemberId === null) {
+                console.log("AI determined no suitable team member is available");
+                
+                // Return the original task with the reasoning, but no assignment
+                return c.json({ 
+                  data: {
+                    $id: task.$id,
+                    name: task.name,
+                    projectId: task.projectId,
+                    workspaceId: task.workspaceId,
+                    status: task.status,
+                    position: task.position,
+                    dueDate: task.dueDate,
+                    preferredRole: task.preferredRole,
+                    expertiseLevel: task.expertiseLevel,
+                    estimatedHours: task.estimatedHours,
+                    description: task.description,
+                    assigneeId: null,
+                    assignee: null,
+                    aiReasoning: aiResponse.reasoning || "No reasoning provided"
+                  }
+                });
+              }
+              
+              // Verify the selected member exists
               const selectedMember = teamMembersData.find(m => m.id === selectedMemberId);
               
               if (!selectedMember) {
-                return c.json({ error: "AI selected an invalid team member" }, 400);
+                console.log("AI selected an invalid team member:", selectedMemberId);
+                
+                // Return the original task with the reasoning, but no assignment
+                return c.json({ 
+                  data: {
+                    $id: task.$id,
+                    name: task.name,
+                    projectId: task.projectId,
+                    workspaceId: task.workspaceId,
+                    status: task.status,
+                    position: task.position,
+                    dueDate: task.dueDate,
+                    preferredRole: task.preferredRole,
+                    expertiseLevel: task.expertiseLevel,
+                    estimatedHours: task.estimatedHours,
+                    description: task.description,
+                    assigneeId: null,
+                    assignee: null,
+                    aiReasoning: aiResponse.reasoning || 
+                      "AI selected a team member that doesn't exist. Please try again."
+                  }
+                });
               }
               
               // Update the task with the selected assignee

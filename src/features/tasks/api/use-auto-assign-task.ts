@@ -59,17 +59,23 @@ export const useAutoAssignTask = () => {
       // Dismiss any loading toasts
       toast.dismiss();
       
-      // Show success message with assignee info if available
-      const assigneeName = data.assignee?.name || "team member";
-      toast.success(`Task assigned successfully to ${assigneeName}!`);
+      // Check if a member was actually assigned
+      const wasAssigned = !!data.assigneeId && !!data.assignee;
       
-      // Note: The reasoning is now shown in a dialog popup in the UI
-      // instead of as a toast notification
-      
-      // Invalidate task queries to refresh the UI
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["task", data.$id] });
-    },    onError: (e) => {
+      if (wasAssigned) {
+        // Show success message with assignee info
+        const assigneeName = data.assignee?.name || "team member";
+        toast.success(`Task assigned successfully to ${assigneeName}!`);
+        
+        // Invalidate task queries to refresh the UI
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+        queryClient.invalidateQueries({ queryKey: ["task", data.$id] });
+      } else {
+        // No assignment happened, but we have AI reasoning to show
+        // Note: The reasoning dialog will be shown by the component
+        // No need to invalidate queries since the task wasn't changed
+      }
+    },onError: (e) => {
       console.error(e);
       // Dismiss any loading toasts
       toast.dismiss();

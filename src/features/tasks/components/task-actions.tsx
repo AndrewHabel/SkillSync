@@ -4,7 +4,7 @@ import{
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Award, ExternalLinkIcon, Loader2, PencilIcon, TrashIcon } from "lucide-react";
+import { AlertTriangle, Award, CheckCircle2, ExternalLinkIcon, Loader2, PencilIcon, TrashIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
@@ -123,8 +123,7 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
             });
             return;
         }
-        
-        // Call the auto-assign API
+          // Call the auto-assign API
         const loadingToast = toast.loading("Finding the best team member for this task...", {
             description: "Our AI is analyzing skills, workloads and performance metrics"
         });
@@ -136,26 +135,37 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                 toast.dismiss(loadingToast);
                   // Extract the assignment reasoning and assignee name to display in dialog
                 const reasoning = data.data.aiReasoning || "No reasoning provided.";
-                const name = data.data.assignee?.name || "team member";
                 
-                // Add a summary tag based on reasoning content (e.g., "Best skill match" or "Balanced workload")
+                // Check if a team member was assigned or not
+                const wasAssigned = data.data.assignee && data.data.assigneeId;
+                const name = data.data.assignee?.name || "No member assigned";
+                
+                // Add a summary tag based on reasoning content
                 let enhancedReasoning = reasoning;
                 
                 // Add a confidence indicator if we can detect certain phrases in the reasoning
-                if (reasoning.toLowerCase().includes("most suitable") || 
+                if (wasAssigned && (reasoning.toLowerCase().includes("most suitable") || 
                     reasoning.toLowerCase().includes("ideal") || 
-                    reasoning.toLowerCase().includes("perfect match")) {
+                    reasoning.toLowerCase().includes("perfect match"))) {
                     enhancedReasoning = "🌟 High confidence match\n\n" + reasoning;
+                } else if (!wasAssigned) {
+                    enhancedReasoning = "⚠️ No suitable match found\n\n" + reasoning;
                 }
                   // Set the state for the dialog
                 setAssignmentReasoning(enhancedReasoning);
                 setAssigneeName(name);
                 setIsReasoningDialogOpen(true);
                 
-                // Also show a quick success toast with a hint about the dialog
-                toast.success(`Task assigned to ${name}!`, {
-                    description: "Showing AI reasoning details..."
-                });
+                // Show appropriate toast based on assignment status
+                if (wasAssigned) {
+                    toast.success(`Task assigned to ${name}!`, {
+                        description: "Showing AI reasoning details..."
+                    });
+                } else {
+                    toast.warning("No suitable team member found", {
+                        description: "Showing AI reasoning details..."
+                    });
+                }
             },
             onError: () => {
                 toast.dismiss(loadingToast);
@@ -200,22 +210,58 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="text-center flex items-center justify-center gap-2">
-                            <Award className="h-5 w-5 text-amber-500" />
-                            Assignment Reasoning
+                            {assigneeName !== "No member assigned" ? (
+                                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                            ) : (
+                                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                            )}
+                            {assigneeName !== "No member assigned" ? "Assignment Successful" : "No Suitable Match"}
                         </DialogTitle>
                         <DialogDescription className="text-center">
-                            Why <span className="font-semibold text-primary">{assigneeName}</span> was chosen for this task
+                            {assigneeName !== "No member assigned" ? (
+                                <>Why <span className="font-semibold text-primary">{assigneeName}</span> was chosen for this task</>
+                            ) : (
+                                <>The AI could not find a suitable team member for this task</>
+                            )}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="my-4 max-h-[60vh] overflow-y-auto text-sm border border-border rounded-md p-4 bg-muted/30">
-                        <p className="whitespace-pre-wrap leading-relaxed">{assignmentReasoning}</p>
+                        {assigneeName !== "No member assigned" ? (
+                            <div className="mb-3 p-2 bg-green-500/10 border border-green-500/20 rounded-md">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Award className="h-4 w-4 text-amber-500" />
+                                    <h4 className="font-medium">Selected Member</h4>
+                                </div>
+                                <p className="text-sm ml-6">{assigneeName}</p>
+                            </div>
+                        ) : (
+                            <div className="mb-3 p-2 bg-amber-500/10 border border-amber-500/20 rounded-md">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <AlertTriangle className="h-4 w-4 text-amber-500" />
+                                    <h4 className="font-medium">No Match Found</h4>
+                                </div>
+                                <p className="text-sm ml-6">Consider adjusting task requirements or adding team members with relevant skills</p>
+                            </div>
+                        )}
+                        
+                        <div className="mb-2 font-medium">AI Reasoning:</div>
+                        <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground pl-2 border-l-2 border-primary/30">{assignmentReasoning}</p>
                     </div>
-                    <DialogFooter>
+                    <DialogFooter className="flex gap-2 justify-end">
                         <DialogClose asChild>
-                            <Button type="button" className="w-full">
-                                Got it
+                            <Button type="button" variant="outline">
+                                Close
                             </Button>
                         </DialogClose>
+                        {assigneeName === "No member assigned" && (
+                            <Button onClick={() => {
+                                setIsReasoningDialogOpen(false);
+                                open(id);
+                            }}>
+                                <PencilIcon className="size-4 mr-2" />
+                                Edit Task
+                            </Button>
+                        )}
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
