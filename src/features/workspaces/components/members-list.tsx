@@ -45,7 +45,7 @@ export const MembersList = () => {
         "Are you sure you want to remove this member?",
         "destructive"
     );
-    const { data: skillsData, isLoading: isLodingSkills} = useGetSkills({workspaceId});
+    const { data: skillsData, isLoading: isLoadingSkillsData} = useGetSkills({workspaceId});
 
     const queryClient = useQueryClient();
     const [membersWithSkills, setMembersWithSkills] = useState<any[]>([]);
@@ -58,22 +58,28 @@ export const MembersList = () => {
             ...prev,
             [memberId]: !prev[memberId]
         }));
-    };
-
-    console.log(skillsData, "skillsData");
+    };    console.log(skillsData, "skillsData");
     console.log(data, "membersData");
-
+    
+    // Make sure to reset loading state when dependencies change
     useEffect(() => {
+        if (isLoadingSkillsData || isLoadingMembers) {
+            setIsLoadingSkills(true);
+        }
+    }, [isLoadingSkillsData, isLoadingMembers]);useEffect(() => {
         const fetchSkillsForMembers = async () => {
             if (!data?.documents?.length) return;
+            if (!skillsData?.documents) return;
             
             setIsLoadingSkills(true);
             const membersData = [...data.documents];
+            const allSkillsData = [...skillsData.documents];
             const membersWithSkillsData = [];
             
+            // Process all members with their skills
             for (const member of membersData) {
-
-                const memberSkills = skillsData?.documents?.filter((skill: any) => skill.userId === member.$id) || [];
+                // Find all skills belonging to this member by userId
+                const memberSkills = allSkillsData.filter((skill: any) => skill.userId === member.$id) || [];
                 const skillsWithLevel = memberSkills.map((skill: any) => ({
                     ...skill,
                     level: skill.experienceLevel as ExpertiseLevel,
@@ -83,15 +89,15 @@ export const MembersList = () => {
                     ...member,
                     skills: skillsWithLevel,
                 });
-               
             }
+            
             console.log(membersWithSkillsData, "membersWithSkillsData");
             setMembersWithSkills(membersWithSkillsData);
             setIsLoadingSkills(false);
         };
         
         fetchSkillsForMembers();
-    }, [data, workspaceId, queryClient]);
+    }, [data, skillsData, workspaceId, queryClient]);
 
     const handelDeleteMember = async (memberId: string) => {
         const ok = await confirm();
@@ -131,7 +137,7 @@ export const MembersList = () => {
         }
     };
 
-    const isLoading = isLoadingMembers || isLoadingSkills;
+    const isLoading = isLoadingMembers || isLoadingSkillsData || isLoadingSkills;
 
     return (
         <Card className='w-full h-full border-none shadow-none max-w-full'>

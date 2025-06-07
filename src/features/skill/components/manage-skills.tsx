@@ -9,11 +9,13 @@ import { useMemberId } from "@/features/members/hooks/use-member-id";
 import { Badge } from "@/components/ui/badge";
 import { useGetSkills } from "../api/use-get-skills";
 import { useBulkCreateSkills } from "../api/use-bulk-create-skills";
+import { useDeleteSkill } from "../api/use-delete-skill";
 import { ExpertiseLevel, Skill, getExpertiseLevelDisplay } from "../types";
 import { SkillSelector } from "./skill-selector";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, TrashIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface ManageSkillsProps {
   userId: string;
@@ -24,6 +26,7 @@ export const ManageSkills = ({ userId }: ManageSkillsProps) => {
   const [selectorOpen, setSelectorOpen] = useState(false);
   const { data: skillsData, isLoading, refetch } = useGetSkills({ workspaceId, userId });
   const { mutate: bulkCreateSkills, isPending } = useBulkCreateSkills();
+  const { mutate: deleteSkill, isPending: isDeleting } = useDeleteSkill();
 
   const userSkills = skillsData?.documents || [];
   
@@ -73,6 +76,16 @@ export const ManageSkills = ({ userId }: ManageSkillsProps) => {
       }
     );
   };
+  const handleDeleteSkill = (skillId: string) => {
+    deleteSkill(
+      { param: { skillId } },
+      {
+        onSuccess: () => {
+          refetch();
+        }
+      }
+    );
+  };
 
   return (
     <Card className="w-full h-full border shadow-md bg-card mt-6">
@@ -100,7 +113,19 @@ export const ManageSkills = ({ userId }: ManageSkillsProps) => {
               {allSkills.map((skill) => (
                 <div key={skill.id} className="flex items-center justify-between p-2 border rounded-md">
                   <div className="font-medium">{skill.name}</div>
-                  <Badge>{getExpertiseLevelDisplay(skill.level)}</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge>{getExpertiseLevelDisplay(skill.level)}</Badge>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                      onClick={() => handleDeleteSkill(skill.id)}
+                      disabled={isDeleting}
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                      <span className="sr-only">Delete skill</span>
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -85,17 +85,53 @@ const app = new Hono()
 
             if (filters.length === 0) {
                 console.log("No filters specified, returning empty results");
-                return c.json({ data: { documents: [], total: 0 } });
-            }
-
-            const skills = await databases.listDocuments(
+                return c.json({ data: { documents: [], total: 0 } });            }              // Use client-side pagination to get all skills
+            // Start with a large limit to minimize the number of requests
+            filters.push(Query.limit(1000)); // Maximum limit per request
+            
+            // First request to get initial set of skills and total count
+            const initialResults = await databases.listDocuments(
                 DATABASE_ID,
                 SKILLS_ID,
-                filters,
+                filters
             );
 
-            console.log("Skills result:", skills);
-
+            let skills = initialResults;
+            const totalSkills = initialResults.total;
+            
+            // If we have more skills than our limit can fetch in one go, fetch the rest
+            if (totalSkills > 1000) {
+                console.log(`Found ${totalSkills} skills, need to fetch remaining ${totalSkills - 1000} skills with pagination`);
+                
+                // Create an array to hold all documents
+                const allSkillDocuments = [...initialResults.documents];
+                
+                // Fetch remaining pages
+                for (let offset = 1000; offset < totalSkills; offset += 1000) {
+                    // Clone the filters array and add offset
+                    const pageFilters = [...filters.filter(f => !f.toString().includes('limit'))];
+                    pageFilters.push(Query.limit(1000));
+                    pageFilters.push(Query.offset(offset));
+                    
+                    const nextPage = await databases.listDocuments(
+                        DATABASE_ID,
+                        SKILLS_ID,
+                        pageFilters
+                    );
+                    
+                    // Add documents to our collection
+                    allSkillDocuments.push(...nextPage.documents);
+                }
+                
+                // Replace the documents in our skills object with the complete set
+                skills = {
+                    ...initialResults,
+                    documents: allSkillDocuments
+                };
+                
+                console.log(`Successfully fetched all ${allSkillDocuments.length} skills`);
+            }            console.log(`Skills result: Total ${skills.total}, Fetched ${skills.documents.length} documents`);
+            
             return c.json({ data: skills });
         }
     )        
@@ -157,17 +193,26 @@ const app = new Hono()
         async (c) => {
             const databases = c.get("databases");
             const { skillId } = c.req.param();
-            const user = c.get("user");
+            const user = c.get("user");  
 
-            // Get the skill
+            const members = await databases.listDocuments(
+                DATABASE_ID,
+                MEMBERS_ID,
+                [Query.equal("userId", user.$id)]
+            );
+            
+            const member = members.documents[0];
+
             const skill = await databases.getDocument(
                 DATABASE_ID,
                 SKILLS_ID,
                 skillId
             );
 
+            console.log(skill.userId) 
+            console.log(user.$id)
             // Verify the user owns the skill
-            if (skill.memberId !== user.$id) {
+            if (skill.userId !== member.$id) {
                 return c.json({ error: "Unauthorized" }, 401);
             }
 

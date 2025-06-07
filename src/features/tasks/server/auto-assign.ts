@@ -113,12 +113,45 @@ const app = new Hono()
           }, 404);
         }// Get skills for all members
         let allSkills;
+        
         try {
-          allSkills = await databases.listDocuments(
+          // First request to get initial set of skills and total count
+          const initialResults = await databases.listDocuments(
             DATABASE_ID,
             SKILLS_ID,
-            []
+            [Query.limit(100)] // Start with a larger chunk than default 25
           );
+
+          const totalSkills = initialResults.total;
+          
+          // If we have more skills than the initial limit, fetch the rest with pagination
+          if (totalSkills > 100) {
+            console.log(`Found ${totalSkills} skills, fetching all with pagination`);
+            
+            // Create an array to hold all documents
+            const allSkillDocuments = [...initialResults.documents];
+            
+            // Fetch remaining pages
+            for (let offset = 100; offset < totalSkills; offset += 100) {
+              const pageResults = await databases.listDocuments(
+                DATABASE_ID,
+                SKILLS_ID,
+                [Query.limit(100), Query.offset(offset)]
+              );
+              
+              // Add documents to our collection
+              allSkillDocuments.push(...pageResults.documents);
+            }
+            
+            // Create a result object with the same structure as listDocuments response
+            allSkills = {
+              documents: allSkillDocuments,
+              total: totalSkills
+            };
+          } else {
+            // We got all documents in the first request
+            allSkills = initialResults;
+          }
         } catch (error) {
           console.error("Error fetching skills:", error);
           console.error("SKILLS_ID value:", SKILLS_ID);
@@ -239,6 +272,8 @@ const app = new Hono()
           "Your response must be parseable by JavaScript's JSON.parse() function."
         ];
         
+        console.log("Generated prompt for AI:", promptParts.join("\n"));
+
         const prompt = promptParts.join("\n");const result = await model.generateContent(prompt);
         const responseText = result.response.text();
         
