@@ -4,10 +4,11 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createAdminClient } from "@/lib/appwrite";
-import { DATABASE_ID, MEMBERS_ID, TASKS_ID, PROJECTS_ID, WORKSPACES_ID } from "@/config";
+import { DATABASE_ID, MEMBERS_ID, TASKS_ID, PROJECTS_ID, WORKSPACES_ID, TEAMS_ID } from "@/config";
 import { getMember } from "@/features/members/utils";
 import { Query } from "node-appwrite";
 import { sendAssignEmail } from "@/lib/sendEmail";
+import { mapRoleToTeamType } from "@/features/teams/utils/map-role-to-team";
 
 // Fix for inconsistent environment variable naming
 const SKILLS_ID = process.env.NEXT_PUBLIC_APPWRITE_Skill_ID || process.env.NEXT_PUBLIC_APPWRITE_SKILLS_ID || "680e59520027d6694ab7"; // Fallback to the actual ID we found in .env.local
@@ -46,8 +47,7 @@ const app = new Hono()
         if (!member) {
           return c.json({ error: "Unauthorized" }, 401);
         }
-        
-        // Check if task has preferred role
+          // Check if task has preferred role
         if (!task.preferredRole) {
           return c.json({ error: "Task must have a preferred role to use auto-assign" }, 400);
         }
@@ -57,16 +57,61 @@ const app = new Hono()
           return c.json({ error: "Task must belong to a project to use auto-assign" }, 400);
         }
         
-        // Get team members with matching role for this project
-        const teamMembers = await databases.listDocuments(
+        // Get the team type that matches the task's preferred role
+        const teamType = mapRoleToTeamType(task.preferredRole);
+        
+        if (!teamType) {
+          return c.json({ error: "No matching team type found for this role" }, 404);
+        }
+        
+        // Find the specific team for this project and team type
+        const teams = await databases.listDocuments(
           DATABASE_ID,
-          MEMBERS_ID,
-          [Query.equal("workspaceId", task.workspaceId)]
+          TEAMS_ID,
+          [
+            Query.equal("projectId", task.projectId),
+            Query.equal("teamtype", teamType)
+          ]
         );
         
+        if (teams.documents.length === 0) {
+          return c.json({ 
+            error: `No "${teamType}" exists in this project`,
+            details: "Please create the required team before using auto-assign"
+          }, 404);
+        }
+        
+        const team = teams.documents[0];
+        
+        // Check if the team has any members
+        if (!team.membersId || team.membersId.length === 0) {
+          return c.json({ 
+            error: `The ${teamType} has no members`,
+            details: "Please add team members to the team before using auto-assign"
+          }, 404);
+        }
+          // Get details of all members in the team
+        // We need to fetch members one by one since the team membersId array contains member IDs
+        const memberPromises = team.membersId.map((memberId: string) => 
+          databases.getDocument(DATABASE_ID, MEMBERS_ID, memberId)
+            .catch(err => {
+              console.error(`Failed to fetch member ${memberId}:`, err);
+              return null;
+            })
+        );
+        
+        const teamMembersResults = await Promise.all(memberPromises);
+        const teamMembers = {
+          // Filter out any null results from failed fetches
+          documents: teamMembersResults.filter(member => member !== null)
+        };
+        
         if (teamMembers.documents.length === 0) {
-          return c.json({ error: "No team members found" }, 404);
-        }        // Get skills for all members
+          return c.json({ 
+            error: `No valid team members found in ${teamType}`, 
+            details: "Team exists but members may have been removed" 
+          }, 404);
+        }// Get skills for all members
         let allSkills;
         try {
           allSkills = await databases.listDocuments(
@@ -154,12 +199,14 @@ const app = new Hono()
         const prompt = `
         You are an AI task assignment system for a project management tool. 
         Your job is to analyze team members' skills, workload, and past performance 
-        to assign a task to the most suitable team member.
+        to assign a task to the most suitable team member from a specific project team.
 
         Task details:
         ${JSON.stringify(taskDetails, null, 2)}
 
-        Team members data:
+        Team type: ${teamType}
+        
+        Team members data (all from ${teamType}):
         ${JSON.stringify(teamMembersData, null, 2)}
 
         Based on the following criteria:
@@ -169,6 +216,7 @@ const app = new Hono()
         4. Past performance: How well has the member completed tasks previously?
 
         Select the most suitable team member for this task and explain your reasoning.
+        Include in your reasoning why this member from the ${teamType} is specifically qualified for this task.
 
         IMPORTANT: Return your response as a valid JSON object WITHOUT markdown formatting, code blocks, or backticks.
         Do not wrap the JSON in \`\`\` markers. Just return plain JSON as follows:
@@ -179,7 +227,7 @@ const app = new Hono()
         }
         
         Your response must be parseable by JavaScript's JSON.parse() function.
-        `;        const result = await model.generateContent(prompt);
+        `;const result = await model.generateContent(prompt);
         const responseText = result.response.text();
         
         console.log("Original AI response:", responseText);

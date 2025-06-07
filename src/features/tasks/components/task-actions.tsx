@@ -91,10 +91,35 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
             return;
         }
         
-        // Check if the task has any team members
-        if (!teamsData || teamsData.documents?.length === 0) {
-            toast.error("No team members available for assignment", {
-                description: "Add team members with relevant skills first"
+        // Check if we determined a team type from the preferred role
+        if (!teamType) {
+            toast.error("No matching team type for this role", {
+                description: "The preferred role doesn't match any team type"
+            });
+            return;
+        }
+        
+        // Check if teams are still loading
+        if (isLoadingTeams) {
+            toast.error("Still checking team information", {
+                description: "Please try again in a moment"
+            });
+            return;
+        }
+        
+        // Check if the specific team exists for this project
+        if (!teamsData || teamsData.data?.documents?.length === 0) {
+            toast.error(`No "${teamType}" exists in this project`, {
+                description: "Create this team first before using auto-assign"
+            });
+            return;
+        }
+        
+        // Check if the team has members
+        const team = teamsData.data?.documents[0];
+        if (!team?.membersId || team.membersId.length === 0) {
+            toast.error(`The ${teamType} has no members`, {
+                description: "Add team members to this team before using auto-assign"
             });
             return;
         }

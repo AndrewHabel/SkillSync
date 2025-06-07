@@ -159,7 +159,7 @@ const app = new Hono()
 
       // Create all tasks
       const createdTasks = await Promise.all(
-        tasks.map(async (taskData) => {
+        tasks.map(async (taskData: typeof tasks[0] & { expertiseLevel?: string }) => {
           const { name, description, status, projectId, assigneeId, dueDate, role, expertiseLevel } = taskData;
           
           // Default position to 1000
