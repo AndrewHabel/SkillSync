@@ -18,6 +18,7 @@ import { getWorkspaces } from "@/features/workspaces/queries";
 import { Workspace } from "@/features/workspaces/types";
 import { sendAssignEmail } from "@/lib/sendEmail";
 import autoAssignRoute from "./auto-assign";
+import { es } from "date-fns/locale";
 
 const app = new Hono()
   .post(
@@ -160,11 +161,13 @@ const app = new Hono()
       // Create all tasks
       const createdTasks = await Promise.all(
         tasks.map(async (taskData: typeof tasks[0] & { expertiseLevel?: string }) => {
-          const { name, description, status, projectId, assigneeId, dueDate, role, expertiseLevel } = taskData;
+          const { name, description, status, projectId, assigneeId, dueDate, role, expertiseLevel , estimatedHours } = taskData;
           
           // Default position to 1000
           const position = 1000;
-          
+
+          const estimatedHoursFloat = estimatedHours ? parseFloat(estimatedHours) : undefined;
+
           return databases.createDocument(
             DATABASE_ID,
             TASKS_ID,
@@ -179,7 +182,8 @@ const app = new Hono()
               assigneeId,
               position,
               preferredRole: role,
-              expertiseLevel
+              expertiseLevel: expertiseLevel || "BEGINNER", // Default to BEGINNER if null
+              estimatedHours: estimatedHoursFloat,
             }
           );
         })

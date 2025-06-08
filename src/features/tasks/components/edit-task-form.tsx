@@ -45,24 +45,24 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
     const selectedProject = projectOptions.find(project => project.id === values.projectId);
     
     // Handle special "unassigned" value for assigneeId
-    const assigneeId = values.assigneeId === "unassigned" ? undefined : values.assigneeId;
+    const assigneeId = values.assigneeId ? undefined : values.assigneeId;
     const selectedAssignee = assigneeId 
       ? memberOptions.find(member => member.id === assigneeId)
-      : null;
+      : undefined;
       
     // Handle special values for preferred role and expertise level
-    const preferredRole = values.preferredRole === "none_role" ? undefined : values.preferredRole;
-    const expertiseLevel = values.expertiseLevel === "none_expertise" ? undefined : values.expertiseLevel;
+    const preferredRole = values.preferredRole ? undefined : values.preferredRole;
+    const expertiseLevel = values.expertiseLevel ? undefined : values.expertiseLevel;
       
     // Process values to handle optional fields correctly
     const submissionData = {
       ...values,
-      assigneeId,
+      assigneeId: assigneeId || '',
       preferredRole,
       expertiseLevel,
       projectName: selectedProject?.name || '',
       // Only include assigneeName if assigneeId is provided
-      ...(assigneeId ? { assigneeName: selectedAssignee?.name || '' } : { assigneeName: '' }),
+      ...(selectedAssignee ? { assigneeName: selectedAssignee?.name || '' } : { assigneeName: '' }),
     };
     
     mutate({ json: submissionData, param: { taskId: initialValues.$id }}, {
@@ -74,8 +74,8 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions, initia
   };
 
   return(
-    <Card className="w-full h-full border-none shadow-none max-w-5xl mx-auto">
-      <CardHeader className="flex p-7">
+    <Card className="w-full h-full border-none shadow-none max-w-10xl mx-auto">
+      <CardHeader className="flex p-12">
         <CardTitle className="text-xl font-bold">
           Edit Task
         </CardTitle>

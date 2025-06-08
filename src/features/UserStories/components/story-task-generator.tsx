@@ -82,6 +82,8 @@ interface GeneratedTasks {
   "Task Titles": string[];
   "Task description": string[];
   "Task Roles": string[];
+  "Experience Level": string[]; // Optional field for experience level
+  "Estimated Time": string[]; // Optional field for estimated time
 }
 
 export const StoryTaskGenerator = ({ userStory }: StoryTaskGeneratorProps) => {
@@ -92,6 +94,8 @@ export const StoryTaskGenerator = ({ userStory }: StoryTaskGeneratorProps) => {
   const [editingTaskIndex, setEditingTaskIndex] = useState<number | null>(null);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
+  const [editedExperienceLevel, setExperienceLevel] = useState("");
+  const [editedEstimatedTime, setEditedEstimatedTime] = useState("");
   const [editedRole, setEditedRole] = useState<string | null>(null);
   // Track the added task indices
   const [addedTaskIndices, setAddedTaskIndices] = useState<Set<number>>(new Set());
@@ -143,9 +147,7 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
   const handleAddSingleTask = (index: number) => {
     if (!generatedTasks) return;
     
-    setAddingTaskIndex(index);
-
-    // Create task object
+    setAddingTaskIndex(index);    // Create task object
     const taskToCreate = {
       name: generatedTasks["Task Titles"][index],
       description: generatedTasks["Task description"][index],
@@ -155,7 +157,9 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
       assigneeId: null,
       dueDate: null,
       position: 1000,
-      role: mapRoleToPreferredRole(generatedTasks["Task Roles"]?.[index]) || undefined
+      role: mapRoleToPreferredRole(generatedTasks["Task Roles"]?.[index]) || undefined,
+      experienceLevel: generatedTasks["Experience Level"]?.[index] || undefined,
+      estimatedTime: generatedTasks["Estimated Time"]?.[index] || undefined
     };
     
     // Call the bulk create API with a single task
@@ -182,8 +186,7 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
       .map((title, index) => {
         if (addedTaskIndices.has(index)) {
           return null; // Skip already added tasks
-        }
-        return {
+        }        return {
           name: title,
           description: generatedTasks["Task description"][index],
           status: null,
@@ -192,7 +195,9 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
           assigneeId: null,
           dueDate: null,
           position: 1000,
-          role: mapRoleToPreferredRole(generatedTasks["Task Roles"]?.[index]) || null
+          role: mapRoleToPreferredRole(generatedTasks["Task Roles"][index]) || undefined,
+          expertiseLevel: generatedTasks["Experience Level"][index] ?? undefined,
+          estimatedHours: generatedTasks["Estimated Time"][index] ?? undefined
         };
       })
       .filter(task => task !== null); // Remove null entries
@@ -201,7 +206,12 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
     if (tasksToCreate.length > 0) {
       // Call the bulk create API
       bulkCreateTasks(
-        { json: { tasks: tasksToCreate.map(task => ({ ...task, role: task.role ?? undefined })) } },
+        { json: { tasks: tasksToCreate.map(task => ({
+          ...task,
+          role: task.role ?? undefined,
+          expertiseLevel: task.expertiseLevel ?? undefined,
+          estimatedHours: task.estimatedHours ?? undefined
+        })) } },
         {
           onSuccess: () => {
             // Mark all tasks as added
@@ -229,6 +239,8 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
       setEditedTitle(generatedTasks["Task Titles"][index]);
       setEditedDescription(generatedTasks["Task description"][index]);
       setEditedRole(generatedTasks["Task Roles"]?.[index] || null);
+      setExperienceLevel(generatedTasks["Experience Level"]?.[index] || "");
+      setEditedEstimatedTime(generatedTasks["Estimated Time"]?.[index] || "");
     }
   };
 
@@ -238,20 +250,23 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
     setEditedDescription("");
     setEditedRole(null);
   };
-
   const handleSaveTask = (index: number) => {
     if (generatedTasks && editingTaskIndex !== null) {
       // Create a copy of the current tasks
       const updatedTasks = {
         "Task Titles": [...generatedTasks["Task Titles"]],
         "Task description": [...generatedTasks["Task description"]],
-        "Task Roles": [...(generatedTasks["Task Roles"] || [])] // Preserve existing roles or default to an empty array
+        "Task Roles": [...(generatedTasks["Task Roles"] || [])], // Preserve existing roles or default to an empty array
+        "Experience Level": [...(generatedTasks["Experience Level"] || [])], // Preserve existing experience levels
+        "Estimated Time": [...(generatedTasks["Estimated Time"] || [])] // Preserve existing time estimates
       };
       
       // Update the specific task
       updatedTasks["Task Titles"][index] = editedTitle;
       updatedTasks["Task description"][index] = editedDescription;
       updatedTasks["Task Roles"][index] = editedRole || "";
+      updatedTasks["Experience Level"][index] = editedExperienceLevel;
+      updatedTasks["Estimated Time"][index] = editedEstimatedTime;
       
       // Update state
       setGeneratedTasks(updatedTasks);
@@ -367,8 +382,7 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                               className="w-full"
                               rows={3}
                             />
-                          </div>
-                          <div>
+                          </div>                          <div>
                             <label htmlFor={`task-role-${index}`} className="block text-sm font-medium mb-1">Task Role</label>
                             <Select
                               value={editedRole || ""}
@@ -388,6 +402,26 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                                 </SelectGroup>
                               </SelectContent>
                             </Select>
+                          </div>
+                          <div>
+                            <label htmlFor={`task-experience-${index}`} className="block text-sm font-medium mb-1">Experience Level</label>
+                            <Input
+                              id={`task-experience-${index}`}
+                              value={editedExperienceLevel}
+                              onChange={(e) => setExperienceLevel(e.target.value)}
+                              className="w-full"
+                              placeholder="Junior, Mid-level, Senior, etc."
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor={`task-time-${index}`} className="block text-sm font-medium mb-1">Estimated Time</label>
+                            <Input
+                              id={`task-time-${index}`}
+                              value={editedEstimatedTime}
+                              onChange={(e) => setEditedEstimatedTime(e.target.value)}
+                              className="w-full"
+                              placeholder="2 hours, 1 day, 3 days, etc."
+                            />
                           </div>
                           <div className="flex justify-end space-x-2">
                             <Button 
@@ -435,15 +469,34 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                                 </Button>
                               )}
                             </div>
+                          </div>                          {/* Display task role */}
+                          <div className="flex flex-wrap gap-2 ml-6 mt-1 mb-2">
+                            {generatedTasks["Task Roles"] && generatedTasks["Task Roles"][index] && (
+                              <Badge
+                                className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200"
+                              >
+                                {generatedTasks["Task Roles"][index]}
+                              </Badge>
+                            )}
+                            {/* Display experience level */}
+                            {generatedTasks["Experience Level"] && generatedTasks["Experience Level"][index] && (
+                              <Badge
+                                className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-200"
+                              >
+                                {generatedTasks["Experience Level"][index]}
+                              </Badge>
+                            )}
+                            {/* Display estimated time */}
+                            {generatedTasks["Estimated Time"] && generatedTasks["Estimated Time"][index] && (
+                              <Badge
+                                className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-200"
+                              >
+                                {generatedTasks["Estimated Time"][index]}
+                                hr
+                              </Badge>
+                              
+                            )}
                           </div>
-                          {/* Display task role */}
-                          {generatedTasks["Task Roles"] && generatedTasks["Task Roles"][index] && (
-                            <Badge
-                              className="ml-6 mt-1 mb-2 bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200"
-                            >
-                              {generatedTasks["Task Roles"][index]}
-                            </Badge>
-                          )}
                           <DottedSeparator className="my-2" />
                           <div className="flex flex-col">
                             <p className="text-sm text-muted-foreground pl-6 mb-3">

@@ -47,6 +47,16 @@ Your output must follow this exact JSON format:
     "Role for Task 1",
     "Role for Task 2",
     ...
+  ],
+  "Experience Level": [
+    "Experience Level for Task 1",
+    "Experience Level for Task 2",
+    ...
+  ],
+  "Estimated Time": [
+    "Estimated time for Task 1 in hours",
+    "Estimated time for Task 2 in hours",
+    ...
   ]
 }
 
@@ -95,6 +105,11 @@ Data Scientist
 6)All tasks must be uniformly formatted across both the "Task Titles" and "Task description" lists.
 
 7)For each task, provide a specific role from the list above in the "Task Roles" array. The role must match exactly one from the roles list.
+
+8)for each task i want you to provide exprince level for the task from these options:"BEGINNER", "INTERMEDIATE", "ADVANCED", "EXPERT".
+
+9)for each task i want Provide a realistic Estimated Time (in hours) to complete each task..
+
 `;
 
         const result = await model.generateContent(prompt);

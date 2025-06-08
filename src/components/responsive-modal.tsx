@@ -17,10 +17,9 @@ export const ResponsiveModal = ({
     onopenchange
 }:ResponsiveModalProps) => {
     const isDesktop = useMedia('(min-width: 1024px)',true);
-    if(isDesktop){
-        return (
+    if(isDesktop){        return (
             <Dialog open={open} onOpenChange={onopenchange}>
-                <DialogContent className='w-full sm:max-w-lg p-0 border-none overflow-y-auto hide-scrollbar ma-h-[85vh]'>
+                <DialogContent className='w-full sm:max-w-[70vw] p-0 border-none overflow-y-auto hide-scrollbar ma-h-[85vh]'>
                     {children}
                 </DialogContent>
             </Dialog>
