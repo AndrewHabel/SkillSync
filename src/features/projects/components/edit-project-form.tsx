@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useRef, useState } from "react";
 import { Avatar, AvatarFallback} from "@/components/ui/avatar";
@@ -114,8 +115,7 @@ export const EditProjectForm = ({ onCancel, initialValues}: EditProjectFormProps
             <DottedSeparator className="py-7" />
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="flex flex-col gap-y-4">
-              <FormField 
+            <div className="flex flex-col gap-y-4">              <FormField 
                 control={form.control}
                 name="name"
                 render={({ field }) => (
@@ -127,6 +127,25 @@ export const EditProjectForm = ({ onCancel, initialValues}: EditProjectFormProps
                       <Input
                         {...field}
                         placeholder="Project name"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField 
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Project Description
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder="Add a description about your project (goals, objectives, etc.)" 
+                        className="resize-none min-h-[100px]"
                       />
                     </FormControl>
                     <FormMessage />

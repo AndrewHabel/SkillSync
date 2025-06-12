@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useCreateProject } from "../api/use-create-projects";
 import { useRef, useState } from "react";
@@ -30,11 +31,11 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
   const { mutate, isPending } = useCreateProject();
   const inputRef = useRef<HTMLInputElement>(null);
   const [techSelectorOpen, setTechSelectorOpen] = useState(false);
-
   const form = useForm<z.infer<typeof createProjectSchema>>({
     resolver: zodResolver(createProjectSchema.omit({ workspaceId: true })),
     defaultValues: {
       name: "",
+      description: "",
       ProjectTechStack: [],
     },
   });
@@ -83,8 +84,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
       <CardContent className="p-7">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="flex flex-col gap-y-4">
-              <FormField
+            <div className="flex flex-col gap-y-4">              <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
@@ -94,6 +94,25 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                     </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Project name" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Project Description
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder="Add a description about your project (goals, objectives, etc.)" 
+                        className="resize-none min-h-[100px]"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

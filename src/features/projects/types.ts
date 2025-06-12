@@ -5,4 +5,5 @@ export type Project = Models.Document &{
     imageUrl: string
     workspaceId: string;
     ProjectTechStack?: string | string[];
+    description?: string;
 }

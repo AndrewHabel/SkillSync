@@ -54,8 +54,7 @@ const app = new Hono()
                 const buffer = Buffer.from(arrayBuffer); // Convert to Node.js Buffer
                 uploadedImageUrl = `data:${image.type};base64,${buffer.toString("base64")}`;
             }
-            
-            const project = await databases.createDocument(
+              const project = await databases.createDocument(
                 DATABASE_ID,
                 PROJECTS_ID,
                 ID.unique(),
@@ -64,6 +63,7 @@ const app = new Hono()
                     imageUrl: uploadedImageUrl,
                     workspaceId,
                     ProjectTechStack,
+                    description: c.req.valid("form").description || "",
                 },
             );
  
@@ -149,13 +149,14 @@ const app = new Hono()
                 
                     const buffer = Buffer.from(arrayBuffer); // Convert to Node.js Buffer
                     uploadedImageUrl = `data:${image.type};base64,${buffer.toString("base64")}`;
-                }
-    
-                const updateData: Record<string, any> = {};
+                }                const updateData: Record<string, any> = {};
                 
                 if (name) updateData.name = name;
                 if (uploadedImageUrl) updateData.imageUrl = uploadedImageUrl;
                 if (ProjectTechStack !== undefined) updateData.ProjectTechStack = ProjectTechStack;
+                
+                const { description } = c.req.valid("form");
+                if (description !== undefined) updateData.description = description;
 
                 const project = await databases.updateDocument(
                     DATABASE_ID,

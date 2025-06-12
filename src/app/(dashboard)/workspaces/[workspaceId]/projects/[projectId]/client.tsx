@@ -12,7 +12,10 @@ import { TaskViewSwitcher } from "@/features/tasks/components/task-view-switcher
 import { PencilIcon } from "lucide-react";
 import { BookUserIcon } from "lucide-react";
 import { UsersIcon } from "lucide-react";
+import { InfoIcon } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export const ProjectIdClient = () => {
 
@@ -28,15 +31,32 @@ export const ProjectIdClient = () => {
 
   return(
     <div className="flex flex-col gap-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-x-2">
-          <ProjectAvatar 
-            name={project.name}
-            image={project.imageUrl}
-            className="size-8"
-          />
-          <p className="text-lg font-semibold">{project.name}</p>
-        </div>
+      <div className="flex items-center justify-between">        <div className="flex flex-col">          <div className="flex items-center gap-x-2">
+            <ProjectAvatar 
+              name={project.name}
+              image={project.imageUrl}
+              className="size-8"
+            />
+            <p className="text-lg font-semibold">{project.name}</p>
+            {project.description && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="size-6 rounded-full" title="View project description">
+                    <InfoIcon className="size-4 text-muted-foreground hover:text-primary" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="text-xl">{project.name} - Project Description</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4 text-sm">
+                    {project.description}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+          </div>
         <div className="flex gap-2">
           <Button variant="secondary" size="sm" asChild>
             <Link href={`/workspaces/${project.workspaceId}/projects/${project.$id}/teams`}>

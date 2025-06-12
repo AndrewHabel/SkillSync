@@ -7,6 +7,7 @@ export const createProjectSchema = z.object({
     z.string().transform((value) => (value === "" ? undefined : value)),
   ]).optional(),
   workspaceId: z.string(),
+  description: z.string().trim().optional(),
   ProjectTechStack: z.union([
     z.string().transform((value) => 
       value ? value.split(',').map(tech => tech.trim()) : []
@@ -22,6 +23,7 @@ export const UpdateProjectSchema = z.object({
       z.string().transform((value) => value === "" ? undefined : value),
   ])
   .optional(),
+  description: z.string().trim().optional(),
   ProjectTechStack: z.union([
     z.string().transform((value) => 
       value ? value.split(',').map(tech => tech.trim()) : []
