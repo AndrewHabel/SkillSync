@@ -209,16 +209,22 @@ const app = new Hono()
               performanceScore
             };
           })
+        );        // Get project details including tech stack
+        const project = await databases.getDocument(
+          DATABASE_ID,
+          PROJECTS_ID,
+          task.projectId
         );
-
-        // Get task details
+        
+        // Get task details and include project tech stack
         const taskDetails = {
           id: task.$id,
           name: task.name,
           description: task.description || "",
           preferredRole: task.preferredRole,
           expertiseLevel: task.expertiseLevel || "BEGINNER",
-          estimatedHours: task.estimatedHours || 0
+          estimatedHours: task.estimatedHours || 0,
+          projectTechStack: project.ProjectTechStack || []
         };
 
         // Call the Gemini API to select the best member
@@ -227,8 +233,7 @@ const app = new Hono()
           return c.json({ error: "API key is missing" }, 500);
         }        const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-        
-        // Create a structured prompt for Gemini
+          // Create a structured prompt for Gemini
         const promptParts = [
           "You are an AI task assignment system for a project management tool.",
           "Your job is to analyze team members' skills, workload, and past performance",
@@ -242,17 +247,20 @@ const app = new Hono()
           `Team members data (all from ${teamType}):`,
           JSON.stringify(teamMembersData, null, 2),
           "",
-          "Based on the following criteria:",
+          "Based on the following criteria in order of priority:",
           "1. Skills match: Does the member have skills relevant to the task's preferred role?",
           "2. Experience level: Does the member's skill level match the task's required expertise?",
           "3. Current workload: How many tasks and estimated hours does the member already have?",
           "4. Past performance: How well has the member completed tasks previously?",
+          "5. Project tech stack familiarity: Consider the project's tech stack as a bonus factor, but give it less weight than skills and availability.",
           "",
           "Select the most suitable team member for this task and explain your reasoning.",
           `Include in your reasoning why this member from the ${teamType} is specifically qualified for this task.`,
-          "",
-          "IMPORTANT: If no team member is suitable for this task (e.g., missing required skills or experience level),",
-          "set \"selectedMemberId\" to null and provide detailed reasoning explaining why no one is suitable.",
+          "",          "IMPORTANT INSTRUCTIONS:",
+          "1. If no team member is suitable for this task, set \"selectedMemberId\" to null and provide detailed reasoning.",
+          "2. DO NOT list or enumerate the member's skills in your reasoning. Focus on their suitability without listing their specific skills.",
+          "3. If there's overlap between the project tech stack and member skills, you can mention they have relevant experience without listing specific technologies.",
+          "4. Format your reasoning as bullet points with 3-5 clear, concise points. Each point should start with a hyphen or bullet character.",
           "",
           "Return your response as a valid JSON object WITHOUT markdown formatting, code blocks, or backticks.",
           "Do not wrap the JSON in ``` markers. Just return plain JSON as follows:",

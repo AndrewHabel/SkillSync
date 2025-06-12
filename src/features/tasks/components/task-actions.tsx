@@ -132,24 +132,37 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                 taskId: id
             }
         }, {            onSuccess: (data) => {
-                toast.dismiss(loadingToast);
-                  // Extract the assignment reasoning and assignee name to display in dialog
+                toast.dismiss(loadingToast);                // Extract the assignment reasoning and assignee name to display in dialog
                 const reasoning = data.data.aiReasoning || "No reasoning provided.";
                 
                 // Check if a team member was assigned or not
                 const wasAssigned = data.data.assignee && data.data.assigneeId;
                 const name = data.data.assignee?.name || "No member assigned";
-                
-                // Add a summary tag based on reasoning content
+                  // Add a summary tag based on reasoning content
                 let enhancedReasoning = reasoning;
                 
-                // Add a confidence indicator if we can detect certain phrases in the reasoning
+                // Format the reasoning if it's not already in bullet points
+                if (!reasoning.trim().startsWith("-") && !reasoning.trim().startsWith("•")) {
+                    // Convert paragraph to bullet points if needed
+                    const sentences = reasoning.split(/(?<=[.!?])\s+/);
+                    enhancedReasoning = sentences.map(sentence => {
+                        sentence = sentence.trim();
+                        return sentence ? `• ${sentence}` : "";
+                    }).filter(s => s).join("\n");
+                }
+                
+                // Add a confidence indicator
                 if (wasAssigned && (reasoning.toLowerCase().includes("most suitable") || 
                     reasoning.toLowerCase().includes("ideal") || 
-                    reasoning.toLowerCase().includes("perfect match"))) {
-                    enhancedReasoning = "🌟 High confidence match\n\n" + reasoning;
+                    reasoning.toLowerCase().includes("perfect match") ||
+                    reasoning.toLowerCase().includes("excellent fit"))) {
+                    enhancedReasoning = "🌟 High confidence match\n\n" + enhancedReasoning;
+                } else if (wasAssigned && (reasoning.toLowerCase().includes("good match") ||
+                    reasoning.toLowerCase().includes("well suited") ||
+                    reasoning.toLowerCase().includes("appropriate choice"))) {
+                    enhancedReasoning = "✅ Good match\n\n" + enhancedReasoning;
                 } else if (!wasAssigned) {
-                    enhancedReasoning = "⚠️ No suitable match found\n\n" + reasoning;
+                    enhancedReasoning = "⚠️ No suitable match found\n\n" + enhancedReasoning;
                 }
                   // Set the state for the dialog
                 setAssignmentReasoning(enhancedReasoning);
@@ -216,10 +229,9 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                                 <AlertTriangle className="h-5 w-5 text-amber-500" />
                             )}
                             {assigneeName !== "No member assigned" ? "Assignment Successful" : "No Suitable Match"}
-                        </DialogTitle>
-                        <DialogDescription className="text-center">
+                        </DialogTitle>                        <DialogDescription className="text-center">
                             {assigneeName !== "No member assigned" ? (
-                                <>Why <span className="font-semibold text-primary">{assigneeName}</span> was chosen for this task</>
+                                <>AI selected <span className="font-semibold text-primary">{assigneeName}</span> for this task</>
                             ) : (
                                 <>The AI could not find a suitable team member for this task</>
                             )}
@@ -243,9 +255,8 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                                 <p className="text-sm ml-6">Consider adjusting task requirements or adding team members with relevant skills</p>
                             </div>
                         )}
-                        
-                        <div className="mb-2 font-medium">AI Reasoning:</div>
-                        <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground pl-2 border-l-2 border-primary/30">{assignmentReasoning}</p>
+                          <div className="mb-2 font-medium">AI Reasoning:</div>
+                        <div className="whitespace-pre-wrap leading-relaxed text-muted-foreground pl-2 border-l-2 border-primary/30 space-y-1">{assignmentReasoning}</div>
                     </div>
                     <DialogFooter className="flex gap-2 justify-end">
                         <DialogClose asChild>
