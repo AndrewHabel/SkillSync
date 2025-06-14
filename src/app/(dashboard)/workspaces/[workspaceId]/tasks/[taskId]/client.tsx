@@ -26,13 +26,12 @@ export const TaskIdClient = () => {
                 <TaskOverview task={data} />
                 <TaskDescription task={data} />
             </div>
-            <DottedSeparator className="my-6" />
-            {data && data.project && (
+            <DottedSeparator className="my-6" />            {data && data.project && (
               <TaskCodeGenerator 
                 taskName={data.name}
                 taskDescription={data.description || ""}
                 projectId={data.projectId}
-                techStack={data.project.techStack || ""}
+                techStack={data.project.ProjectTechStack || ""}
               />
             )}
         </div>
