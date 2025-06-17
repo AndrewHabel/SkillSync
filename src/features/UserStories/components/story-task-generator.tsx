@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useTaskGeneration } from "@/features/taskgeneration/api/use-task-generation";
@@ -24,6 +24,8 @@ import { useBulkCreateTasks } from "@/features/tasks/api/use-bulk-create-tasks";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { PreferredRole, TaskStatus, getPreferredRoleDisplay } from "@/features/tasks/types";
 import { useGetMembers } from "@/features/members/api/use-get-members";
+import { useCurrent } from "@/features/auth/api/use-current";
+import { MemberRole } from "@/features/members/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -105,6 +107,23 @@ export const StoryTaskGenerator = ({ userStory }: StoryTaskGeneratorProps) => {
   // Get necessary context data
   const workspaceId = useWorkspaceId();
   const { data: membersData } = useGetMembers({ workspaceId });
+  const { data: user } = useCurrent();
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Check if the current user is an admin
+  useEffect(() => {
+    if (membersData && user && Array.isArray(membersData.documents)) {
+      const currentUserMember = membersData.documents.find(member => 
+        member.userId === user.$id
+      );
+      
+      if (currentUserMember) {
+        setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+      } else {
+        setIsAdmin(false);
+      }
+    }
+  }, [membersData, user]);
 
   const handleGenerateTasks = () => {
     const userInput = `
@@ -292,25 +311,36 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
               <h3 className="text-lg font-semibold mb-2">AI Task Generation</h3>
               <p className="text-muted-foreground mb-6 max-w-md">
                 Let AI analyze your user story and generate a breakdown of actionable tasks to implement it.
-              </p>
-              <Button 
-                onClick={handleGenerateTasks} 
-                className="px-6 py-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 hover:from-indigo-600 hover:via-purple-600 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-300" 
-                size="lg"
-                disabled={isPending}
-              >
-                {isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Generating Tasks...
-                  </>
-                ) : (
-                  <>
-                    <SparklesIcon className="mr-2 h-5 w-5" />
-                    Generate Tasks with AI
-                  </>
-                )}
-              </Button>
+              </p>              {isAdmin ? (
+                <Button 
+                  onClick={handleGenerateTasks} 
+                  className="px-6 py-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 hover:from-indigo-600 hover:via-purple-600 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-300" 
+                  size="lg"
+                  disabled={isPending}
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Generating Tasks...
+                    </>
+                  ) : (
+                    <>
+                      <SparklesIcon className="mr-2 h-5 w-5" />
+                      Generate Tasks with AI
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button 
+                  disabled
+                  variant="outline"
+                  className="text-muted-foreground"
+                  size="lg"
+                >
+                  <SparklesIcon className="mr-2 h-5 w-5" />
+                  Admin only feature
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -456,13 +486,15 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                               )}
                             </div>
                             <div className="flex items-center gap-2">
-                              {!addedTaskIndices.has(index) && (
-                                <Button 
+                              {!addedTaskIndices.has(index) && (                                <Button 
                                   size="sm" 
                                   variant="ghost" 
-                                  className="h-7 w-7 p-0 rounded-full hover:bg-primary/10" 
-                                  onClick={() => handleEditTask(index)}
-                                  disabled={addingTaskIndex === index}
+                                  className={cn(
+                                    "h-7 w-7 p-0 rounded-full hover:bg-primary/10",
+                                    !isAdmin && "opacity-50 cursor-not-allowed hover:bg-transparent"
+                                  )}
+                                  onClick={isAdmin ? () => handleEditTask(index) : undefined}
+                                  disabled={addingTaskIndex === index || !isAdmin}
                                 >
                                   <PencilIcon className="h-3.5 w-3.5 text-muted-foreground" />
                                   <span className="sr-only">Edit task</span>
@@ -506,13 +538,13 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                               <div className="flex justify-end">
                                 <Button
                                   size="sm"
-                                  variant="outline"
-                                  className={cn(
+                                  variant="outline"                                  className={cn(
                                     "border-primary/40 text-primary hover:bg-primary/10",
-                                    addingTaskIndex === index && "opacity-80"
+                                    addingTaskIndex === index && "opacity-80",
+                                    !isAdmin && "opacity-50 cursor-not-allowed"
                                   )}
-                                  onClick={() => handleAddSingleTask(index)}
-                                  disabled={addingTaskIndex !== null}
+                                  onClick={isAdmin ? () => handleAddSingleTask(index) : undefined}
+                                  disabled={addingTaskIndex !== null || !isAdmin}
                                 >
                                   {addingTaskIndex === index ? (
                                     <>
@@ -543,27 +575,38 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                 </div>
               </ScrollArea>
             )}
-          </CardContent>
-          <CardFooter className="flex justify-center bg-muted/20 py-4 px-6 mt-2">
+          </CardContent>          <CardFooter className="flex justify-center bg-muted/20 py-4 px-6 mt-2">
             {getRemainingTasksCount() > 0 ? (
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
-                onClick={handleAddTasksToProject}
-                disabled={isAddingTasks || addingTaskIndex !== null}
-              >
-                {isAddingTasks ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Creating Tasks...
-                  </>
-                ) : (
-                  <>
-                    <RocketIcon className="mr-2 h-5 w-5" />
-                    Add Remaining {getRemainingTasksCount()} Tasks
-                  </>
-                )}
-              </Button>
+              isAdmin ? (
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                  onClick={handleAddTasksToProject}
+                  disabled={isAddingTasks || addingTaskIndex !== null}
+                >
+                  {isAddingTasks ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Creating Tasks...
+                    </>
+                  ) : (
+                    <>
+                      <RocketIcon className="mr-2 h-5 w-5" />
+                      Add Remaining {getRemainingTasksCount()} Tasks
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  disabled
+                  className="text-muted-foreground"
+                >
+                  <RocketIcon className="mr-2 h-5 w-5" />
+                  Only admins can add tasks
+                </Button>
+              )
             ) : (
               <div className="text-center">
                 <p className="text-green-600 font-medium flex items-center justify-center gap-2">

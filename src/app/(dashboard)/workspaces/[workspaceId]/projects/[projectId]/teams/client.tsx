@@ -20,6 +20,10 @@ import { Team } from "@/features/teams/types";
 import { ViewTeamModal } from "@/features/teams/components/view-team-modal";
 import { useDeleteTeam } from "@/features/teams/api/use-delete-team";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useCurrent } from "@/features/auth/api/use-current";
+import { useGetMembers } from "@/features/members/api/use-get-members";
+import { MemberRole } from "@/features/members/types";
+import { useEffect, useState } from "react";
 
 interface TeamData {
   $id?: string;
@@ -40,6 +44,27 @@ export const TeamsClient = () => {
   const { open: openAddTeamMemberModal } = useAddTeamMemberModal();
   const { open: openViewTeamModal } = useViewTeamModal();
   const { mutate: deleteTeam, isPending: isDeleting } = useDeleteTeam();
+  
+  // Get current user and check role
+  const { data: user } = useCurrent();
+  const { data: members } = useGetMembers({ workspaceId });
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Check if the current user is an admin
+  useEffect(() => {
+    if (members && user && Array.isArray(members.documents)) {
+      // Find the current user's member document
+      const currentUserMember = members.documents.find(member => 
+        member.userId === user.$id
+      );
+      
+      if (currentUserMember) {
+        setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+      } else {
+        setIsAdmin(false);
+      }
+    }
+  }, [members, user]);
   
   const [DeleteTeamDialog, confirmTeamDelete] = useConfirm(
       "Delete Team",
@@ -94,12 +119,13 @@ export const TeamsClient = () => {
               Back to Project
             </Link>
           </Button>
-          <h1 className="text-xl font-bold">Team Management</h1>
-        </div>
-        <Button size="sm" onClick={openCreateTeamModal}>
-          <PlusIcon className="size-4 mr-2" />
-          Create Team
-        </Button>
+          <h1 className="text-xl font-bold">Team Management</h1>        </div>
+        {isAdmin && (
+          <Button size="sm" onClick={openCreateTeamModal}>
+            <PlusIcon className="size-4 mr-2" />
+            Create Team
+          </Button>
+        )}
       </div>
 
       <DottedSeparator />
@@ -133,36 +159,40 @@ export const TeamsClient = () => {
                         >
                           View Team
                         </Button>
-                        <Button 
-                          variant="destructive" 
-                          size="sm" 
-                          onClick={() => handleDeleteTeam(team.$id || team.id || "")}
+                        {isAdmin && (
+                          <Button 
+                            variant="destructive" 
+                            size="sm" 
+                            onClick={() => handleDeleteTeam(team.$id || team.id || "")}
+                          >
+                            Delete Team
+                          </Button>
+                        )}
+                      </div>                      {isAdmin && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openAddTeamMemberModal(team.$id || team.id || "")}
+                          className="ml-auto hover:bg-primary/10"
+                          title="Add member to this team"
                         >
-                          Delete Team
+                          <UserPlusIcon className="size-4" />
                         </Button>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openAddTeamMemberModal(team.$id || team.id || "")}
-                        className="ml-auto hover:bg-primary/10"
-                        title="Add member to this team"
-                      >
-                        <UserPlusIcon className="size-4" />
-                      </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
-              ))}
-              <Card
-                className="hover:bg-accent/30 transition-colors duration-200 border-dashed cursor-pointer"
-                onClick={openCreateTeamModal}
-              >
-                <CardContent className="flex flex-col items-center justify-center h-[120px]">
-                  <PlusIcon className="size-8 mb-2 text-muted-foreground" />
-                  <p className="text-muted-foreground font-medium">Add New Team</p>
-                </CardContent>
-              </Card>
+              ))}              {isAdmin && (
+                <Card
+                  className="hover:bg-accent/30 transition-colors duration-200 border-dashed cursor-pointer"
+                  onClick={openCreateTeamModal}
+                >
+                  <CardContent className="flex flex-col items-center justify-center h-[120px]">
+                    <PlusIcon className="size-8 mb-2 text-muted-foreground" />
+                    <p className="text-muted-foreground font-medium">Add New Team</p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-10">
@@ -170,11 +200,16 @@ export const TeamsClient = () => {
               <h3 className="text-lg font-medium mb-2">No teams created yet</h3>
               <p className="text-muted-foreground mb-4 text-center max-w-md">
                 Create teams to organize your project members by functionality, department, or however you prefer
-              </p>
-              <Button onClick={openCreateTeamModal}>
-                <PlusIcon className="size-4 mr-2" />
-                Create First Team
-              </Button>
+              </p>              {isAdmin ? (
+                <Button onClick={openCreateTeamModal}>
+                  <PlusIcon className="size-4 mr-2" />
+                  Create First Team
+                </Button>
+              ) : (
+                <p className="text-muted-foreground mb-2">
+                  Only administrators can create teams
+                </p>
+              )}
             </div>
           )}
         </CardContent>

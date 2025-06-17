@@ -21,9 +21,12 @@ import Link from "next/link";
 import { Project } from "@/features/projects/types";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { useProjectId } from "@/features/projects/hooks/use-project-id";
-import { Member } from "@/features/members/types";
+import { Member, MemberRole } from "@/features/members/types";
 import { MembersAvatar } from "@/features/members/components/members-avatar";
 import { motion } from "framer-motion";
+import { useCurrent } from "@/features/auth/api/use-current";
+import { useEffect, useState } from "react";
+
 
 export const WorkSpaceIdClient = () => {
 
@@ -32,8 +35,26 @@ export const WorkSpaceIdClient = () => {
     const { data: tasks, isLoading: isLoadingTasks } = useGetTasks({ workspaceId });
     const { data: projects, isLoading: isLoadingProjects } = useGetProjects({ workspaceId });
     const { data: members, isLoading: isLoadingMembers } = useGetMembers({ workspaceId });
+    const { data: user } = useCurrent();
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const { open: createProject } = useCreateProjectModal();
+
+    // Check if the current user is an admin
+    useEffect(() => {
+        if (members && user && Array.isArray(members.documents)) {
+            // Find the current user's member document
+            const currentUserMember = members.documents.find(member => 
+                member.userId === user.$id
+            );
+            
+            if (currentUserMember) {
+                setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+            } else {
+                setIsAdmin(false);
+            }
+        }
+    }, [members, user]);
 
     const isLoading = isLoadingAnalytics || isLoadingTasks || isLoadingProjects || isLoadingMembers;
     if (isLoading) return <PageLoader />
@@ -48,10 +69,9 @@ export const WorkSpaceIdClient = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <TaskList data={tasks.documents} total={tasks.total} />
                     <ProjectList data={projects.documents} total={projects.total} />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                </div>                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <MembersList data={members.documents} total={members.total} />
-                    <GitHubProfileCard />
+                    {isAdmin && <GitHubProfileCard />}
                 </div>
             </div>
         </div>
@@ -66,6 +86,25 @@ interface TaskListProps {
 export const TaskList = ({ data, total }: TaskListProps) => {
     const { open: createTask } = useCreateTaskModal();
     const workspaceId = useWorkspaceId();
+    const { data: user } = useCurrent();
+    const { data: members } = useGetMembers({ workspaceId });
+    const [isAdmin, setIsAdmin] = useState(false);
+    
+    // Check if the current user is an admin
+    useEffect(() => {
+        if (members && user && Array.isArray(members.documents)) {
+            // Find the current user's member document
+            const currentUserMember = members.documents.find(member => 
+                member.userId === user.$id
+            );
+            
+            if (currentUserMember) {
+                setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+            } else {
+                setIsAdmin(false);
+            }
+        }
+    }, [members, user]);
 
     return (
         <div className="workspace-section scale-in w-full">
@@ -74,9 +113,11 @@ export const TaskList = ({ data, total }: TaskListProps) => {
                     <CheckSquareIcon className="size-5 mr-2 text-primary" />
                     <p className="workspace-section-title">Tasks ({total})</p>
                 </div>
-                <Button variant="outline" size="icon" onClick={createTask} className="workspace-button-outline rounded-full">
-                    <PlusIcon className="size-4" />
-                </Button>
+                {isAdmin && (
+                    <Button variant="outline" size="icon" onClick={createTask} className="workspace-button-outline rounded-full">
+                        <PlusIcon className="size-4" />
+                    </Button>
+                )}
             </div>
             <DottedSeparator className="my-4" />
             <div className={`${data.length > 3 ? 'max-h-[450px] overflow-y-auto pr-2 custom-scrollbar' : ''}`}>
@@ -112,16 +153,17 @@ export const TaskList = ({ data, total }: TaskListProps) => {
                                 </motion.div>
                             </Link>
                         </li>
-                    ))}
-                    {data.length === 0 && (
+                    ))}                    {data.length === 0 && (
                         <li className="workspace-empty-state">
                             <div className="workspace-empty-state-icon">
                                 <CheckSquareIcon className="size-10" />
                             </div>
                             <p className="workspace-empty-state-text">No tasks found</p>
-                            <Button variant="outline" onClick={createTask} className="workspace-button workspace-button-outline">
-                                <PlusIcon className="size-4 mr-2" /> Add Task
-                            </Button>
+                            {isAdmin && (
+                                <Button variant="outline" onClick={createTask} className="workspace-button workspace-button-outline">
+                                    <PlusIcon className="size-4 mr-2" /> Add Task
+                                </Button>
+                            )}
                         </li>
                     )}
                 </ul>
@@ -144,6 +186,32 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
     const { open: createTask } = useCreateTaskModal();
     const workspaceId = useWorkspaceId();
     const { open: createProject } = useCreateProjectModal();
+    const { data: user } = useCurrent();
+    const { data: members, isLoading: isLoadingMembers } = useGetMembers({ workspaceId });
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    // Check if the current user is an admin
+    useEffect(() => {
+        const checkAdminStatus = () => {
+            if (members && user && Array.isArray(members.documents)) {
+                // Find the current user's member document
+                const currentUserMember = members.documents.find(member => 
+                    member.userId === user.$id
+                );
+                
+                if (currentUserMember) {
+                    setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+                } else {
+                    setIsAdmin(false);
+                }
+            } else {
+                setIsAdmin(false);
+            }
+        };
+        
+        checkAdminStatus();
+    }, [members, user]);    // Make sure the UI reflects access control status
+    const canCreateProjects = isAdmin === true;
 
     return (
         <div className="workspace-section scale-in w-full" style={{ animationDelay: "0.1s" }}>
@@ -154,9 +222,11 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
                         Projects ({total})
                     </p>
                 </div>
-                <Button variant="outline" size="icon" onClick={createProject} className="workspace-button-outline rounded-full">
-                    <PlusIcon className="size-4" />
-                </Button>
+                {canCreateProjects && (
+                    <Button variant="outline" size="icon" onClick={createProject} className="workspace-button-outline rounded-full">
+                        <PlusIcon className="size-4" />
+                    </Button>
+                )}
             </div>
             <DottedSeparator className="my-4" />
             <div className={`${data.length > 3 ? 'max-h-[450px] overflow-y-auto pr-2 custom-scrollbar' : ''}`}>
@@ -197,16 +267,16 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
                                 </Link>
                             </li>
                         ))}
-                    </ul>
-                ) : (
-                    <div className="workspace-empty-state">
+                    </ul>                ) : (                    <div className="workspace-empty-state">
                         <div className="workspace-empty-state-icon">
                             <BriefcaseIcon className="size-10" />
                         </div>
                         <p className="workspace-empty-state-text">No projects found</p>
-                        <Button variant="outline" onClick={createProject} className="workspace-button workspace-button-outline">
-                            <PlusIcon className="size-4 mr-2" /> Create Project
-                        </Button>
+                        {canCreateProjects && (
+                            <Button variant="outline" onClick={createProject} className="workspace-button workspace-button-outline">
+                                <PlusIcon className="size-4 mr-2" /> Create Project
+                            </Button>
+                        )}
                     </div>
                 )}
             </div>

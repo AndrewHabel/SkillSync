@@ -15,7 +15,10 @@ import { useTaskFilters } from "../hooks/use-task-filters";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { DataKanban } from "./data-kanban";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useCurrent } from "@/features/auth/api/use-current";
+import { useGetMembers } from "@/features/members/api/use-get-members";
+import { MemberRole } from "@/features/members/types";
 import { TaskStatus } from "../types";
 import { useBulkUpdateTasks } from "../api/use-bulk-update-tasks";
 import { DataCalendar } from "./data-calendar";
@@ -35,9 +38,26 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
   });
 
   const { mutate : bulkUpdate } = useBulkUpdateTasks();
-
   const workspaceId = useWorkspaceId();
   const paramProjectId = useProjectId();
+  const { data: user } = useCurrent();
+  const { data: members } = useGetMembers({ workspaceId });
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Check if the current user is an admin
+  useEffect(() => {
+    if (members && user && Array.isArray(members.documents)) {
+      const currentUserMember = members.documents.find(member => 
+        member.userId === user.$id
+      );
+      
+      if (currentUserMember) {
+        setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+      } else {
+        setIsAdmin(false);
+      }
+    }
+  }, [members, user]);
 
   const { data: tasks, isLoading: isLoadingTasks } = useGetTasks({workspaceId, status, assigneeId, dueDate, projectId: paramProjectId || projectId});
   const { open } = useCreateTaskModal();
@@ -49,8 +69,7 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
   return(
     <Tabs defaultValue={view} onValueChange={setView} className="flex-1 w-full border rounded-lg project-table-bg">
       <div className="h-full flex flex-col overflow-auto p-4">
-        <div className="flex flex-col gap-y-2 lg:flex-row justify-between items-center ">
-          <TabsList className="w-full lg:w-auto bg-secondary p-1">
+        <div className="flex flex-col gap-y-2 lg:flex-row justify-between items-center ">          <TabsList className="w-full lg:w-auto bg-secondary p-1">
             <TabsTrigger 
               className="h-8 w-full lg:w-auto data-[state=inactive]:bg-background data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" 
               value="table">
@@ -67,10 +86,12 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
               Calendar
             </TabsTrigger>
           </TabsList>
-          <Button onClick={open} variant="gradient" className="w-full lg:w-auto" size="sm">
-            <PlusIcon className="size-4 mr-2" />
-            New
-          </Button>
+          {isAdmin && (
+            <Button onClick={open} variant="gradient" className="w-full lg:w-auto" size="sm">
+              <PlusIcon className="size-4 mr-2" />
+              New
+            </Button>
+          )}
         </div>
         <DottedSeparator className="my-4" />
         <DataFilters hideProjectFilter={hideProjectFilter} />

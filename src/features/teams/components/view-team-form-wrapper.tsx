@@ -10,6 +10,9 @@ import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
 import { useGetMembers } from "@/features/members/api/use-get-members";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+import { useCurrent } from "@/features/auth/api/use-current";
+import { MemberRole } from "@/features/members/types";
+import { useEffect, useState } from "react";
 
 interface ViewTeamFormWrapperProps {
   teamId: string;
@@ -21,6 +24,26 @@ export const ViewTeamFormWrapper = ({ teamId, onCancel }: ViewTeamFormWrapperPro
   const { data: team, isLoading: isLoadingTeam } = useGetTeam({ teamId });
   const { data: members, isLoading: isLoadingMembers } = useGetMembers({ workspaceId });
   const { mutate: removeTeamMember, isPending: isRemoving } = useRemoveTeamMember();
+  
+  // Get current user and check role
+  const { data: user } = useCurrent();
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Check if the current user is an admin
+  useEffect(() => {
+    if (members && user && Array.isArray(members.documents)) {
+      // Find the current user's member document
+      const currentUserMember = members.documents.find(member => 
+        member.userId === user.$id
+      );
+      
+      if (currentUserMember) {
+        setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+      } else {
+        setIsAdmin(false);
+      }
+    }
+  }, [members, user]);
   
   const [ConfirmDialog, confirm] = useConfirm(
     "Remove Member",
@@ -106,16 +129,18 @@ export const ViewTeamFormWrapper = ({ teamId, onCancel }: ViewTeamFormWrapperPro
                         <p className="text-xs text-muted-foreground">{member.email}</p>
                       </div>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleRemoveMember(member.$id)}
-                      disabled={isRemoving}
-                      className="h-9 px-2"
-                    >
-                      <UserMinusIcon className="size-4 mr-2" />
-                      Remove
-                    </Button>
+                    {isAdmin && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleRemoveMember(member.$id)}
+                        disabled={isRemoving}
+                        className="h-9 px-2"
+                      >
+                        <UserMinusIcon className="size-4 mr-2" />
+                        Remove
+                      </Button>
+                    )}
                   </div>
                   {index !== teamMembers.length - 1 && <Separator className="my-2" />}
                 </motion.div>

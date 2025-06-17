@@ -13,7 +13,7 @@ import { Project } from "@/features/projects/types";
 import { Description } from "@radix-ui/react-dialog";
 import { bulkCreateTasksSchema } from "@/features/UserStories/schemas";
 import assignedTask, { AssignedTask } from "@/components/emails/you-have-been-assigned-task";
-import { Member } from "@/features/members/types";
+import { Member, MemberRole } from "@/features/members/types";
 import { getWorkspaces } from "@/features/workspaces/queries";
 import { Workspace } from "@/features/workspaces/types";
 import { sendAssignEmail } from "@/lib/sendEmail";
@@ -39,16 +39,19 @@ const app = new Hono()
         estimatedHours,
         description,
         expertiseLevel
-      } = c.req.valid("json");
-
-      const member = await getMember({
+      } = c.req.valid("json");      const member = await getMember({
         databases,
         workspaceId,
         userId: user.$id,
-      })
-
+      });
+      
       if(!member){
         return c.json({error: "Unauthorized"}, 401);
+      }
+      
+      // Only ADMIN users can create tasks
+      if(member.role !== MemberRole.ADMIN){
+        return c.json({error: "Only admins can create tasks"}, 403);
       }
 
       const highestPositionTask = await databases.listDocuments(
@@ -152,10 +155,13 @@ const app = new Hono()
         databases,
         workspaceId,
         userId: user.$id,
-      });
-
-      if(!member){
+      });      if(!member){
         return c.json({error: "Unauthorized"}, 401);
+      }
+      
+      // Only ADMIN users can create tasks
+      if(member.role !== MemberRole.ADMIN){
+        return c.json({error: "Only admins can bulk create tasks"}, 403);
       }
 
       // Create all tasks

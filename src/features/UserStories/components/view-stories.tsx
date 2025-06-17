@@ -10,6 +10,10 @@ import { useCreateStoryModal } from "../hooks/use-create-story-modal";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button"; 
+import { useCurrent } from "@/features/auth/api/use-current";
+import { useEffect, useState } from "react";
+import { useGetMembers } from "@/features/members/api/use-get-members";
+import { MemberRole } from "@/features/members/types";
 
 import { PlusIcon } from "lucide-react";
 import { ArrowLeftIcon } from "lucide-react";
@@ -23,6 +27,24 @@ export const ViewStories = () => {
 
   const { data: initialValues, isLoading } = useGetProject({ projectId });
   const { data: userStories, isLoading: loadingStories } = useGetStories({ projectId, workspaceId });
+  const { data: user } = useCurrent();
+  const { data: members } = useGetMembers({ workspaceId });
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Check if the current user is an admin
+  useEffect(() => {
+    if (members && user && Array.isArray(members.documents)) {
+      const currentUserMember = members.documents.find(member => 
+        member.userId === user.$id
+      );
+      
+      if (currentUserMember) {
+        setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+      } else {
+        setIsAdmin(false);
+      }
+    }
+  }, [members, user]);
 
   const { open } = useCreateStoryModal();
 
@@ -38,13 +60,14 @@ export const ViewStories = () => {
         </Link>
       </Button>
 
-      <div className="max-w-6xl mx-auto bg-card rounded-xl shadow p-6 border border-border">
-        <div className="flex justify-between items-center mb-6">
+      <div className="max-w-6xl mx-auto bg-card rounded-xl shadow p-6 border border-border">      <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold text-foreground">User Stories</h2>
-          <Button onClick={open} className="w-full lg:w-auto px-4 py-2" size="sm">
-            <PlusIcon className="size-4 mr-2" />
-            New
-          </Button>
+          {isAdmin && (
+            <Button onClick={open} className="w-full lg:w-auto px-4 py-2" size="sm">
+              <PlusIcon className="size-4 mr-2" />
+              New
+            </Button>
+          )}
         </div>
 
         <div className="space-y-4">

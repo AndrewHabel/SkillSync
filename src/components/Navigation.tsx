@@ -40,6 +40,7 @@ const routes: RouteItem[] = [
         href: "/github-integration",
         icon: GithubIcon,
         activeIcon: GithubIcon,
+        adminOnly: true, // Only ADMIN can see GitHub
     },
     {
         label: "Settings",
@@ -55,7 +56,6 @@ const routes: RouteItem[] = [
     }
 ];
 
-// Admin-only route
 const adminRoutes: RouteItem[] = [
     {
         label: "Admin Analytics",
@@ -71,9 +71,7 @@ export const Navigation = () => {
     const pathname = usePathname();
     const { data: user } = useCurrent();
     const { data: members } = useGetMembers({ workspaceId });
-    const [isAdmin, setIsAdmin] = useState(false);
-
-    // Determine if current user is an admin
+    const [isAdmin, setIsAdmin] = useState(false);    // Determine if current user is an admin
     useEffect(() => {
         if (members && user) {
             const currentUserMember = members.documents.find(member => member.userId === user.$id);
@@ -81,8 +79,20 @@ export const Navigation = () => {
         }
     }, [members, user]);
 
-    // Combine routes - add admin routes only if user is admin
-    const allRoutes = [...routes, ...(isAdmin ? adminRoutes : [])];
+    // Filter routes based on user role
+    const filteredRoutes = routes.filter(route => {
+        // Hide adminOnly routes for non-admin users
+        if (route.adminOnly && !isAdmin) {
+            return false;
+        }
+        // Hide "My Tasks" for admins (if that's the intended behavior)
+        if (isAdmin && route.label === "My Tasks") {
+            return false;
+        }
+        return true;
+    });
+    
+    const allRoutes = [...filteredRoutes, ...(isAdmin ? adminRoutes : [])];
 
     return (
         <ul className="flex flex-col gap-1">
