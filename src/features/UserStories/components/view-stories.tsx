@@ -75,17 +75,18 @@ export const ViewStories = () => {
             <div
               key={story.$id}
               className="flex flex-col md:flex-row md:items-center justify-between gap-4 border p-4 rounded-md bg-accent hover:bg-accent/80 transition-colors"
-            >
-              <div className="flex-1">
+            >              <div className="flex-1">
                 <p className="text-lg font-semibold text-foreground">{story.description}</p>
                 <p className="text-sm text-muted-foreground">{story.AcceptanceCriteria}</p>
               </div>
-              <Button variant="solid" className="w-full md:w-auto px-4 py-2 shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground" size="sm">
-                <Link href={`/workspaces/${workspaceId}/projects/${projectId}/UserStory/${story.$id}`} className="flex items-center">
-                  <PencilIcon className="size-4 mr-2" />
-                  Manage
-                </Link>
-              </Button>
+              {isAdmin && (
+                <Button variant="solid" className="w-full md:w-auto px-4 py-2 shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground" size="sm">
+                  <Link href={`/workspaces/${workspaceId}/projects/${projectId}/UserStory/${story.$id}`} className="flex items-center">
+                    <PencilIcon className="size-4 mr-2" />
+                    Manage
+                  </Link>
+                </Button>
+              )}
             </div>
           ))}
           {userStories?.documents.length === 0 && (

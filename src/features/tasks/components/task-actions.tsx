@@ -17,7 +17,10 @@ import { useEditTaskModal } from "../hooks/use-edit-task-modal";
 import { useGetTask } from "../api/use-get-task";
 import { useGetTeamsByType } from "@/features/teams/api/use-get-teams-by-type";
 import { mapRoleToTeamType } from "@/features/teams/utils/map-role-to-team";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useGetMembers } from "@/features/members/api/use-get-members";
+import { useCurrent } from "@/features/auth/api/use-current";
+import { MemberRole } from "@/features/members/types";
 import { 
     Dialog, 
     DialogContent, 
@@ -44,6 +47,27 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
     const [isReasoningDialogOpen, setIsReasoningDialogOpen] = useState(false);
     const [assignmentReasoning, setAssignmentReasoning] = useState("");
     const [assigneeName, setAssigneeName] = useState("");
+    const [isAdmin, setIsAdmin] = useState(false);
+    
+    // Get current user and members data to check role
+    const { data: user } = useCurrent();
+    const { data: members } = useGetMembers({ workspaceId });
+    
+    // Check if the current user is an admin
+    useEffect(() => {
+        if (members && user && Array.isArray(members.documents)) {
+            // Find the current user's member document
+            const currentUserMember = members.documents.find(member => 
+                member.userId === user.$id
+            );
+            
+            if (currentUserMember) {
+                setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+            } else {
+                setIsAdmin(false);
+            }
+        }
+    }, [members, user, workspaceId]);
 
     const {open} = useEditTaskModal();
 
@@ -197,26 +221,31 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                     <DropdownMenuItem onClick={onOpenTask} disabled={false} className="font-medium p-[10px]">
                         <ExternalLinkIcon className="size-4 mr-2 stroke-2" />
                         Task Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onOpenProject} disabled={false} className="font-medium p-[10px]">
+                    </DropdownMenuItem>                    <DropdownMenuItem onClick={onOpenProject} disabled={false} className="font-medium p-[10px]">
                         <ExternalLinkIcon className="size-4 mr-2 stroke-2" />
                         Open Project
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={()=>open(id)} disabled={false} className="font-medium p-[10px]">
-                        <PencilIcon className="size-4 mr-2 stroke-2" />
-                        Edit Task
-                    </DropdownMenuItem>                    <DropdownMenuItem onClick={onAutoAssign} disabled={isAutoAssigning} className="font-medium p-[10px]">
-                        {isAutoAssigning ? (
-                            <Loader2 className="size-4 mr-2 stroke-2 animate-spin" />
-                        ) : (
-                            <Award className="size-4 mr-2 stroke-2" />
-                        )}
-                        {isAutoAssigning ? "Assigning..." : "Auto Assign"}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDelete} disabled={isPending} className="text-amber-700 focus:text-amber-700 font-medium p-[10px]">
-                        <TrashIcon className="size-4 mr-2 stroke-2" />
-                        delete Task
-                    </DropdownMenuItem>                </DropdownMenuContent>
+                    {isAdmin && (
+                        <>
+                            <DropdownMenuItem onClick={()=>open(id)} disabled={false} className="font-medium p-[10px]">
+                                <PencilIcon className="size-4 mr-2 stroke-2" />
+                                Edit Task
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={onAutoAssign} disabled={isAutoAssigning} className="font-medium p-[10px]">
+                                {isAutoAssigning ? (
+                                    <Loader2 className="size-4 mr-2 stroke-2 animate-spin" />
+                                ) : (
+                                    <Award className="size-4 mr-2 stroke-2" />
+                                )}
+                                {isAutoAssigning ? "Assigning..." : "Auto Assign"}
+                            </DropdownMenuItem>
+                        </>
+                    )}                    {isAdmin && (
+                        <DropdownMenuItem onClick={handleDelete} disabled={isPending} className="text-amber-700 focus:text-amber-700 font-medium p-[10px]">
+                            <TrashIcon className="size-4 mr-2 stroke-2" />
+                            Delete Task
+                        </DropdownMenuItem>
+                    )}</DropdownMenuContent>
             </DropdownMenu>
               {/* Reasoning Dialog */}
             <Dialog open={isReasoningDialogOpen} onOpenChange={setIsReasoningDialogOpen}>
@@ -263,8 +292,7 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                             <Button type="button" variant="outline">
                                 Close
                             </Button>
-                        </DialogClose>
-                        {assigneeName === "No member assigned" && (
+                        </DialogClose>                        {isAdmin && assigneeName === "No member assigned" && (
                             <Button onClick={() => {
                                 setIsReasoningDialogOpen(false);
                                 open(id);
