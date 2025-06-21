@@ -12,4 +12,5 @@ export const createTaskSchema = z.object({
   estimatedHours: z.number().positive().optional(),
   preferredRole: z.nativeEnum(PreferredRole).optional(),
   expertiseLevel: z.nativeEnum(ExpertiseLevel).optional(),
+  dependsOnTaskId: z.array(z.string().trim()).optional(),
 })

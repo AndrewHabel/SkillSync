@@ -12,6 +12,7 @@ import taskInfoGeneration from "@/features/TaskInfoGeneration/server/routes";
 import teams from "@/features/teams/server/route";
 import codegeneration from "@/features/CodeGeneration/server/routes";
 import skill from "@/features/skill/server/route";
+import taskdependencies from "@/features/TasksDependencies/server/route";
 
 const app = new Hono().basePath("/api");
 
@@ -28,6 +29,7 @@ const routes = app
   .route("/teams",teams)
   .route("/codegeneration",codegeneration)
   .route("/skill", skill)
+  .route("/TasksDependencies", taskdependencies);
 
 export const GET = handle(app);
 export const POST = handle(app);
