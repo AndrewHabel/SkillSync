@@ -9,4 +9,5 @@ export const UpdateMemberSchema = z.object({
         z.string().transform((value) => value === "" ? undefined : value),
     ]).optional(),
   gitHubToken: z.string().optional(),
+  specialRoleId: z.string().optional(),
 });

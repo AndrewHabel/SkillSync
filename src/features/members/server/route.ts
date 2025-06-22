@@ -157,23 +157,20 @@ const app = new Hono()
        "/:memberId",
        sessionMiddleware,
        zValidator("form", UpdateMemberSchema),
-       async (c) => {
-
-            const {memberId} = c.req.param();
-            const { role ,name , image} = c.req.valid("form");
+       async (c) => {            
+        const {memberId} = c.req.param();
+            const { role, name, image, specialRoleId } = c.req.valid("form");
             const user = c.get("user");
             const databases = c.get("databases");
             const { account } = await createSessionClient();
             const storage = c.get("storage");
             
-
             const memberToUpdate = await databases.getDocument(
                 DATABASE_ID, 
                 MEMBERS_ID, 
                 memberId
             );
 
-            
             const allMembersInWorkspace = await databases.listDocuments(
                 DATABASE_ID,
                 MEMBERS_ID,
@@ -215,22 +212,35 @@ const app = new Hono()
                         
                 const buffer = Buffer.from(arrayBuffer); // Convert to Node.js Buffer
                 uploadedImageUrl = `data:${image.type};base64,${buffer.toString("base64")}`;
+            }            // Prepare update data with all form fields
+            const updateData: Record<string, any> = {};
+            
+            // Add role if provided
+            if (role) {
+                updateData.role = role;
             }
-
-            if(uploadedImageUrl){
+            
+            // Add image URL if uploaded
+            if (uploadedImageUrl) {
+                updateData.imageUrl = uploadedImageUrl;
+            }
+            
+            // Add specialRoleId if provided
+            if (specialRoleId !== undefined) {
+                updateData.specialRoleId = specialRoleId;
+            }
+            
+            // Only update if there are fields to update
+            if (Object.keys(updateData).length > 0) {
                 await databases.updateDocument(
                     DATABASE_ID,
                     MEMBERS_ID,
                     memberId,
-                    {
-                        role,
-                        imageUrl: uploadedImageUrl,
-                    }
-                )
+                    updateData
+                );
             }
-        
+            
             return c.json({data:{$id:memberToUpdate.$id}});
-
        }
     )
     .get(
