@@ -1,7 +1,7 @@
 "use client";
 // navigation.tsx
 import { cn } from '@/lib/utils';
-import { BarChart2Icon, GithubIcon, SettingsIcon, UsersIcon } from 'lucide-react';
+import { BarChart2Icon, GithubIcon, SettingsIcon, ShieldCheckIcon, UsersIcon } from 'lucide-react';
 import Link from 'next/link';
 import { GoCheckCircle, GoCheckCircleFill, GoHome, GoHomeFill } from 'react-icons/go';
 import type { IconType } from 'react-icons';
@@ -53,6 +53,13 @@ const routes: RouteItem[] = [
         href: "/members",
         icon: UsersIcon,
         activeIcon: UsersIcon,
+    },
+    {
+        label: "Roles",
+        href: "/Roles",
+        icon: ShieldCheckIcon,
+        activeIcon: ShieldCheckIcon,
+        adminOnly: true, // Only ADMIN can manage roles
     }
 ];
 
