@@ -6,6 +6,7 @@ import { Loader } from "lucide-react";
 import { use } from "react";
 import { EditTaskForm } from "./edit-task-form";
 import { useGetTask } from "../api/use-get-task";
+import { useGetAllTaskDependencies } from "@/features/TasksDependencies/api/use-get-tasks-dependencies";
 
 interface EditTaskFormWrapperProps {
     onCancel: () => void;
@@ -25,9 +26,15 @@ export const EditTaskFormWrapper = ({onCancel, id}: EditTaskFormWrapperProps) =>
 
     const projectOptions = projects?.documents.map(project => ({ id: project.$id , name: project.name, imageUrl: project.imageUrl}));
     const memberOptions = members?.documents.map(member => ({ id: member.$id , name: member.name}));
-    const isLoading = isLoadingProjects || isLoadingMembers || isLoadingTask;
+    const isLoading = isLoadingProjects || isLoadingMembers || isLoadingTask;      
+    const {data: taskDependenciesData, isLoading: isLoadingDependencies} = useGetAllTaskDependencies({ taskId: id ,workspaceId: workspaceId, projectId: initialValues?.projectId });
+      // Use the whole dependency objects
+    const taskDependencies = taskDependenciesData;
+    
+    const isLoadingAll = isLoading || isLoadingDependencies;
 
-    if(isLoading){
+    
+    if(isLoadingAll){
         return(
             <Card className="w-full h-[714px] border-none shadow-none">
             <CardContent className="flex items-center justify-center h-full">
@@ -42,7 +49,7 @@ export const EditTaskFormWrapper = ({onCancel, id}: EditTaskFormWrapperProps) =>
     }
 
     return (
-        <EditTaskForm onCancel={onCancel} initialValues={initialValues} projectOptions={projectOptions ?? []} memberOptions={memberOptions ?? []}/>
+        <EditTaskForm onCancel={onCancel} taskDependencies={taskDependencies} initialValues={initialValues} projectOptions={projectOptions ?? []} memberOptions={memberOptions ?? []}/>
     );
 };
 

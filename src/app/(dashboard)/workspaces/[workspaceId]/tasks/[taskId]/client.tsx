@@ -11,8 +11,10 @@ import { TaskCodeGenerator } from "@/features/tasks/components/task-code-generat
 import { TaskDescription } from "@/features/tasks/components/task-description";
 import { TaskOverview } from "@/features/tasks/components/task-overview";
 import { useTaskId } from "@/features/tasks/hooks/use-task-id";
+import { useGetAllTaskDependencies } from "@/features/TasksDependencies/api/use-get-tasks-dependencies";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useEffect, useState } from "react";
+import { Link as LinkIcon } from "lucide-react";
 
 export const TaskIdClient = () => {
     const taskId = useTaskId();
@@ -22,6 +24,10 @@ export const TaskIdClient = () => {
     const { data: members } = useGetMembers({ workspaceId });
     const [isAssignedToCurrentUser, setIsAssignedToCurrentUser] = useState(false);
     
+    const {data: tasksDependencies, isLoading: isLoadingDependencies} = useGetAllTaskDependencies({taskId: taskId,workspaceId: workspaceId, projectId: data?.projectId});
+    
+    console.log("Task Dependencies:", tasksDependencies);
+
     // Check if the current user is the assignee of this task
     useEffect(() => {
         if (data && currentUser && members && Array.isArray(members.documents)) {
@@ -48,8 +54,39 @@ export const TaskIdClient = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <TaskOverview task={data} />
                 <TaskDescription task={data} />
-            </div>
-            <DottedSeparator className="my-6" />            
+            </div>            <DottedSeparator className="my-6" />
+            
+            {/* Task Dependencies Section */}
+            {tasksDependencies && tasksDependencies.length > 0 && (
+              <>
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold mb-4">Task Dependencies</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {tasksDependencies.map((dependency) => (
+                      <div 
+                        key={dependency.$id} 
+                        className="border rounded-lg p-4 bg-muted/30 hover:bg-muted/50 transition-colors"
+                      >                        <div className="flex items-start gap-3">
+                          <div className="bg-primary/10 rounded-full p-2">
+                            <LinkIcon className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-medium truncate">
+                              {dependency.dependOnTaskName || "Dependent Task"}
+                            </h3>
+                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                              {dependency.dependReason || "No reason provided"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <DottedSeparator className="my-6" />
+              </>
+            )}
+            
             {isAssignedToCurrentUser && data.project && data.projectId && (
               <TaskCodeGenerator 
                 taskName={data.name}

@@ -107,14 +107,21 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
 
     const { mutate: autoAssignMutate, isPending: isAutoAssigning } = useAutoAssignTask();
 
+    
+    
     const onAutoAssign = () => {        
 
-            if ((taskDependencies ?? []).length > 0) {
+        if ((taskDependencies ?? []).length > 0) {
             console.log("Task has dependencies, cannot auto-assign", taskDependencies);
             setIsDependenciesDialogOpen(true);
             return;
-            }
+        }
 
+        proceedWithAutoAssign();
+    };
+
+    // Function to handle auto-assignment regardless of dependencies
+    const proceedWithAutoAssign = () => {
         if (!taskData) {
             toast.error("Task data not available");
             return;
@@ -170,7 +177,7 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
             }
         }, 
         {       onSuccess: (data) => {
-                toast.dismiss(loadingToast);                // Extract the assignment reasoning and assignee name to display in dialog
+                toast.dismiss(loadingToast);               
                 const reasoning = data.data.aiReasoning || "No reasoning provided.";
                 
                 // Check if a team member was assigned or not
@@ -254,7 +261,8 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                                 {isAutoAssigning ? "Assigning..." : "Auto Assign"}
                             </DropdownMenuItem>
                         </>
-                    )}                    {isAdmin && (
+                    )}                    
+                    {isAdmin && (
                         <DropdownMenuItem onClick={handleDelete} disabled={isPending} className="text-amber-700 focus:text-amber-700 font-medium p-[10px]">
                             <TrashIcon className="size-4 mr-2 stroke-2" />
                             Delete Task
@@ -356,6 +364,18 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                                 Close
                             </Button>
                         </DialogClose>
+                        {isAdmin && (
+                            <Button 
+                                onClick={() => {
+                                    setIsDependenciesDialogOpen(false);
+                                    proceedWithAutoAssign();
+                                }}
+                                variant="destructive"
+                            >
+                                <AlertTriangle className="size-4 mr-2" />
+                                Proceed Anyway
+                            </Button>
+                        )}
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
