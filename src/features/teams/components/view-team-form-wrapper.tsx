@@ -24,12 +24,12 @@ export const ViewTeamFormWrapper = ({ teamId, onCancel }: ViewTeamFormWrapperPro
   const { data: team, isLoading: isLoadingTeam } = useGetTeam({ teamId });
   const { data: members, isLoading: isLoadingMembers } = useGetMembers({ workspaceId });
   const { mutate: removeTeamMember, isPending: isRemoving } = useRemoveTeamMember();
-  
-  // Get current user and check role
+    // Get current user and check role
   const { data: user } = useCurrent();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canManageTeams, setCanManageTeams] = useState(false);
   
-  // Check if the current user is an admin
+  // Check if the current user is an admin or has team management permissions
   useEffect(() => {
     if (members && user && Array.isArray(members.documents)) {
       // Find the current user's member document
@@ -39,8 +39,15 @@ export const ViewTeamFormWrapper = ({ teamId, onCancel }: ViewTeamFormWrapperPro
       
       if (currentUserMember) {
         setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+        
+        // Check for special role permissions
+        if (currentUserMember.specialRole?.documents?.[0]) {
+          const specialRole = currentUserMember.specialRole.documents[0];
+          setCanManageTeams(!!specialRole.manageTeams);
+        }
       } else {
         setIsAdmin(false);
+        setCanManageTeams(false);
       }
     }
   }, [members, user]);
@@ -128,8 +135,7 @@ export const ViewTeamFormWrapper = ({ teamId, onCancel }: ViewTeamFormWrapperPro
                         <p className="text-sm font-medium">{member.name}</p>
                         <p className="text-xs text-muted-foreground">{member.email}</p>
                       </div>
-                    </div>
-                    {isAdmin && (
+                    </div>                    {(isAdmin || canManageTeams) && (
                       <Button
                         size="sm"
                         variant="destructive"

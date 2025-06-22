@@ -89,6 +89,7 @@ export const TaskList = ({ data, total }: TaskListProps) => {
     const { data: user } = useCurrent();
     const { data: members } = useGetMembers({ workspaceId });
     const [isAdmin, setIsAdmin] = useState(false);
+    const [canManageTasks, setCanManageTasks] = useState(false);
     
     // Check if the current user is an admin
     useEffect(() => {
@@ -100,8 +101,10 @@ export const TaskList = ({ data, total }: TaskListProps) => {
             
             if (currentUserMember) {
                 setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+                setCanManageTasks(currentUserMember.specialRole?.documents?.[0]?.manageTasks === true || currentUserMember.role === MemberRole.ADMIN);
             } else {
                 setIsAdmin(false);
+                setCanManageTasks(false);
             }
         }
     }, [members, user]);
@@ -112,8 +115,7 @@ export const TaskList = ({ data, total }: TaskListProps) => {
                 <div className="flex items-center">
                     <CheckSquareIcon className="size-5 mr-2 text-primary" />
                     <p className="workspace-section-title">Tasks ({total})</p>
-                </div>
-                {isAdmin && (
+                </div>                {(isAdmin || canManageTasks) && (
                     <Button variant="outline" size="icon" onClick={createTask} className="workspace-button-outline rounded-full">
                         <PlusIcon className="size-4" />
                     </Button>
@@ -157,9 +159,8 @@ export const TaskList = ({ data, total }: TaskListProps) => {
                         <li className="workspace-empty-state">
                             <div className="workspace-empty-state-icon">
                                 <CheckSquareIcon className="size-10" />
-                            </div>
-                            <p className="workspace-empty-state-text">No tasks found</p>
-                            {isAdmin && (
+                            </div>                            <p className="workspace-empty-state-text">No tasks found</p>
+                            {(isAdmin || canManageTasks) && (
                                 <Button variant="outline" onClick={createTask} className="workspace-button workspace-button-outline">
                                     <PlusIcon className="size-4 mr-2" /> Add Task
                                 </Button>

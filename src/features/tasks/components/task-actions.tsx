@@ -49,6 +49,7 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
     const [assignmentReasoning, setAssignmentReasoning] = useState("");
     const [assigneeName, setAssigneeName] = useState("");
     const [isAdmin, setIsAdmin] = useState(false);
+    const [canManageTasks, setCanManageTasks] = useState(false);
     const paramProjectId = useProjectId();
     // Get current user and members data to check role
     const { data: user } = useCurrent();
@@ -56,7 +57,7 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
 
     const {data: taskDependencies , isLoading: isLoadingDependencies} = useGetAllTaskDependencies({ taskId: id ,workspaceId: workspaceId, projectId: paramProjectId});
     console.log("Task Dependencies lmao awy:", taskDependencies);
-    // Check if the current user is an admin
+    // Check if the current user is an admin or can manage tasks
     useEffect(() => {
         if (members && user && Array.isArray(members.documents)) {
             // Find the current user's member document
@@ -66,8 +67,11 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
             
             if (currentUserMember) {
                 setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+                setCanManageTasks(currentUserMember.specialRole?.documents?.[0].manageTasks === true || currentUserMember.role === MemberRole.ADMIN);
+                console.log(currentUserMember.specialRole?.documents?.[0].manageTasks)
             } else {
                 setIsAdmin(false);
+                setCanManageTasks(false);
             }
         }
     }, [members, user, workspaceId]);
@@ -246,7 +250,7 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                         <ExternalLinkIcon className="size-4 mr-2 stroke-2" />
                         Open Project
                     </DropdownMenuItem>
-                    {isAdmin && (
+                    {(isAdmin || canManageTasks) && (
                         <>
                             <DropdownMenuItem onClick={()=>open(id)} disabled={false} className="font-medium p-[10px]">
                                 <PencilIcon className="size-4 mr-2 stroke-2" />
@@ -262,7 +266,7 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                             </DropdownMenuItem>
                         </>
                     )}                    
-                    {isAdmin && (
+                    {(isAdmin || canManageTasks) && (
                         <DropdownMenuItem onClick={handleDelete} disabled={isPending} className="text-amber-700 focus:text-amber-700 font-medium p-[10px]">
                             <TrashIcon className="size-4 mr-2 stroke-2" />
                             Delete Task
@@ -315,7 +319,7 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                                 Close
                             </Button>
                         </DialogClose>                        
-                        {isAdmin && assigneeName === "No member assigned" && (
+                        {(isAdmin || canManageTasks) && assigneeName === "No member assigned" && (
                             <Button onClick={() => {
                                 setIsReasoningDialogOpen(false);
                                 open(id);
@@ -364,7 +368,7 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                                 Close
                             </Button>
                         </DialogClose>
-                        {isAdmin && (
+                        {(isAdmin || canManageTasks) && (
                             <Button 
                                 onClick={() => {
                                     setIsDependenciesDialogOpen(false);

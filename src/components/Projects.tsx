@@ -18,12 +18,12 @@ export const Projects = () => {
     const pathname = usePathname();
     const {open} =  useCreateProjectModal();
     const workspaceId = useWorkspaceId();
-    const {data} = useGetProjects({workspaceId});
-    const { data: user } = useCurrent();
+    const {data} = useGetProjects({workspaceId});    const { data: user } = useCurrent();
     const { data: members } = useGetMembers({ workspaceId });
     const [isAdmin, setIsAdmin] = useState(false);
+    const [canManageProjects, setCanManageProjects] = useState(false);
     
-    // Check if the current user is an admin
+    // Check if the current user is an admin or has project management permissions
     useEffect(() => {
         if (members && user && Array.isArray(members.documents)) {
             // Find the current user's member document
@@ -33,12 +33,21 @@ export const Projects = () => {
             
             if (currentUserMember) {
                 setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+                
+                // Check for special role permissions
+                if (currentUserMember.specialRole?.documents?.[0]) {
+                    const specialRole = currentUserMember.specialRole.documents[0];
+                    setCanManageProjects(!!specialRole.manageProjects);
+                }
             } else {
                 setIsAdmin(false);
+                setCanManageProjects(false);
             }
         }
-    }, [members, user]);    // Ensure role check is strict
-    const canCreateProjects = isAdmin === true;
+    }, [members, user]);
+    
+    // Allow project creation for admins OR users with manageProjects permission
+    const canCreateProjects = isAdmin === true || canManageProjects === true;
 
     return (
         <div className="flex flex-col gap-y-2">

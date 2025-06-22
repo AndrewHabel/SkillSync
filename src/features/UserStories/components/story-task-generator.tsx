@@ -109,8 +109,9 @@ export const StoryTaskGenerator = ({ userStory }: StoryTaskGeneratorProps) => {
   const { data: membersData } = useGetMembers({ workspaceId });
   const { data: user } = useCurrent();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canManageUserStories, setCanManageUserStories] = useState(false);
   
-  // Check if the current user is an admin
+  // Check if the current user is an admin or can manage user stories
   useEffect(() => {
     if (membersData && user && Array.isArray(membersData.documents)) {
       const currentUserMember = membersData.documents.find(member => 
@@ -119,8 +120,10 @@ export const StoryTaskGenerator = ({ userStory }: StoryTaskGeneratorProps) => {
       
       if (currentUserMember) {
         setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+        setCanManageUserStories(currentUserMember.specialRole?.documents?.[0]?.manageUserStories === true || currentUserMember.role === MemberRole.ADMIN);
       } else {
         setIsAdmin(false);
+        setCanManageUserStories(false);
       }
     }
   }, [membersData, user]);
@@ -311,7 +314,7 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
               <h3 className="text-lg font-semibold mb-2">AI Task Generation</h3>
               <p className="text-muted-foreground mb-6 max-w-md">
                 Let AI analyze your user story and generate a breakdown of actionable tasks to implement it.
-              </p>              {isAdmin ? (
+              </p>              {(isAdmin || canManageUserStories) ? (
                 <Button 
                   onClick={handleGenerateTasks} 
                   className="px-6 py-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 hover:from-indigo-600 hover:via-purple-600 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-300" 
@@ -338,7 +341,7 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                   size="lg"
                 >
                   <SparklesIcon className="mr-2 h-5 w-5" />
-                  Admin only feature
+                  Permission required
                 </Button>
               )}
             </div>
@@ -491,10 +494,10 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                                   variant="ghost" 
                                   className={cn(
                                     "h-7 w-7 p-0 rounded-full hover:bg-primary/10",
-                                    !isAdmin && "opacity-50 cursor-not-allowed hover:bg-transparent"
+                                    !(isAdmin || canManageUserStories) && "opacity-50 cursor-not-allowed hover:bg-transparent"
                                   )}
-                                  onClick={isAdmin ? () => handleEditTask(index) : undefined}
-                                  disabled={addingTaskIndex === index || !isAdmin}
+                                  onClick={(isAdmin || canManageUserStories) ? () => handleEditTask(index) : undefined}
+                                  disabled={addingTaskIndex === index || !(isAdmin || canManageUserStories)}
                                 >
                                   <PencilIcon className="h-3.5 w-3.5 text-muted-foreground" />
                                   <span className="sr-only">Edit task</span>
@@ -541,10 +544,10 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                                   variant="outline"                                  className={cn(
                                     "border-primary/40 text-primary hover:bg-primary/10",
                                     addingTaskIndex === index && "opacity-80",
-                                    !isAdmin && "opacity-50 cursor-not-allowed"
+                                    !(isAdmin || canManageUserStories) && "opacity-50 cursor-not-allowed"
                                   )}
-                                  onClick={isAdmin ? () => handleAddSingleTask(index) : undefined}
-                                  disabled={addingTaskIndex !== null || !isAdmin}
+                                  onClick={(isAdmin || canManageUserStories) ? () => handleAddSingleTask(index) : undefined}
+                                  disabled={addingTaskIndex !== null || !(isAdmin || canManageUserStories)}
                                 >
                                   {addingTaskIndex === index ? (
                                     <>
@@ -575,9 +578,8 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                 </div>
               </ScrollArea>
             )}
-          </CardContent>          <CardFooter className="flex justify-center bg-muted/20 py-4 px-6 mt-2">
-            {getRemainingTasksCount() > 0 ? (
-              isAdmin ? (
+          </CardContent>          <CardFooter className="flex justify-center bg-muted/20 py-4 px-6 mt-2">            {getRemainingTasksCount() > 0 ? (
+              (isAdmin || canManageUserStories) ? (
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
@@ -604,7 +606,7 @@ ${userStory.AcceptanceCriteria || "No acceptance criteria provided"}
                   className="text-muted-foreground"
                 >
                   <RocketIcon className="mr-2 h-5 w-5" />
-                  Only admins can add tasks
+                  Permission required
                 </Button>
               )
             ) : (

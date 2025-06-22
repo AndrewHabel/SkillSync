@@ -4,7 +4,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getMember} from "../utils";
-import { DATABASE_ID, IMAGES_BUCKET_ID, MEMBERS_ID, TASKS_ID } from "@/config";
+import { DATABASE_ID, IMAGES_BUCKET_ID, MEMBERS_ID, Roles_ID, TASKS_ID } from "@/config";
 import { ID, Query } from "node-appwrite";
 import { get } from "http";
 import { Member, MemberRole } from "../types";
@@ -32,26 +32,34 @@ const app = new Hono()
 
             if (!member) {
                 return c.json({ error: "Unauthorized" }, 401);
-            }
-
-            const members =  await databases.listDocuments<Member>(
+            }            const members =  await databases.listDocuments<Member>(
                 DATABASE_ID,
                 MEMBERS_ID,
                 [
                     Query.equal("workspaceId", workspaceId),
                 ]
-            )
-
+            );
+            
             const populatedMembers = await Promise.all(
                 members.documents.map(async (member) => {
                     const user = await users.get(member.userId);
                     const username = user.email.split('@')[0];
+                    
+                    const specialRole = await databases.listDocuments(
+                        DATABASE_ID,
+                        Roles_ID,
+                        [
+                            Query.equal("$id", member.specialRoleId || "default"),
+                        ]
+                    );
+                    
                     return {
                         ...member,
-                        name:user.name || username,
-                        image:member.imageUrl || null,
-                        email:user.email,
-                        role:member.role,
+                        name: user.name || username,
+                        image: member.imageUrl || null,
+                        email: user.email,
+                        role: member.role,
+                        specialRole: specialRole || null,
                     };
                 })
             )
@@ -93,12 +101,21 @@ const app = new Hono()
                 ]
             )
             
+            const Specialrole = await databases.listDocuments(
+                DATABASE_ID,
+                Roles_ID,
+                [
+                    Query.equal("$id", memberProfle.documents[0].specialRoleId || "default"),
+                ]
+            );
+
             return c.json({data:{
                 id: memberProfle.documents[0].$id,
                 name:user.name,
                 email:user.email,
                 role:memberProfle.documents[0].role,
                 image:memberProfle.documents[0].imageUrl,
+                specialRole: Specialrole || null,
             }});
         }
     )

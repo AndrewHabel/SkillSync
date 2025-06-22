@@ -41,16 +41,19 @@ export const TeamsClient = () => {
   const { data: project, isLoading: isLoadingProject } = useGetProject({ projectId });
   const { data: teamsData, isLoading: isLoadingTeams } = useGetTeams({ projectId, workspaceId });
   const { open: openCreateTeamModal } = useCreateTeamModal();
-  const { open: openAddTeamMemberModal } = useAddTeamMemberModal();
+  const { open: openAddTeamMemberModal, teamId: currentTeamId } = useAddTeamMemberModal();
   const { open: openViewTeamModal } = useViewTeamModal();
-  const { mutate: deleteTeam, isPending: isDeleting } = useDeleteTeam();
   
-  // Get current user and check role
+  // Debug logging for team member modal
+  console.log("Current team ID for add member modal:", currentTeamId);
+  const { mutate: deleteTeam, isPending: isDeleting } = useDeleteTeam();
+    // Get current user and check role
   const { data: user } = useCurrent();
   const { data: members } = useGetMembers({ workspaceId });
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canManageTeams, setCanManageTeams] = useState(false);
   
-  // Check if the current user is an admin
+  // Check if the current user is an admin or has team management permissions
   useEffect(() => {
     if (members && user && Array.isArray(members.documents)) {
       // Find the current user's member document
@@ -60,8 +63,15 @@ export const TeamsClient = () => {
       
       if (currentUserMember) {
         setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+        
+        // Check for special role permissions
+        if (currentUserMember.specialRole?.documents?.[0]) {
+          const specialRole = currentUserMember.specialRole.documents[0];
+          setCanManageTeams(!!specialRole.manageTeams);
+        }
       } else {
         setIsAdmin(false);
+        setCanManageTeams(false);
       }
     }
   }, [members, user]);
@@ -119,8 +129,7 @@ export const TeamsClient = () => {
               Back to Project
             </Link>
           </Button>
-          <h1 className="text-xl font-bold">Team Management</h1>        </div>
-        {isAdmin && (
+          <h1 className="text-xl font-bold">Team Management</h1>        </div>        {(isAdmin || canManageTeams) && (
           <Button size="sm" onClick={openCreateTeamModal}>
             <PlusIcon className="size-4 mr-2" />
             Create Team
@@ -158,8 +167,7 @@ export const TeamsClient = () => {
                           onClick={() => openViewTeamModal(team.$id || team.id || "")}
                         >
                           View Team
-                        </Button>
-                        {isAdmin && (
+                        </Button>                        {(isAdmin || canManageTeams) && (
                           <Button 
                             variant="destructive" 
                             size="sm" 
@@ -168,11 +176,15 @@ export const TeamsClient = () => {
                             Delete Team
                           </Button>
                         )}
-                      </div>                      {isAdmin && (
+                      </div>                      {(isAdmin || canManageTeams) && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => openAddTeamMemberModal(team.$id || team.id || "")}
+                          onClick={() => {
+                            const teamIdToUse = team.$id || team.id || "";
+                            console.log("Opening add member modal for team:", teamIdToUse);
+                            openAddTeamMemberModal(teamIdToUse);
+                          }}
                           className="ml-auto hover:bg-primary/10"
                           title="Add member to this team"
                         >
@@ -182,7 +194,7 @@ export const TeamsClient = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}              {isAdmin && (
+              ))}              {(isAdmin || canManageTeams) && (
                 <Card
                   className="hover:bg-accent/30 transition-colors duration-200 border-dashed cursor-pointer"
                   onClick={openCreateTeamModal}
@@ -200,14 +212,14 @@ export const TeamsClient = () => {
               <h3 className="text-lg font-medium mb-2">No teams created yet</h3>
               <p className="text-muted-foreground mb-4 text-center max-w-md">
                 Create teams to organize your project members by functionality, department, or however you prefer
-              </p>              {isAdmin ? (
+              </p>              {(isAdmin || canManageTeams) ? (
                 <Button onClick={openCreateTeamModal}>
                   <PlusIcon className="size-4 mr-2" />
                   Create First Team
                 </Button>
               ) : (
                 <p className="text-muted-foreground mb-2">
-                  Only administrators can create teams
+                  Only administrators or users with team management permission can create teams
                 </p>
               )}
             </div>

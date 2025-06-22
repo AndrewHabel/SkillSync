@@ -10,15 +10,15 @@ import { MemberRole } from "@/features/members/types";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export const CreateProjectModal = () => {
-    const {isOpen, setIsOpen, close} = useCreateProjectModal();
+export const CreateProjectModal = () => {    const {isOpen, setIsOpen, close} = useCreateProjectModal();
     const workspaceId = useWorkspaceId();
     const { data: user } = useCurrent();
     const { data: members } = useGetMembers({ workspaceId });
     const [isAdmin, setIsAdmin] = useState(false);
+    const [canManageProjects, setCanManageProjects] = useState(false);
     const router = useRouter();
 
-    // Check if the current user is an admin
+    // Check if the current user is an admin or has project management permissions
     useEffect(() => {
         if (members && user && Array.isArray(members.documents)) {
             // Find the current user's member document
@@ -28,21 +28,31 @@ export const CreateProjectModal = () => {
             
             if (currentUserMember) {
                 setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+                
+                // Check for special role permissions
+                if (currentUserMember.specialRole?.documents?.[0]) {
+                    const specialRole = currentUserMember.specialRole.documents[0];
+                    setCanManageProjects(!!specialRole.manageProjects);
+                }
             } else {
                 setIsAdmin(false);
+                setCanManageProjects(false);
             }
         }
     }, [members, user]);
 
-    // Close modal and redirect if not admin
+    // Allow project creation for admins OR users with manageProjects permission
+    const canCreateProjects = isAdmin === true || canManageProjects === true;
+
+    // Close modal and redirect if not authorized
     useEffect(() => {
-        if (isOpen && !isAdmin) {
+        if (isOpen && !canCreateProjects) {
             setIsOpen(false);
             router.push(`/workspaces/${workspaceId}`);
         }
-    }, [isOpen, isAdmin, setIsOpen, router, workspaceId]);
+    }, [isOpen, canCreateProjects, setIsOpen, router, workspaceId]);
 
-    if (!isAdmin) return null;
+    if (!canCreateProjects) return null;
 
     return (
         <ResponsiveModal open={isOpen} onopenchange={setIsOpen}>

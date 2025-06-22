@@ -16,9 +16,10 @@ export const CreateTaskModal = () => {
     const workspaceId = useWorkspaceId();
     const { data: members } = useGetMembers({ workspaceId });
     const [isAdmin, setIsAdmin] = useState(false);
+    const [canManageTasks, setCanManageTasks] = useState(false);
     const router = useRouter();
 
-    // Check if the current user is an admin
+    // Check if the current user is an admin or can manage tasks
     useEffect(() => {
         if (members && user && Array.isArray(members.documents)) {
             const currentUserMember = members.documents.find(member => 
@@ -27,20 +28,22 @@ export const CreateTaskModal = () => {
             
             if (currentUserMember) {
                 setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+                setCanManageTasks(currentUserMember.specialRole?.documents?.[0]?.manageTasks === true || currentUserMember.role === MemberRole.ADMIN);
             } else {
                 setIsAdmin(false);
+                setCanManageTasks(false);
             }
         }
     }, [members, user]);
 
-    // Close modal if not admin
+    // Close modal if not authorized
     useEffect(() => {
-        if (isOpen && !isAdmin) {
+        if (isOpen && !isAdmin && !canManageTasks) {
             setIsOpen(false);
         }
-    }, [isOpen, isAdmin, setIsOpen]);
+    }, [isOpen, isAdmin, canManageTasks, setIsOpen]);
 
-    if (!isAdmin) return null;
+    if (!isAdmin && !canManageTasks) return null;
     
     return (
         <ResponsiveModal open={isOpen} onopenchange={setIsOpen}>

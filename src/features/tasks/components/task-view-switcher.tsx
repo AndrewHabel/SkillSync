@@ -60,8 +60,11 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
   const workspaceId = useWorkspaceId();
   const paramProjectId = useProjectId();
   const { data: user } = useCurrent();
-  const { data: members } = useGetMembers({ workspaceId });  const [isAdmin, setIsAdmin] = useState(false);
-  const [isResolving, setIsResolving] = useState(false);  const [showDependenciesModal, setShowDependenciesModal] = useState(false);
+  const { data: members } = useGetMembers({ workspaceId });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [canManageTasks, setCanManageTasks] = useState(false);
+  const [isResolving, setIsResolving] = useState(false);
+  const [showDependenciesModal, setShowDependenciesModal] = useState(false);
   const [dependencies, setDependencies] = useState<TaskDependencyItem[]>([]);
 
   useEffect(() => {
@@ -72,8 +75,10 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
       
       if (currentUserMember) {
         setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+        setCanManageTasks(currentUserMember.specialRole?.documents?.[0]?.manageTasks === true || currentUserMember.role === MemberRole.ADMIN);
       } else {
         setIsAdmin(false);
+        setCanManageTasks(false);
       }
     }
   }, [members, user]);
@@ -185,7 +190,7 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
                 Calendar
               </TabsTrigger>
             </TabsList>
-            {isAdmin && (
+            {(isAdmin || canManageTasks) && (
               <>
               <div className="flex items-center gap-x-2 mt-2 lg:mt-0">
                 <Button onClick={open} variant="gradient" className="w-full lg:w-auto" size="sm">

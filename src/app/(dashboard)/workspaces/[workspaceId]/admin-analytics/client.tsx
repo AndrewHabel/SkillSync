@@ -72,18 +72,10 @@ export const AdminAnalyticsClient = () => {
     }
   }, [members, user]);
 
-  // Redirect if not admin
-  useEffect(() => {
-    if (isAdmin === false) {
-      router.push(`/workspaces/${workspaceId}`);
-    }
-  }, [isAdmin, router, workspaceId]);
-
   if (isLoading) return <PageLoader />;
   if (!analytics || !tasks || !projects || !members || !user) 
     return <PageError message="Failed to load analytics data" />;
-  if (isAdmin === false)
-    return <PageError message="Unauthorized: Admin access required" />;
+
 
   // Prepare data for Task Status Distribution (Pie Chart)
   const taskStatusData = [
@@ -102,6 +94,7 @@ export const AdminAnalyticsClient = () => {
     const projectTasks = tasks.documents.filter(task => 
       task.project && task.project.$id === project.$id
     );
+
     return {
       name: project.name,
       tasks: projectTasks.length,

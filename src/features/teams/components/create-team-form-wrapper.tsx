@@ -16,12 +16,12 @@ interface CreateTeamFormWrapperProps {
 export const CreateTeamFormWrapper = ({ onCancel }: CreateTeamFormWrapperProps) => {
   const workspaceId = useWorkspaceId();
   const projectId = useProjectId();
-  const { data: projects, isLoading: isLoadingProjects } = useGetProjects({ workspaceId });
-  const { data: user } = useCurrent();
+  const { data: projects, isLoading: isLoadingProjects } = useGetProjects({ workspaceId });  const { data: user } = useCurrent();
   const { data: members } = useGetMembers({ workspaceId });
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canManageTeams, setCanManageTeams] = useState(false);
   
-  // Check if the current user is an admin
+  // Check if the current user is an admin or has team management permissions
   useEffect(() => {
     if (members && user && Array.isArray(members.documents)) {
       // Find the current user's member document
@@ -31,19 +31,22 @@ export const CreateTeamFormWrapper = ({ onCancel }: CreateTeamFormWrapperProps) 
       
       if (currentUserMember) {
         setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+        
+        // Check for special role permissions
+        if (currentUserMember.specialRole?.documents?.[0]) {
+          const specialRole = currentUserMember.specialRole.documents[0];
+          setCanManageTeams(!!specialRole.manageTeams);
+        }
       } else {
         setIsAdmin(false);
+        setCanManageTeams(false);
       }
     }
   }, [members, user]);
   
-  // Redirect non-admin users away from this form
-  useEffect(() => {
-    if (members && !isAdmin) {
-      onCancel();
-    }
-  }, [members, isAdmin, onCancel]);
-  
+  // Allow team creation for admins OR users with manageTeams permission
+  const canCreateTeams = isAdmin || canManageTeams;
+
   const projectOptions = projects?.documents.map(project => ({ 
     id: project.$id, 
     name: project.name, 

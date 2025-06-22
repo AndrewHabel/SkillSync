@@ -30,8 +30,9 @@ export const ViewStories = () => {
   const { data: user } = useCurrent();
   const { data: members } = useGetMembers({ workspaceId });
   const [isAdmin, setIsAdmin] = useState(false);
-  
-  // Check if the current user is an admin
+  const [canManageUserStories, setCanManageUserStories] = useState(false);
+
+  // Check if the current user is an admin or can manage user stories
   useEffect(() => {
     if (members && user && Array.isArray(members.documents)) {
       const currentUserMember = members.documents.find(member => 
@@ -40,8 +41,10 @@ export const ViewStories = () => {
       
       if (currentUserMember) {
         setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+        setCanManageUserStories(currentUserMember.specialRole?.documents?.[0]?.manageUserStories === true || currentUserMember.role === MemberRole.ADMIN);
       } else {
         setIsAdmin(false);
+        setCanManageUserStories(false);
       }
     }
   }, [members, user]);
@@ -62,7 +65,7 @@ export const ViewStories = () => {
 
       <div className="max-w-6xl mx-auto bg-card rounded-xl shadow p-6 border border-border">      <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold text-foreground">User Stories</h2>
-          {isAdmin && (
+          {(isAdmin || canManageUserStories) && (
             <Button onClick={open} className="w-full lg:w-auto px-4 py-2" size="sm">
               <PlusIcon className="size-4 mr-2" />
               New
@@ -79,7 +82,7 @@ export const ViewStories = () => {
                 <p className="text-lg font-semibold text-foreground">{story.description}</p>
                 <p className="text-sm text-muted-foreground">{story.AcceptanceCriteria}</p>
               </div>
-              {isAdmin && (
+              {(isAdmin || canManageUserStories) && (
                 <Button variant="solid" className="w-full md:w-auto px-4 py-2 shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground" size="sm">
                   <Link href={`/workspaces/${workspaceId}/projects/${projectId}/UserStory/${story.$id}`} className="flex items-center">
                     <PencilIcon className="size-4 mr-2" />

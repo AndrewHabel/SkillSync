@@ -6,9 +6,15 @@ import { AddTeamMemberFormWrapper } from "./add-team-member-form-wrapper";
 
 export const AddTeamMemberModal = () => {
     const { teamId, close } = useAddTeamMemberModal();
-
-    return (
-        <ResponsiveModal open={!!teamId} onopenchange={close}>
+    
+    // Debug log
+    console.log("AddTeamMemberModal - teamId:", teamId, "Modal should be open:", !!teamId);    return (
+        <ResponsiveModal 
+            open={!!teamId} 
+            onopenchange={close}
+            title="Add Team Member"
+            description="Add new member to the team"
+        >
             {teamId && (
                 <AddTeamMemberFormWrapper 
                     teamId={teamId} 

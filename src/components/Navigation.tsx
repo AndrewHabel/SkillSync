@@ -41,12 +41,12 @@ const routes: RouteItem[] = [
         icon: GithubIcon,
         activeIcon: GithubIcon,
         adminOnly: true, // Only ADMIN can see GitHub
-    },
-    {
-        label: "Settings",
+    },    {
+        label: "Workspace Settings",
         href: "/settings",
         icon: SettingsIcon,
         activeIcon: SettingsIcon,
+        adminOnly: true, // Only ADMIN can access workspace settings
     },
     {
         label: "Members",
@@ -65,7 +65,7 @@ const routes: RouteItem[] = [
 
 const adminRoutes: RouteItem[] = [
     {
-        label: "Admin Analytics",
+        label: "Analytics",
         href: "/admin-analytics",
         icon: BarChart2Icon,
         activeIcon: BarChart2Icon,
@@ -78,28 +78,55 @@ export const Navigation = () => {
     const pathname = usePathname();
     const { data: user } = useCurrent();
     const { data: members } = useGetMembers({ workspaceId });
+    const [memberSpecialRole, setMemberSpecialRole] = useState<string | undefined>();
     const [isAdmin, setIsAdmin] = useState(false);    // Determine if current user is an admin
+    const [canManageAnalytics, setCanManageAnalytics] = useState(false);
+    const [memberPermissions, setMemberPermissions] = useState({
+        manageProjects: false,
+        manageTasks: false,
+        manageUserStories: false,
+        manageTeams: false,
+        manageAnalytics: false
+    });
+    
     useEffect(() => {
         if (members && user) {
             const currentUserMember = members.documents.find(member => member.userId === user.$id);
+            console.log("Current user member:", currentUserMember);
             setIsAdmin(currentUserMember?.role === MemberRole.ADMIN);
+            
+            // Check for special role permissions
+            if (currentUserMember?.specialRole?.documents?.[0]) {
+                const specialRole = currentUserMember.specialRole.documents[0];
+                setCanManageAnalytics(!!specialRole.manageAnalytics);
+                
+                // Store all permissions for potential future use
+                setMemberPermissions({
+                    manageProjects: !!specialRole.manageProjects,
+                    manageTasks: !!specialRole.manageTasks,
+                    manageUserStories: !!specialRole.manageUserStories,
+                    manageTeams: !!specialRole.manageTeams,
+                    manageAnalytics: !!specialRole.manageAnalytics
+                });
+            }
         }
-    }, [members, user]);
-
-    // Filter routes based on user role
+    }, [members, user]);    
     const filteredRoutes = routes.filter(route => {
-        // Hide adminOnly routes for non-admin users
+       
         if (route.adminOnly && !isAdmin) {
             return false;
         }
-        // Hide "My Tasks" for admins (if that's the intended behavior)
+        
         if (isAdmin && route.label === "My Tasks") {
             return false;
         }
+        
         return true;
     });
     
-    const allRoutes = [...filteredRoutes, ...(isAdmin ? adminRoutes : [])];
+    // Show Analytics route if user is admin OR has manageAnalytics permission
+    const shouldShowAnalytics = isAdmin || canManageAnalytics;
+    const allRoutes = [...filteredRoutes, ...(shouldShowAnalytics ? adminRoutes : [])];
 
     return (
         <ul className="flex flex-col gap-1">

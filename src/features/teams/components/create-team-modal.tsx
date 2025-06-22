@@ -11,12 +11,12 @@ import { MemberRole } from "@/features/members/types";
 
 export const CreateTeamModal = () => {
   const { isOpen, setIsOpen, close } = useCreateTeamModal();
-  const workspaceId = useWorkspaceId();
-  const { data: user } = useCurrent();
+  const workspaceId = useWorkspaceId();  const { data: user } = useCurrent();
   const { data: members } = useGetMembers({ workspaceId });
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canManageTeams, setCanManageTeams] = useState(false);
 
-  // Check if the current user is an admin
+  // Check if the current user is an admin or has team management permissions
   useEffect(() => {
     if (members && user && Array.isArray(members.documents)) {
       // Find the current user's member document
@@ -26,23 +26,35 @@ export const CreateTeamModal = () => {
 
       if (currentUserMember) {
         setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
-      } else {
+        
+        // Check for special role permissions
+        if (currentUserMember.specialRole?.documents?.[0]) {
+          const specialRole = currentUserMember.specialRole.documents[0];
+          setCanManageTeams(!!specialRole.manageTeams);
+        }
+
+      } else  {
         setIsAdmin(false);
+        setCanManageTeams(false);
       }
     }
   }, [members, user]);
 
-  // Close modal if not admin
+  // Allow team creation for admins OR users with manageTeams permission
+  const canCreateTeams = isAdmin || canManageTeams;
+
+  // Close modal if not authorized
   useEffect(() => {
-    if (isOpen && !isAdmin) {
-      setIsOpen(false);
-    }
-  }, [isOpen, isAdmin, setIsOpen]);
+    
+  }, [isOpen, canCreateTeams, setIsOpen]);
 
-  if (!isAdmin) return null;
-
-  return (
-    <ResponsiveModal open={isOpen} onopenchange={setIsOpen}>
+  if (!canCreateTeams) return null;  return (
+    <ResponsiveModal 
+      open={isOpen} 
+      onopenchange={setIsOpen}
+      title="Create Team"
+      description="Create a new team for your project"
+    >
       <div>
         <CreateTeamFormWrapper onCancel={close} />
       </div>

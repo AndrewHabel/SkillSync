@@ -22,16 +22,17 @@ import { MemberRole } from "@/features/members/types";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 
 export const ProjectIdClient = () => {
-
   const projectId = useProjectId();
   const workspaceId = useWorkspaceId();
   const {data:project, isLoading:isLoadingProject} = useGetProject({projectId});
   const {data:analytics, isLoading:isLoadinganalytics} = useGetProjectAnalytics({projectId});
   const { data: user } = useCurrent();
-  const { data: members, isLoading: isLoadingMembers } = useGetMembers({ workspaceId });
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { data: members, isLoading: isLoadingMembers } = useGetMembers({ workspaceId });  const [isAdmin, setIsAdmin] = useState(false);
+  const [canManageProjects, setCanManageProjects] = useState(false);
+  const [canManageTeams, setCanManageTeams] = useState(false);
+  const [canManageUserStories, setCanManageUserStories] = useState(false);
   
-  // Check if the current user is an admin
+  // Check if the current user is an admin or has specific permissions
   useEffect(() => {
     if (members && user && Array.isArray(members.documents)) {
       // Find the current user's member document
@@ -41,8 +42,19 @@ export const ProjectIdClient = () => {
       
       if (currentUserMember) {
         setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+        
+        // Check for special role permissions
+        if (currentUserMember.specialRole?.documents?.[0]) {
+          const specialRole = currentUserMember.specialRole.documents[0];
+          setCanManageProjects(!!specialRole.manageProjects);
+          setCanManageTeams(!!specialRole.manageTeams);
+          setCanManageUserStories(!!specialRole.manageUserStories);
+        }
       } else {
         setIsAdmin(false);
+        setCanManageProjects(false);
+        setCanManageTeams(false);
+        setCanManageUserStories(false);
       }
     }
   }, [members, user]);
@@ -80,19 +92,21 @@ export const ProjectIdClient = () => {
               </Dialog>
             )}
           </div>
-          </div>        <div className="flex gap-2">          <Button variant="secondary" size="sm" asChild>
+          </div>        
+          <div className="flex gap-2">            
+            <Button variant="secondary" size="sm" asChild>
             <Link href={`/workspaces/${project.workspaceId}/projects/${project.$id}/teams`}>
               <UsersIcon className="size-4 mr-2" />
-              {isAdmin ? "Manage Teams" : "View Teams"}
+              {isAdmin || canManageTeams ? "Manage Teams" : "View Teams"}
             </Link>
-          </Button>
+          </Button>          
           <Button variant="secondary" size="sm" asChild>
             <Link href={`/workspaces/${project.workspaceId}/projects/${project.$id}/UserStory`}>
               <BookUserIcon className="size-4 mr-2" />
-              {isAdmin ? "Manage User Stories" : "View User Stories"}
+              {isAdmin || canManageUserStories ? "Manage User Stories" : "View User Stories"}
             </Link>
           </Button>
-          {isAdmin && (
+           {(isAdmin || canManageProjects) && (
             <Button variant="secondary" size="sm" asChild>
               <Link href={`/workspaces/${project.workspaceId}/projects/${project.$id}/settings`}>
                 <PencilIcon className="size-4 mr-2" />

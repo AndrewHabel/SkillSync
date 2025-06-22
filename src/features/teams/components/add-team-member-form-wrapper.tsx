@@ -16,12 +16,12 @@ interface AddTeamMemberFormWrapperProps {
 export const AddTeamMemberFormWrapper = ({ onCancel, teamId }: AddTeamMemberFormWrapperProps) => { 
     const workspaceId = useWorkspaceId();
     const { data: members, isLoading } = useGetMembers({ workspaceId });
-    
-    // Get current user and check role
+      // Get current user and check role
     const { data: user } = useCurrent();
     const [isAdmin, setIsAdmin] = useState(false);
+    const [canManageTeams, setCanManageTeams] = useState(false);
     
-    // Check if the current user is an admin
+    // Check if the current user is an admin or has team management permissions
     useEffect(() => {
         if (members && user && Array.isArray(members.documents)) {
             // Find the current user's member document
@@ -31,18 +31,23 @@ export const AddTeamMemberFormWrapper = ({ onCancel, teamId }: AddTeamMemberForm
             
             if (currentUserMember) {
                 setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
+                
+                // Check for special role permissions
+                if (currentUserMember.specialRole?.documents?.[0]) {
+                    const specialRole = currentUserMember.specialRole.documents[0];
+                    setCanManageTeams(!!specialRole.manageTeams);
+                }
             } else {
                 setIsAdmin(false);
+                setCanManageTeams(false);
             }
         }
     }, [members, user]);
+      // Allow team management for admins OR users with manageTeams permission
+    const canManage = isAdmin || canManageTeams;
     
-    // Redirect non-admin users away from this form
-    useEffect(() => {
-        if (!isLoading && members && !isAdmin) {
-            onCancel();
-        }
-    }, [isLoading, members, isAdmin, onCancel]);
+    // Debug log
+    console.log("AddTeamMemberFormWrapper - teamId:", teamId, "canManage:", canManage, "isAdmin:", isAdmin, "canManageTeams:", canManageTeams);
 
     // Filter out members with ADMIN role
     const filteredMembers = members?.documents.filter((member) => member.role !== MemberRole.ADMIN);
