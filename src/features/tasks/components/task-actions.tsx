@@ -31,6 +31,8 @@ import {
     DialogClose 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useGetAllTaskDependencies } from "@/features/TasksDependencies/api/use-get-tasks-dependencies";
+import { useProjectId } from "@/features/projects/hooks/use-project-id";
 
 
 interface TaskActionsProps {
@@ -41,18 +43,19 @@ interface TaskActionsProps {
 
 export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
     const workspaceId = useWorkspaceId();
-    const router = useRouter();
-    
-    // State for the reasoning dialog
+    const router = useRouter();    // State for the reasoning dialog
     const [isReasoningDialogOpen, setIsReasoningDialogOpen] = useState(false);
+    const [isDependenciesDialogOpen, setIsDependenciesDialogOpen] = useState(false);
     const [assignmentReasoning, setAssignmentReasoning] = useState("");
     const [assigneeName, setAssigneeName] = useState("");
     const [isAdmin, setIsAdmin] = useState(false);
-    
+    const paramProjectId = useProjectId();
     // Get current user and members data to check role
     const { data: user } = useCurrent();
     const { data: members } = useGetMembers({ workspaceId });
-    
+
+    const {data: taskDependencies , isLoading: isLoadingDependencies} = useGetAllTaskDependencies({ taskId: id ,workspaceId: workspaceId, projectId: paramProjectId});
+    console.log("Task Dependencies lmao awy:", taskDependencies);
     // Check if the current user is an admin
     useEffect(() => {
         if (members && user && Array.isArray(members.documents)) {
@@ -100,8 +103,18 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
         workspaceId,
         projectId: taskData?.projectId || "",
         teamtype: teamType,
-    });    // Use the auto-assign mutation hook
-    const { mutate: autoAssignMutate, isPending: isAutoAssigning } = useAutoAssignTask();      const onAutoAssign = () => {
+    });
+
+    const { mutate: autoAssignMutate, isPending: isAutoAssigning } = useAutoAssignTask();
+
+    const onAutoAssign = () => {        
+
+            if ((taskDependencies ?? []).length > 0) {
+            console.log("Task has dependencies, cannot auto-assign", taskDependencies);
+            setIsDependenciesDialogOpen(true);
+            return;
+            }
+
         if (!taskData) {
             toast.error("Task data not available");
             return;
@@ -155,7 +168,8 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
             json: {
                 taskId: id
             }
-        }, {            onSuccess: (data) => {
+        }, 
+        {       onSuccess: (data) => {
                 toast.dismiss(loadingToast);                // Extract the assignment reasoning and assignee name to display in dialog
                 const reasoning = data.data.aiReasoning || "No reasoning provided.";
                 
@@ -292,7 +306,8 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                             <Button type="button" variant="outline">
                                 Close
                             </Button>
-                        </DialogClose>                        {isAdmin && assigneeName === "No member assigned" && (
+                        </DialogClose>                        
+                        {isAdmin && assigneeName === "No member assigned" && (
                             <Button onClick={() => {
                                 setIsReasoningDialogOpen(false);
                                 open(id);
@@ -301,6 +316,46 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
                                 Edit Task
                             </Button>
                         )}
+                    </DialogFooter>
+                </DialogContent>            
+            </Dialog>            
+            <Dialog open={isDependenciesDialogOpen} onOpenChange={setIsDependenciesDialogOpen}>
+                <DialogContent className="sm:max-w-xl md:max-w-6xl w-[90vw]">
+                    <DialogHeader>
+                        <DialogTitle className="text-center flex items-center justify-center gap-2">
+                            <AlertTriangle className="h-5 w-5 text-amber-500" />
+                            Task Dependencies Detected
+                        </DialogTitle>
+                        <DialogDescription className="text-center">
+                            This task has dependencies that must be resolved before it can be auto-assigned
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="my-4 max-h-[60vh] overflow-y-auto text-sm border border-border rounded-md p-4 bg-muted/30">
+                        <div className="mb-3 p-2 bg-amber-500/10 border border-amber-500/20 rounded-md">
+                            <div className="flex items-center gap-2 mb-2">                            
+                                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                                <h4 className="font-medium">Dependencies Found</h4>
+                            </div>
+                            <p className="text-sm ml-6">This task <span className="text-red-600">{taskData?.name}</span> depends on {taskDependencies?.length} other tasks that must be completed first.</p>
+                        </div>
+                        
+                        <div className="mb-2 font-medium">Dependent Tasks:</div>
+                        <div className="space-y-2">
+                            {(taskDependencies ?? []).map((dependency, index) => (
+                                <div key={index} className="p-2 bg-muted/50 rounded-md border border-border">
+                                    <div className="font-medium">{dependency.name || `Dependency ${index + 1}`}</div>
+                                    <div className="text-xs text-muted-foreground mt-1">Depend on : {dependency.dependOnTaskName}</div>
+                                    <div className="text-xs text-muted-foreground mt-1">Reason: {dependency.dependReason}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <DialogFooter className="flex gap-2 justify-end">
+                        <DialogClose asChild>
+                            <Button type="button" variant="outline">
+                                Close
+                            </Button>
+                        </DialogClose>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

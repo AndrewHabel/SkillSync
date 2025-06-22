@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlusIcon, FileCheck2, Check, X } from "lucide-react"
 import { useCreateTaskModal } from "../hooks/use-create-task-modal"
-import { useTaskDependencies } from "@/features/TasksDependencies/api/use-task-dependencies";
+import { useTaskDependencies } from "@/features/TasksDependencies/api/use-generate-task-dependencies";
+import { useCreateBulkDependencies } from "@/features/TasksDependencies/api/use-create-bulk-dependencies";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-
 import { useGetTasks } from "../api/use-get-tasks";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import LoadingPage from "@/app/loading";
@@ -21,16 +21,18 @@ import { columns } from "./columns";
 import { DataKanban } from "./data-kanban";
 import { useCallback, useEffect, useState } from "react";
 
-// TypeScript interfaces for task dependencies
 interface TaskDependency {
   dependsOnTaskId: string;
+  dependsOnTaskName: string;
   reason: string;
 }
 
 interface TaskDependencyItem {
   taskId: string;
+  dependsOnTaskName: string;
   dependencies: TaskDependency[];
 }
+
 import { useCurrent } from "@/features/auth/api/use-current";
 import { useGetMembers } from "@/features/members/api/use-get-members";
 import { MemberRole } from "@/features/members/types";
@@ -38,6 +40,7 @@ import { TaskStatus } from "../types";
 import { useBulkUpdateTasks } from "../api/use-bulk-update-tasks";
 import { DataCalendar } from "./data-calendar";
 import { useProjectId } from "@/features/projects/hooks/use-project-id";
+import { useGetAllTaskDependencies } from "@/features/TasksDependencies/api/use-get-tasks-dependencies";
 
 
 interface TaskViewSwitcherProps {
@@ -51,9 +54,9 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
   const [view, setView] = useQueryState("task-view", {
     defaultValue: "table"
   });
-
   const { mutate : bulkUpdate } = useBulkUpdateTasks();
   const { mutate: generateDependencies } = useTaskDependencies();
+  const { mutate: saveDependencies } = useCreateBulkDependencies();
   const workspaceId = useWorkspaceId();
   const paramProjectId = useProjectId();
   const { data: user } = useCurrent();
@@ -77,11 +80,13 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
 
   const { data: tasks, isLoading: isLoadingTasks } = useGetTasks({workspaceId, status, assigneeId, dueDate, projectId: paramProjectId || projectId});
   const { open } = useCreateTaskModal();
+  
+  const {data: tasksDependencies, isLoading: isLoadingDependencies} = useGetAllTaskDependencies({workspaceId: workspaceId, projectId: paramProjectId});
 
   const onKanbanChange = useCallback((tasks:{ $id: string, status: TaskStatus, position: number }[])=>{
     bulkUpdate({json: {tasks}});
   },[bulkUpdate]);
-  // Helper function to get task name from ID
+  
   const getTaskNameById = (taskId: string) => {
     if (!tasks) return "Unknown Task";
     const task = tasks.documents.find(task => task.$id === taskId);
@@ -89,6 +94,7 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
   };
 
   const resolveDependencies = () => {
+
     if (!tasks || tasks.documents.length === 0) {
       toast.warning("No tasks available to resolve dependencies.");
       return;
@@ -104,6 +110,7 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
 
     setIsResolving(true);
     setDependencies([]);
+
     generateDependencies(
       { json: { tasks: tasksSelectedFields } },
       {
@@ -127,6 +134,35 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
       }
     );
   };
+
+  const saveDependenciesData = () => {
+    const tasksDependencies = dependencies.flatMap(item => 
+      item.dependencies?.map(dep => ({
+        taskId: item.taskId,
+        dependOnTaskId: dep.dependsOnTaskId,
+        dependOnTaskName: getTaskNameById(dep.dependsOnTaskId),
+        dependReason: dep.reason || "",
+      })) || []
+    );
+
+    if (tasksDependencies.length === 0) {
+      toast.warning("No dependencies to save");
+      return;
+    }
+
+    saveDependencies(
+      { json: { tasksDependencies } },
+      {
+        onSuccess: () => {
+          setShowDependenciesModal(false);
+        }
+      }
+    );
+  };
+
+  if( isLoadingTasks || isLoadingDependencies) {
+    return <LoadingPage />;};
+  
   return(
     <>
       <Tabs defaultValue={view} onValueChange={setView} className="flex-1 w-full border rounded-lg project-table-bg">
@@ -240,15 +276,10 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
             >
               <X className="size-4 mr-2" />
               Cancel
-            </Button>
+            </Button>            
             <Button 
               type="button" 
-              onClick={() => {
-                toast.success("Dependencies saved successfully!");
-                // Note: This is a placeholder. Actual save functionality would be implemented later
-                setShowDependenciesModal(false);
-              }}
-            >
+              onClick={() => {saveDependenciesData()}}>
               <Check className="size-4 mr-2" />
               Save Dependencies
             </Button>
