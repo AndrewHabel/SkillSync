@@ -115,7 +115,8 @@ export const TaskList = ({ data, total }: TaskListProps) => {
                 <div className="flex items-center">
                     <CheckSquareIcon className="size-5 mr-2 text-primary" />
                     <p className="workspace-section-title">Tasks ({total})</p>
-                </div>                {(isAdmin || canManageTasks) && (
+                </div>                
+                {(isAdmin || canManageTasks) && (
                     <Button variant="outline" size="icon" onClick={createTask} className="workspace-button-outline rounded-full">
                         <PlusIcon className="size-4" />
                     </Button>
@@ -142,11 +143,10 @@ export const TaskList = ({ data, total }: TaskListProps) => {
                                                 <span className="task-status task-status-todo">
                                                     {task.status}
                                                 </span>
-                                                <div className="size-1 rounded-full bg-neutral-300" />
-                                                <div className="workspace-task-info">
+                                                <div className="size-1 rounded-full bg-neutral-300" />                                                <div className="workspace-task-info">
                                                     <CalendarIcon className="size-3 mr-1" />
                                                     <span>
-                                                        {formatDistanceToNow(new Date(task.dueDate))}
+                                                        {task.dueDate ? formatDistanceToNow(new Date(task.dueDate)) : "Not specified"}
                                                     </span>
                                                 </div>
                                             </div>
@@ -241,20 +241,19 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3, delay: index * 0.1 }}
                                         whileHover={{ scale: 1.02 }}
-                                    >
-                                        <Card className="workspace-card workspace-project-card shadow-none">
-                                            <CardContent className="p-4 flex items-center gap-x-3">
+                                    >                                        <Card className="workspace-card workspace-project-card shadow-none">
+                                            <CardContent className="p-4 flex items-center gap-x-3 w-full overflow-hidden">
                                                 <ProjectAvatar
                                                     className="workspace-project-avatar"
                                                     fallbackClassName="text-lg"
                                                     name={project.name}
                                                     image={project.imageUrl}
-                                                />
-                                                <div className="workspace-project-info">
-                                                    <p className="workspace-project-title">
+                                                />                                                
+                                                <div className="workspace-project-info flex-1 min-w-0 flex flex-col w-full">
+                                                    <p className="workspace-project-title mb-1">
                                                         {project.name}
-                                                    </p>
-                                                    <p className="workspace-project-tech">
+                                                    </p>                                                    
+                                                    <p className="workspace-project-tech text-sm whitespace-normal break-all" style={{ width: "100%", maxWidth: "100%", wordBreak: "break-word" }}>
                                                         {project.ProjectTechStack 
                                                             ? Array.isArray(project.ProjectTechStack) 
                                                                 ? project.ProjectTechStack.join(" • ")
@@ -268,7 +267,8 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
                                 </Link>
                             </li>
                         ))}
-                    </ul>                ) : (                    <div className="workspace-empty-state">
+                    </ul> ) : (
+                        <div className="workspace-empty-state">
                         <div className="workspace-empty-state-icon">
                             <BriefcaseIcon className="size-10" />
                         </div>

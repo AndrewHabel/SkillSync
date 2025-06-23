@@ -108,10 +108,9 @@ export const MemberProfile = () => {
                                 <p className="text-lg font-bold text-primary">Name: <span className="text-foreground font-normal">{data?.name}</span></p>
                                 <p className="text-lg font-bold text-primary">Email: <span className="text-foreground font-normal">{data?.email}</span></p>
                                 <p className="text-lg font-bold text-primary">Role: <span className="text-foreground font-normal">{data?.role.toLowerCase()}</span></p>
-                                <DottedSeparator className="py-7" />
-                                <div className="flex justify-end">
-                                    <Button className="w-28" size="sm" onClick={handleEdit}>
-                                        Edit
+                                <DottedSeparator className="py-7" />                                <div className="flex justify-end">
+                                    <Button className="w-28" size="sm" onClick={handleEdit} disabled={isPending}>
+                                        {isPending ? "Editing..." : "Edit"}
                                     </Button>
                                 </div>
                             </div>
@@ -186,13 +185,12 @@ export const MemberProfile = () => {
                                         </FormItem>
                                     )}
                                 />
-                                <DottedSeparator className="py-7" />
-                                <div className="flex items-center justify-end gap-4">
-                                    <Button type="button" size="sm" variant="secondary" onClick={handleCancel}>
+                                <DottedSeparator className="py-7" />                                <div className="flex items-center justify-end gap-4">
+                                    <Button type="button" size="sm" variant="secondary" onClick={handleCancel} disabled={isPending}>
                                         Cancel
                                     </Button>
-                                    <Button type="submit" size="sm">
-                                        Confirm
+                                    <Button type="submit" size="sm" disabled={isPending}>
+                                        {isPending ? "Saving..." : "Confirm"}
                                     </Button>
                                 </div>
                             </form>

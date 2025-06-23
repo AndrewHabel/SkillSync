@@ -26,6 +26,7 @@ const availablePermissions = [
   { id: "manageUserStories", label: "Manage User Stories", key: "manageUserStories" },
   { id: "manageTasks", label: "Manage Tasks", key: "manageTasks" },
   { id: "manageAnalytics", label: "Analytics", key: "manageAnalytics" },
+  { id: "manageMembers", label: "Manage Members", key: "manageMembers" },
 ];
 
 interface RoleForm {
@@ -201,10 +202,9 @@ const RolesPage = () => {
                   value={newRole.name}
                   onChange={(e) => setNewRole({ ...newRole, name: e.target.value })}
                 />
-              </div>
-              <div className="space-y-2">
+              </div>              <div className="space-y-2">
                 <Label>Permissions</Label>
-                <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-4 mt-2">
                   {availablePermissions.map((permission) => (
                     <div key={permission.id} className="flex items-center space-x-2">
                       <Checkbox 

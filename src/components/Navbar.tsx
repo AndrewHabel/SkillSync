@@ -4,6 +4,10 @@ import { UserButton } from "@/features/auth/components/user-button"
 import { MobileSidebar } from "./mobile-sidebar"
 import { usePathname } from "next/navigation";
 import { ModeToggle } from "./mode-toggle";
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+import { useGetMembers } from "@/features/members/api/use-get-members";
+import { useCurrent } from "@/features/auth/api/use-current";
+import { Badge } from "@/components/ui/badge";
 
 const pathnameMap = {
     "tasks":{
@@ -31,15 +35,25 @@ const defaultMap = {
 
 export const Navbar = () => {
 
+    const workspaceId = useWorkspaceId();
+    const { data: user } = useCurrent();
+    const { data: members, isLoading: isLoadingMembers } = useGetMembers({ workspaceId });
     const pathname = usePathname();
     const pathnameParts = pathname.split("/");
     const pathnameKey = pathnameParts[3] as keyof typeof pathnameMap;
     const { title, description } = pathnameMap[pathnameKey] || defaultMap;
-
+    const currentMember = members?.documents.find(member => member.userId === user?.$id);
+    console.log("Current Member soekjseoibjsroibjiorbjsobjobij:", currentMember);
     return (
-        <nav className="pt-4 px-6 flex items-center justify-between">
-            <div className="flex-col hidden lg:flex">
-                <h1 className="text-2xl font-semibold">{title}</h1>
+        <nav className="pt-4 px-6 flex items-center justify-between">            <div className="flex-col hidden lg:flex">
+                <h1 className="text-2xl font-semibold">
+                    {title}
+                    {currentMember?.specialRole?.documents?.[0]?.roleName && (
+                        <Badge variant="secondary" className="ml-2 text-xs">
+                            {currentMember.specialRole.documents[0].roleName}
+                        </Badge>
+                    )}
+                </h1>
                 <p className="text-muted-foreground">{description}</p>
             </div>
             

@@ -106,7 +106,8 @@ const app = new Hono()
                     manageTeams, 
                     manageUserStories, 
                     manageTasks, 
-                    manageAnalytics 
+                    manageAnalytics,
+                    manageMembers
                 } = c.req.valid("json");
 
                 // Verify user is an admin of the workspace
@@ -137,6 +138,7 @@ const app = new Hono()
                         manageUserStories: manageUserStories ?? false,
                         manageTasks: manageTasks ?? false,
                         manageAnalytics: manageAnalytics ?? false,
+                        manageMembers: manageMembers ?? false,
                     }
                 );
 

@@ -67,14 +67,14 @@ export const UserButton = () => {
               )}
             </Avatar>
             <div className="flex flex-col items-center justify-center">
-              <p className="text-sm font-medium text-neutral-900">{name || "User"}</p>
-              <p className="text-xs text-neutral-600">{email}</p>
+              <p className="text-base font-medium white">{name || "User"}</p>
+              <p className="text-sm white">{email}</p>
             </div>
           </div>
           <DottedSeparator className="mb-1" />
           <Link href={`/workspaces/${workspaceId}/memberprofile/${user.$id}`}>
             <DropdownMenuItem
-              className="h-auto flex items-center justify-center text-blue-700 font-medium cursor-pointer"
+              className="h-auto flex items-center justify-center text-blue-500 font-medium cursor-pointer"
             >
               <FaUserAlt className="size-4 mr-2"/>
                 Profile
@@ -83,7 +83,7 @@ export const UserButton = () => {
           <DottedSeparator className="mb-1" />
           <DropdownMenuItem
             onClick={() => logout()} // Fixed this
-            className="h-auto flex items-center justify-center text-amber-700 font-medium cursor-pointer"
+            className="h-auto flex items-center justify-center text-orange-100 font-medium cursor-pointer"
           >
             <LogOut className="size-4 mr-2" />
               Log out

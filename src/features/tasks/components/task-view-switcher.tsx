@@ -120,7 +120,6 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
       { json: { tasks: tasksSelectedFields } },
       {
         onSuccess: (result) => {
-          console.log("Task Dependencies Result:", result);
           if (result?.data) {
             setDependencies(result.data);
             setShowDependenciesModal(true);

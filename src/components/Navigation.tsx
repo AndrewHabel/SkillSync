@@ -86,7 +86,8 @@ export const Navigation = () => {
         manageTasks: false,
         manageUserStories: false,
         manageTeams: false,
-        manageAnalytics: false
+        manageAnalytics: false,
+        manageMembers: false
     });
     
     useEffect(() => {
@@ -106,13 +107,28 @@ export const Navigation = () => {
                     manageTasks: !!specialRole.manageTasks,
                     manageUserStories: !!specialRole.manageUserStories,
                     manageTeams: !!specialRole.manageTeams,
-                    manageAnalytics: !!specialRole.manageAnalytics
+                    manageAnalytics: !!specialRole.manageAnalytics,
+                    manageMembers: !!specialRole.manageMembers
+                });
+                
+                console.log("User permissions:", {
+                    isAdmin: currentUserMember?.role === MemberRole.ADMIN,
+                    manageMembers: !!specialRole.manageMembers
                 });
             }
         }
-    }, [members, user]);    
-    const filteredRoutes = routes.filter(route => {
-       
+    }, [members, user]);    const filteredRoutes = routes.filter(route => {
+        // For Roles tab - show if user is admin OR has manageMembers permission
+        if (route.label === "Roles") {
+            const showRoles = isAdmin || memberPermissions.manageMembers;
+            console.log(`Should show Roles tab: ${showRoles}`, { 
+                isAdmin, 
+                manageMembers: memberPermissions.manageMembers 
+            });
+            return showRoles;
+        }
+        
+        // For other adminOnly routes, only show if user is admin
         if (route.adminOnly && !isAdmin) {
             return false;
         }
@@ -163,19 +179,18 @@ export const Navigation = () => {
                 const Icon = isActive ? item.activeIcon : item.icon;
 
                 return (
-                    <li key={item.href}>
-                        <Link
+                    <li key={item.href}>                        <Link
                             href={fullHref}
                             className={cn(
                                 "flex items-center gap-2.5 p-2.5 rounded-md font-medium transition-all duration-300 ease-in-out group text-muted-foreground hover:text-primary hover:bg-accent",
                                 isActive && "bg-card shadow-sm hover:opacity-100 text-primary",
-                                item.adminOnly && "text-muted-foreground"
+                                item.adminOnly && !(item.label === "Roles" && memberPermissions.manageMembers) && "text-muted-foreground"
                             )}
                         >
                            <Icon className={cn(
                                 "size-5 text-muted-foreground transition-colors duration-300 group-hover:text-primary group-hover:scale-110",
                                 isActive && "text-primary",
-                                item.adminOnly && "text-muted-foreground"
+                                item.adminOnly && !(item.label === "Roles" && memberPermissions.manageMembers) && "text-muted-foreground"
                             )} />
                             <span className="group-hover:translate-x-2 transition-transform duration-300">
                                 {item.label}

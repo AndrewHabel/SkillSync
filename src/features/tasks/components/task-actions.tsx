@@ -64,11 +64,11 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
             const currentUserMember = members.documents.find(member => 
                 member.userId === user.$id
             );
-            
-            if (currentUserMember) {
+              if (currentUserMember) {
                 setIsAdmin(currentUserMember.role === MemberRole.ADMIN);
-                setCanManageTasks(currentUserMember.specialRole?.documents?.[0].manageTasks === true || currentUserMember.role === MemberRole.ADMIN);
-                console.log(currentUserMember.specialRole?.documents?.[0].manageTasks)
+                // Add safety check for manageTasks property
+                setCanManageTasks(currentUserMember.specialRole?.documents?.[0]?.manageTasks === true || currentUserMember.role === MemberRole.ADMIN);
+                console.log(currentUserMember.specialRole?.documents?.[0]?.manageTasks)
             } else {
                 setIsAdmin(false);
                 setCanManageTasks(false);

@@ -61,17 +61,19 @@ export const EditTaskForm = ({ onCancel , projectOptions , memberOptions,taskDep
   const onSubmit = (values: z.infer<typeof createTaskSchema> ) => {
     const selectedProject = projectOptions.find(project => project.id === values.projectId);
     
-    // Handle special "unassigned" value for assigneeId
-    const assigneeId = values.assigneeId ? undefined : values.assigneeId;
+    const assigneeId = values.assigneeId ?  values.assigneeId : undefined ;
     const selectedAssignee = assigneeId 
       ? memberOptions.find(member => member.id === assigneeId)
       : undefined;
-      
-    // Handle special values for preferred role and expertise level
+    
+    console.log("assigneeId fffffffffffffffffffff:", values.assigneeId);
+    console.log("Selected Assignee ffffffffffffffff:", selectedAssignee);
+
+
     const preferredRole = values.preferredRole ? undefined : values.preferredRole;
     const expertiseLevel = values.expertiseLevel ? undefined : values.expertiseLevel;
       
-    // Process values to handle optional fields correctly
+    
     const submissionData = {
       ...values,
       assigneeId: assigneeId || '',

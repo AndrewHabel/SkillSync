@@ -8,4 +8,5 @@ export const createRoleSchema = z.object({
   manageUserStories: z.boolean().optional(),
   manageTasks: z.boolean().optional(),
   manageAnalytics: z.boolean().optional(),
+  manageMembers: z.boolean().optional(),
 });

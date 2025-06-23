@@ -34,12 +34,16 @@ import { useGetSkills } from "@/features/skill/api/use-get-skills";
 import { ExpertiseLevel, getExpertiseLevelDisplay } from "@/features/skill/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useCurrent } from "@/features/auth/api/use-current";
 
 export const MembersList = () => {
     const workspaceId = useWorkspaceId();
     const { data, isLoading: isLoadingMembers } = useGetMembers({ workspaceId });
     const { mutate: deleteMember, isPending: isDeleteingMember } = useDeleteMember();
     const { mutate: updateMember, isPending: isUpdatingMember } = useUpdateMember();
+    const { data: user } = useCurrent();
+    const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(false);
+    const [canManageMembers, setCanManageMembers] = useState(false);
     const [ConfirmDialog, confirm] = useConfirm(
         "Remove Member",
         "Are you sure you want to remove this member?",
@@ -58,7 +62,8 @@ export const MembersList = () => {
             ...prev,
             [memberId]: !prev[memberId]
         }));
-    };    console.log(skillsData, "skillsData");
+    };    
+    console.log(skillsData, "skillsData");
     console.log(data, "membersData");
     
     // Make sure to reset loading state when dependencies change
@@ -66,7 +71,30 @@ export const MembersList = () => {
         if (isLoadingSkillsData || isLoadingMembers) {
             setIsLoadingSkills(true);
         }
-    }, [isLoadingSkillsData, isLoadingMembers]);useEffect(() => {
+    }, [isLoadingSkillsData, isLoadingMembers]);
+      // Check if the current user is an admin or has manageMembers permission
+    useEffect(() => {
+        if (data && user && Array.isArray(data.documents)) {
+            // Find the current user's member document
+            const currentUserMember = data.documents.find(member => 
+                member.userId === user.$id
+            );
+            
+            if (currentUserMember) {
+                setIsCurrentUserAdmin(currentUserMember.role === MemberRole.ADMIN);
+                // Check if user has manageMembers permission
+                setCanManageMembers(
+                    currentUserMember.role === MemberRole.ADMIN || 
+                    currentUserMember.specialRole.documents[0].manageMembers === true
+                );
+            } else {
+                setIsCurrentUserAdmin(false);
+                setCanManageMembers(false);
+            }
+        }
+    }, [data, user]);
+    
+    useEffect(() => {
         const fetchSkillsForMembers = async () => {
             if (!data?.documents?.length) return;
             if (!skillsData?.documents) return;
@@ -294,43 +322,43 @@ export const MembersList = () => {
                                                 </div>
                                             ) : (
                                                 <p className="text-xs text-muted-foreground italic">No skills listed</p>
+                                            )}                                        </CardContent>                                        <CardFooter className="p-5 pt-3 border-t flex justify-end items-center mt-auto card-footer">
+                                            {(isCurrentUserAdmin || canManageMembers) && (
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button className="ml-auto" variant="ghost" size="icon">
+                                                            <MoreVerticalIcon className="size-4 text-muted-foreground" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent side="bottom" align="end" className="w-60">
+                                                        <DropdownMenuItem 
+                                                            className="font-medium cursor-pointer" 
+                                                            onClick={() => { handelUpdateMember(member.$id, MemberRole.ADMIN, member) }} 
+                                                            disabled={isUpdatingMember || member.role === MemberRole.ADMIN}
+                                                        >
+                                                            <Crown className="mr-2 size-4 text-amber-500" />
+                                                            Set As Administrator
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem 
+                                                            className="font-medium cursor-pointer" 
+                                                            onClick={() => { handelUpdateMember(member.$id, MemberRole.MEMBER, member) }} 
+                                                            disabled={isUpdatingMember || member.role === MemberRole.MEMBER}
+                                                        >
+                                                            <UserRoundCheck className="mr-2 size-4 text-blue-500" />
+                                                            Set As Member
+                                                        </DropdownMenuItem>
+                                                        <Separator className="my-2" />
+                                                        <DropdownMenuItem 
+                                                            className="font-medium text-destructive cursor-pointer" 
+                                                            onClick={() => { handelDeleteMember(member.$id) }} 
+                                                            disabled={isDeleteingMember}
+                                                        >
+                                                            <User2Icon className="mr-2 size-4" />
+                                                            Remove {member.name}
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             )}
-                                        </CardContent>
-                                        <CardFooter className="p-5 pt-3 border-t flex justify-end items-center mt-auto card-footer">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button className="ml-auto" variant="ghost" size="icon">
-                                                        <MoreVerticalIcon className="size-4 text-muted-foreground" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent side="bottom" align="end" className="w-60">
-                                                    <DropdownMenuItem 
-                                                        className="font-medium cursor-pointer" 
-                                                        onClick={() => { handelUpdateMember(member.$id, MemberRole.ADMIN, member) }} 
-                                                        disabled={isUpdatingMember || member.role === MemberRole.ADMIN}
-                                                    >
-                                                        <Crown className="mr-2 size-4 text-amber-500" />
-                                                        Set As Administrator
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem 
-                                                        className="font-medium cursor-pointer" 
-                                                        onClick={() => { handelUpdateMember(member.$id, MemberRole.MEMBER, member) }} 
-                                                        disabled={isUpdatingMember || member.role === MemberRole.MEMBER}
-                                                    >
-                                                        <UserRoundCheck className="mr-2 size-4 text-blue-500" />
-                                                        Set As Member
-                                                    </DropdownMenuItem>
-                                                    <Separator className="my-2" />
-                                                    <DropdownMenuItem 
-                                                        className="font-medium text-destructive cursor-pointer" 
-                                                        onClick={() => { handelDeleteMember(member.$id) }} 
-                                                        disabled={isDeleteingMember}
-                                                    >
-                                                        <User2Icon className="mr-2 size-4" />
-                                                        Remove {member.name}
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
                                         </CardFooter>
                                     </Card>
                                 </motion.div>
